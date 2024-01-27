@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 @tailwind base;
@@ -10,7 +10,7 @@
     @apply text-2xl font-heading text-grey;
   }
   h2 {
-    @apply text-xl font-heading;
+    @apply text-lg font-heading text-grey;
   }
   p {
     @apply text-sm font-sans;
