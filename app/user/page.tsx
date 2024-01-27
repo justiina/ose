@@ -1,6 +1,6 @@
-import { Item, ItemAccess } from "./api/items/route";
+import { Item, ItemAccess } from "../api/items/route";
 
-const Login = async () => {
+const User = async () => {
   let items: Item[] = [];
   const response = await fetch(`${process.env.API_URL}/api/items`);
   if (response.ok) {
@@ -10,7 +10,7 @@ const Login = async () => {
 
   return (
     <div>
-      <h1 className="text-white text-xl mb-10">OSEn jäsensivusto</h1>
+      <h1 className="text-white text-xl mb-10">UserPage</h1>
       {items.map((item) => {
         return (
           <div
@@ -35,6 +35,7 @@ const Login = async () => {
       })}
     </div>
   );
-};
 
-export default Login;
+}
+
+export default User
