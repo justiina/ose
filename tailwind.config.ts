@@ -5,6 +5,7 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    './index.html',
   ],
   theme: {
     extend: {
@@ -13,6 +14,16 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      fontFamily: {
+        sans: ['Roboto', 'sans-serif'],
+        heading: ['Outfit', 'sans-serif']
+      },
+      colors: {
+        background: "#F2F2F2",
+        grey: "#42464D",
+        blue: "#0470C0",
+        orange: "#F35B18",
+      }
     },
   },
   plugins: [],
