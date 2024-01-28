@@ -1,3 +1,4 @@
+'use client'
 import Link from 'next/link'
 import React from 'react'
 
@@ -9,7 +10,7 @@ const Navbar = () => {
           <Link href="/">Login</Link>
         </li>
         <li className='p-2 cursor-pointer'>
-          <Link href="/main">Main</Link>
+          <Link href="/main/calendar">Calendar</Link>
         </li>
       </ul>
     </div>
