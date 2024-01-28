@@ -1,8 +1,6 @@
 "use client";
 
-type Props = {
-  which: string;
-};
+type Props = { which: string };
 
 const Button: React.FC<Props> = ({ which = "SignIn" }) => {
   const handleClick = () => {
