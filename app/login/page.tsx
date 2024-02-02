@@ -1,16 +1,28 @@
 "use client";
 
+import { AuthService } from "@/app/components/AuthService";
+import { login } from "@/app/components/AuthFunctions";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
-import { login } from "../actions/auth";
 
 export default function Login() {
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const router = useRouter();
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setLoginData((prevData) => ({ ...prevData, [name]: value }));
-  };
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const email = form.email.value;
+    const password = form.password.value;
+
+    try {
+      const user = await login(email, password);
+      if (user !== null) {
+        router.push("/main/calendar");
+      }
+    } catch (error) {
+      window.alert(error);
+    }
+  }
 
   return (
     <div className="sm:flex justify-center items-center mt-10">
@@ -32,23 +44,19 @@ export default function Login() {
           Oulun Seudun Etsintäkoirat OSE ry:n jäsenet voivat kirjautua
           sivustolle omilla tunnuksillaan.
         </p>
-        <form action={() => login(loginData)} className="grid gap-1 mt-8 mr-28">
+        <form className="grid gap-1 mt-8" onSubmit={handleSubmit}>
           <input
             className="border border-grey rounded-full py-1 px-4 text-sm focus:border-grey"
             type="email"
             name="email"
             placeholder="Sähköposti"
-            value={loginData.email}
-            onChange={handleChange}
             required
           />
           <input
-            className="border mb-2 border-grey rounded-full py-1 px-4 text-sm"
+            className="border border-grey rounded-full py-1 px-4 text-sm mb-2"
             type="password"
             name="password"
             placeholder="Salasana"
-            value={loginData.password}
-            onChange={handleChange}
             required
           />
           <div className="justify-items-center">
