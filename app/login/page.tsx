@@ -38,13 +38,13 @@ export default function Login() {
           blurDataURL={"/images/logo300.png"}
         />
       </div>
-      <div className="p-4 w-80">
-        <h1 className="mb-4">Tervetuloa OSEn jäsensivustolle!</h1>
-        <p>
+      <div className="p-4 w-96">
+        <h1 className="mb-2">Tervetuloa OSEn jäsensivustolle!</h1>
+        <p className="mb-4">
           Oulun Seudun Etsintäkoirat OSE ry:n jäsenet voivat kirjautua
           sivustolle omilla tunnuksillaan.
         </p>
-        <form className="grid gap-1 mt-8" onSubmit={handleSubmit}>
+        <form className="grid gap-1" onSubmit={handleSubmit}>
           <input
             className="border border-grey rounded-full py-1 px-4 text-sm"
             type="email"
@@ -53,7 +53,7 @@ export default function Login() {
             required
           />
           <input
-            className="border border-grey rounded-full py-1 px-4 text-sm mb-2"
+            className="border border-grey rounded-full py-1 px-4 text-sm mb-4"
             type="password"
             name="password"
             placeholder="Salasana"
