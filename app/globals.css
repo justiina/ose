@@ -6,6 +6,9 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    @apply bg-background
+  }
   h1 {
     @apply text-2xl font-heading text-grey;
   }
@@ -13,6 +16,6 @@
     @apply text-lg font-heading text-grey;
   }
   p {
-    @apply text-sm font-sans;
+    @apply text-base font-sans;
   }
 }

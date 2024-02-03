@@ -17,7 +17,7 @@ export default function Login() {
     try {
       const user = await login(email, password);
       if (user !== null) {
-        router.push("/main/calendar");
+        router.push("/calendar");
       }
     } catch (error) {
       window.alert(error);
@@ -25,7 +25,7 @@ export default function Login() {
   }
 
   return (
-    <div className="sm:flex justify-center items-center mt-10">
+    <div className="sm:flex min-h-screen w-screen justify-center items-center">
       <div className="p-4">
         <Image
           src="/images/logo300.png"
@@ -38,7 +38,7 @@ export default function Login() {
           blurDataURL={"/images/logo300.png"}
         />
       </div>
-      <div className="sm:w-4/12 p-4">
+      <div className="p-4 w-80">
         <h1 className="mb-4">Tervetuloa OSEn jäsensivustolle!</h1>
         <p>
           Oulun Seudun Etsintäkoirat OSE ry:n jäsenet voivat kirjautua
@@ -46,7 +46,7 @@ export default function Login() {
         </p>
         <form className="grid gap-1 mt-8" onSubmit={handleSubmit}>
           <input
-            className="border border-grey rounded-full py-1 px-4 text-sm focus:border-grey"
+            className="border border-grey rounded-full py-1 px-4 text-sm"
             type="email"
             name="email"
             placeholder="Sähköposti"
