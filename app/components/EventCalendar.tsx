@@ -13,6 +13,8 @@ import React, { useMemo, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
+import Dialog from "./Dialog";
+import Link from "next/link";
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -94,75 +96,95 @@ function EventCalendar({ events }: EventCalendarPropsType) {
     console.log(eventsForDay);
   };
 
+  async function onClose() {
+    console.log("Modal has closed")
+    
+  }
+  async function onOk() {
+    console.log("Ok was clicked")
+    
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4 flex justify-between gap-4">
-        <button
-          onClick={goToPreviousMonth}
-          className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-        >
-          <IoIosArrowBack className="text-2x" />
-        </button>
-        <div className="flex gap-2">
-          <h1 className="text-center">
-            {monthName} {currentYear}
-          </h1>
+    <>
+      <Dialog title="Esimerkkimodal" onClose={onClose} onOk={onOk}>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
+          magnam deserunt praesentium? Enim dolorum suscipit cum! Omnis aut
+          voluptate mollitia ab adipisci, magni, dolorum aliquid perferendis
+          amet fugiat soluta temporibus.
+        </p>
+      </Dialog>
+      <div className="container mx-auto p-4">
+        <div className="mb-4 flex justify-between gap-4">
           <button
-            onClick={goToToday}
+            onClick={goToPreviousMonth}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
           >
-            <MdOutlineToday className="text-2x" />
+            <IoIosArrowBack className="text-2x" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">
+              {monthName} {currentYear}
+            </h1>
+            <button
+              onClick={goToToday}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2x" />
+            </button>
+          </div>
+
+          <button
+            onClick={goToNextMonth}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowForward className="text-2x" />
           </button>
         </div>
-
-        <button
-          onClick={goToNextMonth}
-          className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-        >
-          <IoIosArrowForward className="text-2x" />
-        </button>
+        <div className="grid grid-cols-7 gap-2">
+          {WEEKDAYS.map((day) => {
+            return (
+              <div key={day} className="font-bold text-center">
+                {day}
+              </div>
+            );
+          })}
+          {Array.from({ length: startingDayIndex }).map((_, index) => {
+            return <div key={`empty-${index}`} className="min-h-20 min-w-16" />;
+          })}
+          {daysInMonth.map((day, index) => {
+            const dateKey = format(day, "yyyy-MM-dd");
+            const todaysEvents = eventsByDate[dateKey] || [];
+            return (
+              <Link
+                href="http://localhost:3000/main?showDialog=y"
+                key={index}
+                className={
+                  isToday(day)
+                    ? "cursor-pointer border-4 border-grey rounded-md p-1 text-end bg-white min-h-20 min-w-16"
+                    : "cursor-pointer border border-grey rounded-md p-1  text-end bg-white min-h-20 min-w-16"
+                }
+              >
+                {format(day, "d")}
+                {todaysEvents.map((event, index) => {
+                  const backgroundColor =
+                    eventColorMap[event.title] || "bg-blue";
+                  return (
+                    <div
+                      key={`event-${index}`}
+                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-md`}
+                    >
+                      {event.title}
+                    </div>
+                  );
+                })}
+              </Link>
+            );
+          })}
+        </div>
       </div>
-      <div className="grid grid-cols-7 gap-2">
-        {WEEKDAYS.map((day) => {
-          return (
-            <div key={day} className="font-bold text-center">
-              {day}
-            </div>
-          );
-        })}
-        {Array.from({ length: startingDayIndex }).map((_, index) => {
-          return <div key={`empty-${index}`} className="min-h-20 min-w-16" />;
-        })}
-        {daysInMonth.map((day, index) => {
-          const dateKey = format(day, "yyyy-MM-dd");
-          const todaysEvents = eventsByDate[dateKey] || [];
-          return (
-            <div
-              onClick={() => handleClick(day)}
-              key={index}
-              className={
-                isToday(day)
-                  ? "cursor-pointer border-4 border-grey rounded-md p-1 text-end bg-white min-h-20 min-w-16"
-                  : "cursor-pointer border border-grey rounded-md p-1  text-end bg-white min-h-20 min-w-16"
-              }
-            >
-              {format(day, "d")}
-              {todaysEvents.map((event, index) => {
-                const backgroundColor = eventColorMap[event.title] || "bg-blue";
-                return (
-                  <div
-                    key={`event-${index}`}
-                    className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-md`}
-                  >
-                    {event.title}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    </>
   );
 }
 

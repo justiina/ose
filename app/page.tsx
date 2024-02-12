@@ -6,6 +6,4 @@ export default function Page() {
   if (accessDenied) {
     redirect("/login");
   }
-
-  // Define other routes and logic
 }
