@@ -17,7 +17,7 @@ export default function Login() {
     try {
       const user = await login(email, password);
       if (user !== null) {
-        router.push("/calendar");
+        router.push("/main");
       }
     } catch (error) {
       window.alert(error);
