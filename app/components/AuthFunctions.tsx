@@ -9,16 +9,18 @@ import { auth } from "@/app/firebase/firebaseConfig";
 
 export async function login(email: string, password: string) {
   try {
-    await signInWithEmailAndPassword(auth, email, password).then(
-      (userCredential) => {
-        if (userCredential.user) {
-          console.log("login ok!");
-          console.log(userCredential.user);
-          return userCredential.user;
-        }
-        return null;
-      }
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
     );
+    if (userCredential.user) {
+      console.log("login ok!");
+      console.log(userCredential.user);
+      return userCredential.user;
+    } else {
+      return null;
+    }
   } catch (error) {
     console.log(error);
     throw error;

@@ -112,12 +112,12 @@ function EventCalendar({ events }: EventCalendarPropsType) {
     <>
       <div className="container mx-auto p-4">
         {/*---Heading with month name and days---*/}
-        <div className="mb-4 flex justify-between gap-4">
+        <div className="mb-4 flex justify-center gap-8">
           <button
             onClick={goToPreviousMonth}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
           >
-            <IoIosArrowBack className="text-2x" />
+            <IoIosArrowBack className="text-2xl" />
           </button>
           <div className="flex gap-2">
             <h1 className="text-center">
@@ -127,7 +127,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
               onClick={goToToday}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
-              <MdOutlineToday className="text-2x" />
+              <MdOutlineToday className="text-2xl" />
             </button>
           </div>
 
@@ -135,10 +135,10 @@ function EventCalendar({ events }: EventCalendarPropsType) {
             onClick={goToNextMonth}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
           >
-            <IoIosArrowForward className="text-2x" />
+            <IoIosArrowForward className="text-2xl" />
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-2 p-4">
           {WEEKDAYS.map((day) => {
             return (
               <div key={day} className="font-bold text-center">

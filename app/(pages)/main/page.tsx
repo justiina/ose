@@ -1,6 +1,6 @@
 import EventCalendar from "@/app/components/EventCalendar";
 
-const Main = () => {
+const Main = () => { 
   return (
     <div className="container mx-auto p-4">
       <EventCalendar
@@ -15,7 +15,7 @@ const Main = () => {
           { date: new Date("2024-02-24"), title: "Laji" },
           { date: new Date("2024-02-22"), title: "Häly" },
           { date: new Date("2024-02-18"), title: "Muu" },
-        ]} 
+        ]}
       />
     </div>
   );

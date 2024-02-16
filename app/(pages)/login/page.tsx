@@ -1,6 +1,4 @@
 "use client";
-
-import { AuthService } from "@/app/components/AuthService";
 import { login } from "@/app/components/AuthFunctions";
 import { useRouter } from "next/navigation";
 import Image from "next/image";

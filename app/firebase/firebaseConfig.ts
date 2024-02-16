@@ -20,6 +20,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Function to get the current user from Firebase Authentication
+
 function getCurrentUser() {
   return new Promise((resolve) => {
     onAuthStateChanged(auth, (user) => {
