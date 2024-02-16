@@ -1,8 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { getCurrentUser } from "@/app/firebase/firebaseConfig";
-import { logout } from "@/app/components/AuthFunctions";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaDog } from "react-icons/fa6";
 import { TbFiles } from "react-icons/tb";
@@ -12,9 +11,8 @@ import { FaUserCircle } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 
 const Navbar = () => {
-  const currentPathname = usePathname();
+  const currentPathname: string | null = usePathname();
   const router = useRouter();
-  const user = getCurrentUser();
 
   const navList = [
     {
@@ -58,48 +56,51 @@ const Navbar = () => {
   const smallNavList = navList.filter((item) => item.showOnSmallScreen);
 
   const handleSignOut = () => {
-    logout();
+    signOut();
     router.replace("/");
   };
 
   return (
     <div>
-      {currentPathname !== "/" && currentPathname !== "/login" && (
-        <nav className="hidden md:grid grid-rows-10 min-h-screen bg-grey text-background font-sans text-lg p-4">
-          <div className="row-span-3 flex justify-between">
-            <img src="/images/logo300.png" className="h-40"></img>
-          </div>
-          <ul className="row-span-4 flex flex-col justify-evenly">
-            {navList.map(({ icon, title, route }, index) => {
-              const isActive = currentPathname.startsWith(route);
-              return (
-                <li key={index}>
-                  <Link
-                    href={route}
-                    className={
-                      isActive
-                        ? "flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 bg-background text-grey"
-                        : "flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 hover:bg-background hover:text-grey"
-                    }
-                  >
-                    {icon}
-                    {title}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          <div className="row-span-4 flex flex-col justify-evenly">
-            <button
-              className="flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 hover:bg-orange"
-              onClick={handleSignOut}
-            >
-              <MdLogout className="text-2xl" />
-              Kirjaudu ulos
-            </button>
-          </div>
-        </nav>
-      )}
+      {/*--- Don't show navbar on root, login and forgot password pages */}
+      {currentPathname !== "/" &&
+        currentPathname !== "/login" &&
+        currentPathname !== "/forgotpassword" && (
+          <nav className="hidden md:grid grid-rows-10 min-h-screen bg-grey text-background font-sans text-lg p-4">
+            <div className="row-span-3 flex justify-between">
+              <img src="/images/logo300.png" className="h-40"></img>
+            </div>
+            <ul className="row-span-4 flex flex-col justify-evenly">
+              {navList.map(({ icon, title, route }, index) => {
+                const isActive = currentPathname?.startsWith(route);
+                return (
+                  <li key={index}>
+                    <Link
+                      href={route}
+                      className={
+                        isActive
+                          ? "flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 bg-background text-grey"
+                          : "flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 hover:bg-background hover:text-grey"
+                      }
+                    >
+                      {icon}
+                      {title}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="row-span-4 flex flex-col justify-evenly">
+              <button
+                className="flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 hover:bg-orange"
+                onClick={handleSignOut}
+              >
+                <MdLogout className="text-2xl" />
+                Kirjaudu ulos
+              </button>
+            </div>
+          </nav>
+        )}
     </div>
   );
 };
