@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
-import { auth, getCurrentUser } from "@/firebase/firebaseConfig";
+import { auth, getCurrentUser } from "@/app/firebase/firebaseConfig";
 import { checkUser } from "./app/components/AuthFunctions";
 
 const protectedRoutes = ["/calendar"];

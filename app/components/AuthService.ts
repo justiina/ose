@@ -3,13 +3,12 @@ import {
   signOut,
   User as FirebaseUser,
 } from "firebase/auth";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth } from "@/app/firebase/firebaseConfig";
 
 export const AuthService = {
   login: async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
-      .then(
+      await signInWithEmailAndPassword(auth, email, password).then(
         (userCredential) => {
           if (userCredential.user) {
             console.log("login ok!");

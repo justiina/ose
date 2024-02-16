@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="fi">
       <body className="flex">
         <Navbar />
-        <div>
+        <div className="grow">
           {children}
         </div>
       </body>

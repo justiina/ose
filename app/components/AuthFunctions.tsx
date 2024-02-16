@@ -5,22 +5,20 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth } from "@/app/firebase/firebaseConfig";
 
 export async function login(email: string, password: string) {
   try {
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    ).then((userCredential) => {
-      if (userCredential.user) {
-        console.log("login ok!");
-        console.log(userCredential.user);
-        return userCredential.user;
+    await signInWithEmailAndPassword(auth, email, password).then(
+      (userCredential) => {
+        if (userCredential.user) {
+          console.log("login ok!");
+          console.log(userCredential.user);
+          return userCredential.user;
+        }
+        return null;
       }
-      return null;
-    });
+    );
   } catch (error) {
     console.log(error);
     throw error;
@@ -28,11 +26,13 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
-  firebaseSignOut(auth).then(() => {
-    console.log("logout ok")
-  }).catch((error) => {
-    console.log(error)
-  });
+  firebaseSignOut(auth)
+    .then(() => {
+      console.log("logout ok");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 export function checkUser() {

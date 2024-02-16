@@ -9,12 +9,14 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import Dialog from "./Dialog";
 import Link from "next/link";
+import DayCard from "./DayCard";
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -44,8 +46,18 @@ interface EventCalendarPropsType {
 
 function EventCalendar({ events }: EventCalendarPropsType) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth = startOfMonth(currentDate);
   const lastDayOfMonth = endOfMonth(currentDate);
+  const searchParams = useSearchParams();
+  const dateParams = searchParams.get("date");
+
+  useEffect(() => {
+    if (dateParams !== null) {
+      const [year, month, day] = dateParams.split("-");
+      setEventDate(`${day}.${month}.${year}`);
+    }
+  }, [dateParams]);
 
   const daysInMonth = eachDayOfInterval({
     start: firstDayOfMonth,
@@ -90,32 +102,16 @@ function EventCalendar({ events }: EventCalendarPropsType) {
     setCurrentDate(new Date());
   };
 
-  const handleClick = (day: Date) => {
-    const dateKey = format(day, "yyyy-MM-dd");
-    const eventsForDay = eventsByDate[dateKey] || [];
-    console.log(eventsForDay);
+  const closeModal = async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("date");
+    window.history.replaceState({}, "", url.toString());
   };
-
-  async function onClose() {
-    console.log("Modal has closed")
-    
-  }
-  async function onOk() {
-    console.log("Ok was clicked")
-    
-  }
 
   return (
     <>
-      <Dialog title="Esimerkkimodal" onClose={onClose} onOk={onOk}>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
-          magnam deserunt praesentium? Enim dolorum suscipit cum! Omnis aut
-          voluptate mollitia ab adipisci, magni, dolorum aliquid perferendis
-          amet fugiat soluta temporibus.
-        </p>
-      </Dialog>
       <div className="container mx-auto p-4">
+        {/*---Heading with month name and days---*/}
         <div className="mb-4 flex justify-between gap-4">
           <button
             onClick={goToPreviousMonth}
@@ -150,22 +146,27 @@ function EventCalendar({ events }: EventCalendarPropsType) {
               </div>
             );
           })}
+
+          {/*---Add empty boxes to start if month doesn't start on Monday---*/}
           {Array.from({ length: startingDayIndex }).map((_, index) => {
-            return <div key={`empty-${index}`} className="min-h-20 min-w-16" />;
+            return <div key={`empty-${index}`} className="min-h-20" />;
           })}
+
+          {/*---Highlight today and add events---*/}
           {daysInMonth.map((day, index) => {
             const dateKey = format(day, "yyyy-MM-dd");
             const todaysEvents = eventsByDate[dateKey] || [];
             return (
               <Link
-                href="http://localhost:3000/main?showDialog=y"
+                href={`http://localhost:3000/main?showDialog=y&date=${dateKey}`}
                 key={index}
                 className={
                   isToday(day)
-                    ? "cursor-pointer border-4 border-grey rounded-md p-1 text-end bg-white min-h-20 min-w-16"
-                    : "cursor-pointer border border-grey rounded-md p-1  text-end bg-white min-h-20 min-w-16"
+                    ? "cursor-pointer border-4 border-grey rounded-md p-1 text-end bg-white min-h-20"
+                    : "cursor-pointer border border-grey rounded-md p-1  text-end bg-white min-h-20"
                 }
               >
+                {/*---Add events from Firebase---*/}
                 {format(day, "d")}
                 {todaysEvents.map((event, index) => {
                   const backgroundColor =
@@ -173,7 +174,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
                   return (
                     <div
                       key={`event-${index}`}
-                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-md`}
+                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full mx-4 py-0.5`}
                     >
                       {event.title}
                     </div>
@@ -184,6 +185,9 @@ function EventCalendar({ events }: EventCalendarPropsType) {
           })}
         </div>
       </div>
+      <Dialog title={eventDate} onClose={closeModal}>
+        <DayCard date={eventDate} />
+      </Dialog>
     </>
   );
 }

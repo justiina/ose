@@ -1,15 +1,15 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useRef, useEffect } from "react";
+import { IoClose } from "react-icons/io5";
 
 type Props = {
-  title: string;
+  title: string | null;
   onClose: () => void;
-  onOk: () => void;
   children: React.ReactNode;
 };
 
-export default function Dialog({ title, onClose, onOk, children }: Props) {
+export default function Dialog({ title, onClose, children }: Props) {
   const searchParams = useSearchParams();
   const dialogRef = useRef<null | HTMLDialogElement>(null);
   const showDialog = searchParams.get("showDialog");
@@ -28,11 +28,6 @@ export default function Dialog({ title, onClose, onOk, children }: Props) {
     removeShowDialogParam();
   };
 
-  const clickOk = () => {
-    onOk();
-    closeDialog();
-  };
-
   const removeShowDialogParam = () => {
     const url = new URL(window.location.href);
     url.searchParams.delete("showDialog");
@@ -45,26 +40,18 @@ export default function Dialog({ title, onClose, onOk, children }: Props) {
         ref={dialogRef}
         className="fixed top-52 left-52 -translate-x-52 -translate-y-52 z-10 rounded-xl backdrop:bg-gray-800/50"
       >
-        <div className="w-[500px] max-w-full bg-gray-200 flex flex-col">
-          <div className="flex flex-row justify-between mb-4 pt-2 px-5 bg-yellow">
-            <h1>{title}</h1>
+        <div className="w-[500px] max-w-full bg-background flex flex-col">
+          <div className="flex flex-row justify-between mb-4 pt-2 px-5 bg-orange">
+            <h1 className="mb-2 text-white">{title}</h1>
             <button
               onClick={closeDialog}
-              className="mb-2 py-1 px-2 cursor-pointer rounded border-none w-8 h-8 font-bold bg-red-600 text-white"
+              className="mb-2 py-1 px-2 cursor-pointer text-white"
             >
-              x
+              <IoClose className="text-2xl"/>
             </button>
           </div>
           <div className="px-5 pb-6">
             {children}
-            <div className="flex flex-row justify-end mt-2">
-              <button
-                onClick={clickOk}
-                className="bg-green py-1 px-2 rounded border-none"
-              >
-                OK
-              </button>
-            </div>
           </div>
         </div>
       </dialog>

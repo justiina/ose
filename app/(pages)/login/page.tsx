@@ -25,7 +25,7 @@ export default function Login() {
   }
 
   return (
-    <div className="sm:flex min-h-screen w-screen justify-center items-center">
+    <div className="min-h-screen w-screen flex flex-col lg:flex-row justify-center items-center">
       <div className="p-4">
         <Image
           src="/images/logo300.png"
@@ -62,7 +62,7 @@ export default function Login() {
           <div className="justify-items-center">
             <button
               type="submit"
-              className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-xs"
+              className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm"
             >
               Kirjaudu sisään
             </button>

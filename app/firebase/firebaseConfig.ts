@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, EmailAuthProvider, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_APIKEY,
@@ -15,7 +15,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
+const provider = new EmailAuthProvider()
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -28,4 +28,4 @@ function getCurrentUser() {
   });
 }
 
-export { db, auth, getCurrentUser };
+export { db, auth, provider, getCurrentUser };

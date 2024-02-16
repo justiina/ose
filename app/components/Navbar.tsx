@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser } from "@/firebase/firebaseConfig";
+import { getCurrentUser } from "@/app/firebase/firebaseConfig";
 import { logout } from "@/app/components/AuthFunctions";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaDog } from "react-icons/fa6";
