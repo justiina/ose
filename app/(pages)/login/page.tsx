@@ -23,16 +23,16 @@ export default function Login() {
           blurDataURL={"/images/logo300.png"}
         />
       </div>
-      <div className="p-4 w-96">
+      <div className="p-4">
         <h1 className="mb-2">Tervetuloa OSEn jäsensivustolle!</h1>
-        <p className="mb-4">
+        <p className="mb-4 w-96">
           Oulun Seudun Etsintäkoirat OSE ry:n jäsenet voivat kirjautua
           sivustolle omilla tunnuksillaan.
         </p>
         <div className="grid gap-1">
           <input
             id="email"
-            className="border border-grey rounded-full py-1 px-4 text-sm"
+            className="border border-grey rounded-full py-1 px-4 text-sm mr-8"
             type="email"
             name="email"
             placeholder="Sähköposti"
@@ -42,7 +42,7 @@ export default function Login() {
           />
           <input
             id="password"
-            className="border border-grey rounded-full py-1 px-4 text-sm mb-4"
+            className="border border-grey rounded-full py-1 px-4 text-sm mb-4  mr-8"
             type="password"
             name="password"
             placeholder="Salasana"
@@ -50,13 +50,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <div className="justify-items-center">
-            <button
-              onClick={() => router.push("/forgotpassword")}
-              className="bg-grey hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm mr-2"
-            >
-              Unohtunut salasana
-            </button>
+          <div className="grid gap-2">
             <button
               onClick={() =>
                 signIn("credentials", {
@@ -66,9 +60,15 @@ export default function Login() {
                   callbackUrl: "/main",
                 })
               }
-              className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm"
+              className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm mr-8"
             >
               Kirjaudu sisään
+            </button>
+            <button
+              onClick={() => router.push("/forgotpassword")}
+              className="text-grey hover:text-orange text-sm mr-8"
+            >
+              Unohtuiko salasana?
             </button>
           </div>
         </div>

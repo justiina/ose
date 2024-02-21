@@ -23,7 +23,7 @@ export default function RootLayout({
         <SessionProvider>
           <Navbar />
           <div className="grow">{children}</div>
-          <Toaster position="top-center"/>        
+          <Toaster position="top-center" />
         </SessionProvider>
       </body>
     </html>
