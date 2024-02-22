@@ -12,7 +12,7 @@ type Props = {
 export default function Dialog({ title, onClose, children }: Props) {
   const searchParams = useSearchParams();
   const dialogRef = useRef<null | HTMLDialogElement>(null);
-  const showDialog = searchParams.get("showDialog");
+  const showDialog = searchParams?.get("showDialog");
 
   useEffect(() => {
     if (showDialog === "y") {

@@ -9,7 +9,7 @@ import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { getEvents } from "@/app/firebase/firestoreFunctions";
 
 export default function Main() {
-  const [events, setEvents] = useState<{ date: Date; title: string }[]>([]);
+  const [events, setEvents] = useState<{ date: Date; type: string }[]>([]);
 
   // Fetch the events data
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Main() {
         eventData?.map(
           (event: { date: string | number | Date; type: string }) => ({
             date: new Date(event.date),
-            title: event.type,
+            type: event.type,
           })
         )
       );

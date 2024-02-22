@@ -38,7 +38,7 @@ const MONTHNAMES = [
 
 interface EventType {
   date: Date;
-  title: string;
+  type: string;
 }
 
 interface EventCalendarPropsType {
@@ -185,13 +185,13 @@ function EventCalendar({ events }: EventCalendarPropsType) {
                 {format(day, "d")}
                 {todaysEvents.map((event, index) => {
                   const backgroundColor =
-                    eventColorMap[event.title] || "bg-blue";
+                    eventColorMap[event.type] || "bg-blue";
                   return (
                     <div
                       key={`event-${index}`}
                       className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full mx-4 py-0.5`}
                     >
-                      {event.title}
+                      {event.type}
                     </div>
                   );
                 })}

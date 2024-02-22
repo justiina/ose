@@ -15,17 +15,28 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const provider = new EmailAuthProvider()
+const provider = new EmailAuthProvider();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Function to get the current user from Firebase Authentication
-
+/*
 function getCurrentUser() {
   return new Promise((resolve) => {
     onAuthStateChanged(auth, (user) => {
       resolve(user);
     });
+  });
+}*/
+
+function getCurrentUser() {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      return uid;
+    } else {
+      // User is signed out
+    }
   });
 }
 
