@@ -22,14 +22,14 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onSelect }) => {
   };
 
   return (
-    <div className="dropdown">
-      <button className="dropdown-toggle" onClick={toggleDropdown}>
+    <div className="dropdown cursor-pointer" onClick={toggleDropdown}>
+      <button className="dropdown-toggle">
         {selectedOption || "Valitse listalta"}
       </button>
       {isOpen && (
-        <ul className="dropdown-menu cursor-pointer">
+        <ul className="dropdown-menu">
           {options.map((option) => (
-            <li key={option} onClick={() => handleOptionSelect(option)}>
+            <li className="hover:bg-blue hover:text-white" key={option} onClick={() => handleOptionSelect(option)}>
               {option}
             </li>
           ))}

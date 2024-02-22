@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -9,18 +9,32 @@ import { saveEvent } from "@/app/firebase/firestoreFunctions";
 import { serverTimestamp } from "firebase/firestore";
 import Dropdown from "@/app/components/Dropdown";
 
+interface FormDataType {
+  title: string;
+  date: string;
+  type: string;
+  place: string;
+  details: string;
+}
+
 const AddEvent = () => {
   const [formData, setFormData] = useState({
     created: serverTimestamp(),
     title: "",
-    details: "",
+    date: "",
     type: "",
+    place: "",
+    details: "",
   });
 
+  // Set up the auto height of textarea used in details section
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useAutoSizeTextArea("details", textAreaRef.current, formData.details);
+
+  // Initialise router
   const router = useRouter();
 
+  // Check that user is signed in
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -32,7 +46,8 @@ const AddEvent = () => {
     return <LoadingIndicator />;
   }
 
-  const typeOptions = [
+  // List event types for dropdown list
+  const eventTypeOptions = [
     "MaA-treeni",
     "MaB-treeni",
     "TiA-treeni",
@@ -43,12 +58,15 @@ const AddEvent = () => {
     "Muu",
   ];
 
-  const selectType = (selectedOption: string) => {
-    setFormData({ ...formData, type: selectedOption });
-  };
+  const handleInputChange =
+    (fieldName: keyof FormDataType) =>
+    (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
+      setFormData({ ...formData, [fieldName]: e.target.value });
+    };
 
+  // Save form data to Firebase
   const saveAndRedirect = async () => {
-    if (!formData.title || !formData.details || !formData.type) {
+    if (!formData.title || !formData.date || !formData.type) {
       toast.error("Täytä pakolliset kentät!");
       return;
     } else {
@@ -63,12 +81,15 @@ const AddEvent = () => {
     }
   };
 
+  // Cancel add event and go back to main page
   const clearAndRedirect = () => {
     setFormData({
       created: serverTimestamp(),
       title: "",
-      details: "",
+      date: "",
       type: "",
+      place: "",
+      details: "",
     });
     router.push("/main");
   };
@@ -78,6 +99,7 @@ const AddEvent = () => {
       <h1 className="mb-4">Lisää tapahtuma</h1>
       <p className="mb-4">Täytä ainakin tähdellä merkityt kohdat.</p>
       <div>
+        {/*---Title---*/}
         <div className="lg:grid lg:grid-cols-12">
           <div className="lg:col-span-2 flex gap-1">
             <label className="font-bold">Tapahtuman nimi</label>
@@ -85,46 +107,81 @@ const AddEvent = () => {
           </div>
           <input
             id="name"
-            className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 text-sm mb-2"
+            className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
             type="text"
             name="name"
-            placeholder="Esim. hakutreeni"
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            placeholder="Esim. Hakutreeni tai Viikkotreeni"
+            onChange={handleInputChange("title")}
             required
           />
         </div>
 
+        {/*---Date---*/}
         <div className="lg:grid lg:grid-cols-12">
-          <div className="md:col-span-2 flex gap-1">
-            <label className="font-bold">Kuvaus</label>
+          <div className="lg:col-span-2 flex gap-1">
+            <label className="font-bold">Aika</label>
             <p className="text-orange">*</p>
           </div>
-          <textarea
-            ref={textAreaRef}
-            id="details"
-            className="col-span-6 overflow-hidden border min-h-12 border-grey bg-white rounded-lg py-1 px-4 text-sm mb-2"
-            name="details"
-            placeholder="Lyhyt kuvaus suunnitellusta tapahtumasta"
-            onChange={(e) =>
-              setFormData({ ...formData, details: e.target.value })
-            }
-            required
-          />
+          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+            <input
+              id="datetimeInput"
+              aria-label="Date and time"
+              type="datetime-local"
+              onChange={handleInputChange("date")}
+            />
+          </div>
         </div>
 
+        {/*---Type---*/}
         <div className="lg:grid lg:grid-cols-12">
           <div className="md:col-span-2 flex gap-1">
             <label className="font-bold">Tapahtuman tyyppi</label>
             <p className="text-orange">*</p>
           </div>
 
-          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 text-sm mb-2">
-            <Dropdown options={typeOptions} onSelect={selectType} />
+          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+            <Dropdown
+              options={eventTypeOptions}
+              onSelect={(selectedOption) =>
+                setFormData({ ...formData, type: selectedOption })
+              }
+            />
           </div>
         </div>
 
+        {/*---Place---*/}
+        <div className="lg:grid lg:grid-cols-12">
+          <div className="lg:col-span-2 flex gap-1">
+            <label className="font-bold">Paikka</label>
+          </div>
+          <input
+            id="name"
+            className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
+            type="text"
+            name="name"
+            placeholder="Paikan nimi tai karttalinkki"
+            onChange={handleInputChange("place")}
+            required
+          />
+        </div>
+
+        {/*---Details---*/}
+        <div className="lg:grid lg:grid-cols-12">
+          <div className="md:col-span-2 flex gap-1">
+            <label className="font-bold">Kuvaus</label>
+          </div>
+          <textarea
+            ref={textAreaRef}
+            id="details"
+            className="col-span-6 overflow-hidden border min-h-12 border-grey bg-white rounded-lg py-1 px-4 mb-2"
+            name="details"
+            placeholder="Lyhyt kuvaus suunnitellusta tapahtumasta"
+            onChange={handleInputChange("details")}
+            required
+          />
+        </div>
+
+        {/*---Save or cancel---*/}
         <div className="lg:grid lg:grid-cols-12 mt-8">
           <div className="md:col-span-8 flex gap-1 justify-end">
             <button
