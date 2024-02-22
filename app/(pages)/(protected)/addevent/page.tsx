@@ -52,17 +52,50 @@ const AddEvent = () => {
     "MaB-treeni",
     "TiA-treeni",
     "TiB-treeni",
-    "Häytreeni",
+    "Hälytreeni",
     "Lajitreeni",
     "Avoin treeni",
     "Muu",
   ];
 
+  // Add input value to formData
   const handleInputChange =
     (fieldName: keyof FormDataType) =>
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
       setFormData({ ...formData, [fieldName]: e.target.value });
     };
+
+  // Add event type to formData
+  const selectType = (selectedOption: string) => {
+    let selected: string = "";
+    switch (selectedOption) {
+      case "MaA-treeni":
+        selected = "MaA";
+        break;
+      case "MaB-treeni":
+        selected = "MaB";
+        break;
+      case "TiA-treeni":
+        selected = "TiA";
+        break;
+      case "TiB-treeni":
+        selected = "TiB";
+        break;
+      case "Hälytreeni":
+        selected = "Häly";
+        break;
+      case "Lajitreeni":
+        selected = "Laji";
+        break;
+      case "Avoin treeni":
+        selected = "Avoin";
+        break;
+      default:
+        selected = "Muu";
+        break;
+    }
+    setFormData({ ...formData, type: selected });
+  };
 
   // Save form data to Firebase
   const saveAndRedirect = async () => {
@@ -140,12 +173,7 @@ const AddEvent = () => {
           </div>
 
           <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
-            <Dropdown
-              options={eventTypeOptions}
-              onSelect={(selectedOption) =>
-                setFormData({ ...formData, type: selectedOption })
-              }
-            />
+            <Dropdown options={eventTypeOptions} onSelect={selectType} />
           </div>
         </div>
 

@@ -66,7 +66,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
     end: lastDayOfMonth,
   });
 
-  // get the index of the weekday (week starts from Sunday (index 0) by default, we need it to start from Monday)
+  // Get the index of the weekday (week starts from Sunday (index 0) by default, we need it to start from Monday)
   const startingDayIndex =
     getDay(firstDayOfMonth) === 0 ? 6 : getDay(firstDayOfMonth) - 1;
 
