@@ -38,9 +38,9 @@ export default function Dialog({ title, onClose, children }: Props) {
     showDialog === "y" ? (
       <dialog
         ref={dialogRef}
-        className="fixed top-52 left-52 -translate-x-52 -translate-y-52 z-10 rounded-xl backdrop:bg-gray-800/50"
+        className="z-10 rounded-xl backdrop:bg-gray-800/50"
       >
-        <div className="w-[500px] max-w-full bg-background flex flex-col">
+        <div className="w-[700px] max-w-full bg-background flex flex-col">
           <div className="flex flex-row justify-between mb-4 pt-2 px-5 bg-orange">
             <h1 className="mb-2 text-white">{title}</h1>
             <button

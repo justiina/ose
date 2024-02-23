@@ -55,30 +55,33 @@ function EventCalendar({ events }: EventCalendarPropsType) {
   const router = useRouter();
 
   useEffect(() => {
-    if (dateParams !== null) {
+    if (dateParams !== null && eventDate !== dateParams) {
       const [year, month, day] = dateParams.split("-");
       setEventDate(`${day}.${month}.${year}`);
     }
-  }, [dateParams]);
+  }, [dateParams, eventDate]);
 
   const daysInMonth = eachDayOfInterval({
     start: firstDayOfMonth,
     end: lastDayOfMonth,
   });
 
-  // Get the index of the weekday (week starts from Sunday (index 0) by default, we need it to start from Monday)
+  // Get the index of the weekday (week starts from Sunday (index 0) by default, 
+  // we need it to start from Monday)
   const startingDayIndex =
     getDay(firstDayOfMonth) === 0 ? 6 : getDay(firstDayOfMonth) - 1;
 
   const eventsByDate = useMemo(() => {
-    return events.reduce((acc: { [key: string]: EventType[] }, event) => {
-      const dateKey = format(event.date, "yyyy-MM-dd");
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(event);
-      return acc;
-    }, {});
+    if (events !== undefined) {
+      return events.reduce((acc: { [key: string]: EventType[] }, event) => {
+        const dateKey = format(event.date, "yyyy-MM-dd");
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(event);
+        return acc;
+      }, {});
+    } else return {};
   }, [events]);
 
   const currentMonthIndex = currentDate.getMonth();
@@ -87,6 +90,10 @@ function EventCalendar({ events }: EventCalendarPropsType) {
 
   // Define mapping between event titles and background colors
   const eventColorMap: { [key: string]: string } = {
+    MaA: "bg-blue",
+    MaB: "bg-blue",
+    TiA: "bg-blue",
+    TiB: "bg-blue",
     Avoin: "bg-green",
     Laji: "bg-purple",
     Häly: "bg-orange",
@@ -103,8 +110,6 @@ function EventCalendar({ events }: EventCalendarPropsType) {
   const goToToday = () => {
     setCurrentDate(new Date());
   };
-
-  const addEvent = () => {};
 
   const closeModal = async () => {
     const url = new URL(window.location.href);
@@ -167,7 +172,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
             return <div key={`empty-${index}`} className="min-h-20" />;
           })}
 
-          {/*---Highlight today and add events---*/}
+          {/*---Highlight today and show events---*/}
           {daysInMonth.map((day, index) => {
             const dateKey = format(day, "yyyy-MM-dd");
             const todaysEvents = eventsByDate[dateKey] || [];
@@ -185,7 +190,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
                 {format(day, "d")}
                 {todaysEvents.map((event, index) => {
                   const backgroundColor =
-                    eventColorMap[event.type] || "bg-blue";
+                    eventColorMap[event.type] || "bg-grey";
                   return (
                     <div
                       key={`event-${index}`}
@@ -200,6 +205,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
           })}
         </div>
       </div>
+      {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
         <DayCard date={eventDate} />
       </Dialog>

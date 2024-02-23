@@ -12,8 +12,10 @@ import Dropdown from "@/app/components/Dropdown";
 interface FormDataType {
   title: string;
   date: string;
+  time: string;
   type: string;
   place: string;
+  placeLink: string;
   details: string;
 }
 
@@ -22,8 +24,10 @@ const AddEvent = () => {
     created: serverTimestamp(),
     title: "",
     date: "",
+    time: "",
     type: "",
     place: "",
+    placeLink: "",
     details: "",
   });
 
@@ -62,7 +66,13 @@ const AddEvent = () => {
   const handleInputChange =
     (fieldName: keyof FormDataType) =>
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
-      setFormData({ ...formData, [fieldName]: e.target.value });
+      if(fieldName==="date") {
+        const [day, time] = e.target.value.split("T")
+        setFormData({...formData, date: day, time: time})
+
+      } else {
+        setFormData({ ...formData, [fieldName]: e.target.value });
+      }
     };
 
   // Add event type to formData
@@ -120,8 +130,10 @@ const AddEvent = () => {
       created: serverTimestamp(),
       title: "",
       date: "",
+      time: "",
       type: "",
       place: "",
+      placeLink: "",
       details: "",
     });
     router.push("/main");
@@ -180,15 +192,30 @@ const AddEvent = () => {
         {/*---Place---*/}
         <div className="lg:grid lg:grid-cols-12">
           <div className="lg:col-span-2 flex gap-1">
-            <label className="font-bold">Paikka</label>
+            <label className="font-bold">Paikan nimi</label>
           </div>
           <input
             id="name"
             className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
             type="text"
             name="name"
-            placeholder="Paikan nimi tai karttalinkki"
+            placeholder="Paikan nimi"
             onChange={handleInputChange("place")}
+            required
+          />
+        </div>
+
+        <div className="lg:grid lg:grid-cols-12">
+          <div className="lg:col-span-2 flex gap-1">
+            <label className="font-bold">Paikan karttalinkki</label>
+          </div>
+          <input
+            id="name"
+            className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
+            type="text"
+            name="name"
+            placeholder="Karttalinkki"
+            onChange={handleInputChange("placeLink")}
             required
           />
         </div>
