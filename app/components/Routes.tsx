@@ -3,6 +3,7 @@ import { FaDog } from "react-icons/fa6";
 import { TbFiles } from "react-icons/tb";
 import { FaSuitcase } from "react-icons/fa";
 import { GoBellFill } from "react-icons/go";
+import { FaBookOpen } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
 
 interface RoutesType {
@@ -69,6 +70,14 @@ export const AllRoutes: RoutesType[] = [
     route: "/calloutgroup",
     showOnNavBar: true,
     showOnSmallScreen: true,
+    withNavBar: true,
+  },
+  {
+    icon: <FaBookOpen className="text-2xl" />,
+    title: "Yhteystiedot",
+    route: "/contacts",
+    showOnNavBar: true,
+    showOnSmallScreen: false,
     withNavBar: true,
   },
   {

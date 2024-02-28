@@ -25,7 +25,7 @@ const Navbar = () => {
           <div className="row-span-3 flex justify-between">
             <img src="/images/logo300.png" className="h-40"></img>
           </div>
-          <ul className="row-span-4 flex flex-col justify-evenly">
+          <ul className="row-span-5 flex flex-col justify-evenly">
             {navList.map(({ icon, title, route }, index) => {
               const isActive = currentPathname?.startsWith(route);
               return (
@@ -45,7 +45,7 @@ const Navbar = () => {
               );
             })}
           </ul>
-          <div className="row-span-4 flex flex-col justify-evenly">
+          <div className="row-span-3 flex flex-col justify-evenly">
             <button
               className="flex gap-4 items-center cursor-pointer rounded-full px-4 py-2 hover:bg-orange"
               onClick={handleSignOut}

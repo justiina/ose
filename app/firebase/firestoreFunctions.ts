@@ -28,7 +28,11 @@ export const getEvents = async (
   collectionName: string
 ): Promise<DocumentData | null> => {
   try {
-    const querySnapshot = await getDocs(collection(db, collectionName));
+    const q = query(
+      collection(db, collectionName),
+      orderBy("time"),
+      orderBy("type"))
+    const querySnapshot = await getDocs(q);
     const eventData: DocumentData[] = [];
     querySnapshot.forEach((doc) => {
       eventData.push(doc.data() as DocumentData);
