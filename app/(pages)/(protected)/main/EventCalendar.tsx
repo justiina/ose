@@ -10,12 +10,13 @@ import {
   subMonths,
 } from "date-fns";
 import React, { useMemo, useState, useEffect } from "react";
+import { getEvents } from "@/app/firebase/firestoreFunctions";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
-import Dialog from "./Dialog";
+import Dialog from "../../../components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
 
@@ -45,7 +46,7 @@ interface EventCalendarPropsType {
   events: EventType[];
 }
 
-function EventCalendar({ events }: EventCalendarPropsType) {
+function EventCalendar() {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -53,6 +54,7 @@ function EventCalendar({ events }: EventCalendarPropsType) {
   const searchParams = useSearchParams()!;
   const dateParams: string | null = searchParams.get("date");
   const router = useRouter();
+  const [events, setEvents] = useState<{ date: Date; type: string }[]>([]);
 
   useEffect(() => {
     if (dateParams !== null && eventDate !== dateParams) {
@@ -61,12 +63,28 @@ function EventCalendar({ events }: EventCalendarPropsType) {
     }
   }, [dateParams, eventDate]);
 
+  // Fetch the events data
+  useEffect(() => {
+    const fetchData = async () => {
+      const eventData = await getEvents("events");
+      setEvents(
+        eventData?.map(
+          (event: { date: string | number | Date; type: string }) => ({
+            date: new Date(event.date),
+            type: event.type,
+          })
+        )
+      );
+    };
+    fetchData();
+  }, []);
+
   const daysInMonth = eachDayOfInterval({
     start: firstDayOfMonth,
     end: lastDayOfMonth,
   });
 
-  // Get the index of the weekday (week starts from Sunday (index 0) by default, 
+  // Get the index of the weekday (week starts from Sunday (index 0) by default,
   // we need it to start from Monday)
   const startingDayIndex =
     getDay(firstDayOfMonth) === 0 ? 6 : getDay(firstDayOfMonth) - 1;

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { auth } from "@/app/firebase/firebaseConfig";
 
 export default function ForgotPassword() {
@@ -10,7 +10,7 @@ export default function ForgotPassword() {
 
   const resetEmail = () => {
     sendPasswordResetEmail(auth, email);
-    redirect("/");
+    router.push("/");
   };
 
   const goBack = () => {
