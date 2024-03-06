@@ -1,11 +1,11 @@
 import Image from "next/image";
-import LoginForm from "@/app/(pages)/login/LoginForm";
+import LoginForm from "./LoginForm";
 
 
 export default function Login() {
   return (
-    <div className="min-h-screen w-screen flex flex-col lg:flex-row justify-center items-center">
-      <div className="flex p-4 justify-end">
+    <div className="flex flex-col md:mt-32 md:flex-row justify-center items-center">
+      <div className="flex p-4">
         <Image
           src="/images/logo300.png"
           width={0}

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getEventsByDate } from "../../../firebase/firestoreFunctions";
+import { getEventsByDate } from "@/app/firebase/firestoreFunctions";
 import { MdAccessTime } from "react-icons/md";
 import { IoLocationOutline } from "react-icons/io5";
 

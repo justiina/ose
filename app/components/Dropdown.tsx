@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { IoIosArrowDown } from "react-icons/io";
 
 // Define props interface for the dropdown component
 interface DropdownProps {

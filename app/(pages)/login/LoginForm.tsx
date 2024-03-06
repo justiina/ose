@@ -1,11 +1,16 @@
 "use client";
 import { useFormState } from "react-dom";
-import { login } from "../../actions";
+import { login } from "@/app/actions";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const LoginForm = () => {
   const [state, formAction] = useFormState<any, FormData>(login, undefined);
   const router = useRouter();
+
+  if (state?.error) {
+    toast.error(state.error, { id: "login" });
+  }
 
   return (
     <>
@@ -26,11 +31,7 @@ const LoginForm = () => {
           placeholder="Salasana"
           required
         />
-        {state?.error && (
-          <p className="grid justify-center text-blue text-sm font-bold">
-            {state.error}
-          </p>
-        )}
+
         <button className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm mt-4">
           Kirjaudu sisään
         </button>

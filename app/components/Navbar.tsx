@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import LogoutForm from "./LogoutForm";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaDog } from "react-icons/fa6";
@@ -15,16 +15,26 @@ import { GiHamburgerMenu } from "react-icons/gi";
 const Navbar = () => {
   const currentPath: string | null = usePathname();
   const [hamburgerOpen, setHamburgerOpen] = useState<boolean>(false);
-  const containerRef = useRef(null);
+  const showNavbar = [
+    "/addevent",
+    "/board",
+    "/calloutgroup",
+    "/contacts",
+    "/groups",
+    "/instructions",
+    "/main",
+    "/userinfo",
+  ];
 
   // Open/close the hamburger menu when small/medium screen
   const toggleHamburger = () => {
     setHamburgerOpen(!hamburgerOpen);
   };
-  return (
+
+  return showNavbar.includes(currentPath) ? (
     <>
       {/*--- Big screen navbar on the side ---*/}
-      <nav className="hidden md:grid grid-rows-10 min-h-screen bg-grey text-background font-sans text-lg p-4">
+      <nav className="hidden md:grid grid-rows-10 md:w-80 min-h-screen bg-grey text-background font-sans text-lg p-4">
         <div className="row-span-3 flex justify-between">
           <img src="/images/logo300.png" className="h-40"></img>
         </div>
@@ -33,8 +43,8 @@ const Navbar = () => {
             href="/main"
             className={
               currentPath?.startsWith("/main")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <FaRegCalendarAlt className="text-2xl" />
@@ -45,8 +55,8 @@ const Navbar = () => {
             href="/groups"
             className={
               currentPath?.startsWith("/groups")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <FaDog className="text-2xl" />
@@ -56,8 +66,8 @@ const Navbar = () => {
             href="/instructions"
             className={
               currentPath?.startsWith("/instructions")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <TbFiles className="text-2xl" />
@@ -67,8 +77,8 @@ const Navbar = () => {
             href="/board"
             className={
               currentPath?.startsWith("/board")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <FaSuitcase className="text-2xl" />
@@ -78,8 +88,8 @@ const Navbar = () => {
             href="/calloutgroup"
             className={
               currentPath?.startsWith("/calloutgroup")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <GoBellFill className="text-2xl" />
@@ -89,8 +99,8 @@ const Navbar = () => {
             href="/contacts"
             className={
               currentPath?.startsWith("/contacts")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <FaBookOpen className="text-2xl" />
@@ -100,8 +110,8 @@ const Navbar = () => {
             href="/userinfo"
             className={
               currentPath?.startsWith("/userinfo")
-                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 bg-background text-grey"
-                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-background hover:text-grey"
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-background text-grey"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-background hover:text-grey"
             }
           >
             <FaUserCircle className="text-2xl" />
@@ -154,9 +164,20 @@ const Navbar = () => {
           <FaDog className="text-2xl" />
         </Link>
 
+        <Link
+          href="/userinfo"
+          className={
+            currentPath?.startsWith("/userinfo")
+              ? "items-center cursor-pointer rounded-full px-2 py-2 bg-background text-grey"
+              : "items-center cursor-pointer rounded-full px-2 py-2 hover:bg-background hover:text-grey"
+          }
+        >
+          <FaUserCircle className="text-2xl" />
+        </Link>
+
         <LogoutForm showText={false} />
       </nav>
     </>
-  );
+  ) : null;
 };
 export default Navbar;

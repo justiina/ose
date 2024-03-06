@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, EmailAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_APIKEY,
@@ -15,29 +15,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const provider = new EmailAuthProvider();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Function to get the current user from Firebase Authentication
-/*
-function getCurrentUser() {
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
-      resolve(user);
-    });
-  });
-}*/
-
-function getCurrentUser() {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const uid = user.uid;
-      return uid;
-    } else {
-      // User is signed out
-    }
-  });
-}
-
-export { db, auth, provider, getCurrentUser };
+export { db, auth };

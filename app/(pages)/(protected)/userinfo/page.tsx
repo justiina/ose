@@ -1,5 +1,6 @@
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
+import UserForm from "./UserForm";
 
 const UserInfo = async () => {
   // check that the user is logged in
@@ -8,7 +9,11 @@ const UserInfo = async () => {
     redirect("/");
   }
 
-  return <div>UserInfo</div>;
+  return (
+    <div>
+      <UserForm />
+    </div>
+  );
 };
 
 export default UserInfo;

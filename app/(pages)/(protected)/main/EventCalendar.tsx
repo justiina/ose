@@ -16,7 +16,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
-import Dialog from "../../../components/Dialog";
+import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
 
@@ -137,7 +137,7 @@ function EventCalendar() {
 
   return (
     <>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto md:p-4">
         {/*---Heading with month name and days---*/}
         <div className="grid grid-cols-12 mx-4">
           <div className="mb-4 flex justify-center gap-8 col-span-11">
@@ -176,7 +176,7 @@ function EventCalendar() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 p-4">
+        <div className="grid grid-cols-7 md:gap-2 md:p-4">
           {WEEKDAYS.map((day) => {
             return (
               <div key={day} className="font-bold text-center">
@@ -187,7 +187,7 @@ function EventCalendar() {
 
           {/*---Add empty boxes to start if month doesn't start on Monday---*/}
           {Array.from({ length: startingDayIndex }).map((_, index) => {
-            return <div key={`empty-${index}`} className="min-h-20" />;
+            return <div key={`empty-${index}`} className="md:min-h-20" />;
           })}
 
           {/*---Highlight today and show events---*/}
@@ -200,8 +200,8 @@ function EventCalendar() {
                 key={index}
                 className={
                   isToday(day)
-                    ? "cursor-pointer border-4 border-grey rounded-md p-1 text-end bg-white min-h-20"
-                    : "cursor-pointer border border-grey rounded-md p-1  text-end bg-white min-h-20"
+                    ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white md:min-h-20"
+                    : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white md:min-h-20"
                 }
               >
                 {/*---Add events from Firebase---*/}

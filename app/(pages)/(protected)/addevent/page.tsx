@@ -1,5 +1,5 @@
 import { getSession } from "@/app/actions";
-import AddEventForm from "@/app/(pages)/(protected)/addevent/AddEventForm";
+import AddEventForm from "./AddEventForm";
 import { redirect } from "next/navigation";
 
 const AddEvent = async () => {

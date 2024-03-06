@@ -1,4 +1,4 @@
-import EventCalendar from "@/app/(pages)/(protected)/main/EventCalendar";
+import EventCalendar from "./EventCalendar";
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
 
