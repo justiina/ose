@@ -101,18 +101,25 @@ export const updateUserInfo = async (
 ) => {
   const session = await getSession();
   const uid = session.userId;
-  const formFirstname = formData.get("firstName") as string;
-  const formLastname = formData.get("lastName") as string;
-  const formShowFirstName = formData.get("showFirstName") as string | null;
-  const formShowLastname = formData.get("showLastName") as string | null;
+  const formFirstName = formData.get("firstName") as string;
+  const formLastName = formData.get("lastName") as string;
+  const formEmail = formData.get("email") as string;
+  const formPhoneNumber = formData.get("phoneNumber") as string;
+  const formShowName = formData.get("showName") as boolean | null;
+  const formShowEmail = formData.get("showEmail") as string | null;
+  const formShowPhoneNumber = formData.get("showPhoneNumber") as string | null;
+
   if (uid !== undefined) {
     try {
       const docRef = doc(db, "users", uid);
       await updateDoc(docRef, {
-        firstName: formFirstname,
-        lastName: formLastname,
-        showFirstName: formShowFirstName,
-        showLastName: formShowLastname,
+        firstName: formFirstName,
+        lastName: formLastName,
+        email: formEmail,
+        phoneNumber: formPhoneNumber,
+        showName: formShowName,
+        showEmail: formShowEmail,
+        showPhoneNumber: formShowPhoneNumber,
       });
       return { message: "Tietojen päivitys onnistui!" };
     } catch (error: any) {

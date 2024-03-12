@@ -187,7 +187,7 @@ function EventCalendar() {
 
           {/*---Add empty boxes to start if month doesn't start on Monday---*/}
           {Array.from({ length: startingDayIndex }).map((_, index) => {
-            return <div key={`empty-${index}`} className="md:min-h-20" />;
+            return <div key={`empty-${index}`} className="min-h-20" />;
           })}
 
           {/*---Highlight today and show events---*/}
@@ -200,8 +200,8 @@ function EventCalendar() {
                 key={index}
                 className={
                   isToday(day)
-                    ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white md:min-h-20"
-                    : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white md:min-h-20"
+                    ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white min-h-20"
+                    : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white min-h-20"
                 }
               >
                 {/*---Add events from Firebase---*/}

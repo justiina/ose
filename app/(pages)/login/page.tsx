@@ -1,8 +1,14 @@
 import Image from "next/image";
 import LoginForm from "./LoginForm";
+import { getSession } from "@/app/actions";
+import { redirect } from "next/navigation";
 
-
-export default function Login() {
+const Login = async () => {
+  // redirect to main if user is logged in
+  const session = await getSession();
+  if (session.isLoggedIn) {
+    redirect("/main");
+  }
   return (
     <div className="flex flex-col md:mt-32 md:flex-row justify-center items-center">
       <div className="flex p-4">
@@ -27,4 +33,6 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
+
+export default Login;

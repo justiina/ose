@@ -4,21 +4,44 @@ import { getUserInfo, updateUserInfo } from "@/app/actions";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
+import UserInfoField from "@/app/(pages)/(protected)/userinfo/UserInfoField";
+import { MdOutlineEdit } from "react-icons/md";
+import { IoIosCheckmarkCircle } from "react-icons/io";
+import { TbEye } from "react-icons/tb";
+import { TbEyeClosed } from "react-icons/tb";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 interface UserType {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  showFirstName: string | null;
-  showLastName: string | null;
-  showEmail: string | null;
-  showPhoneNumber: string | null;
+  group: string;
+  role: {};
+  showName: boolean | undefined;
+  showEmail: boolean;
+  showPhoneNumber: boolean;
+}
+
+interface EditType {
+  editName: boolean;
+  editEmail: boolean;
+  editPhoneNumber: boolean;
+  editGroup: boolean;
+  editRole: boolean;
 }
 
 const UserForm = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [edit, setEdit] = useState<EditType>({
+    editName: false,
+    editEmail: false,
+    editPhoneNumber: false,
+    editGroup: false,
+    editRole: false,
+  });
+  const [change, setChange] = useState<boolean>(false);
   const [state, formAction] = useFormState<any, FormData>(
     updateUserInfo,
     undefined
@@ -30,6 +53,8 @@ const UserForm = () => {
 
   if (state?.message) {
     toast.success(state.message, { id: "updateSuccess" });
+    setUser(null);
+    window.location.reload();
   }
 
   // Fetch the user data
@@ -42,8 +67,9 @@ const UserForm = () => {
           lastName: userData.lastName,
           email: userData.email,
           phoneNumber: userData.phoneNumber,
-          showFirstName: userData.showFirstName,
-          showLastName: userData.showLastName,
+          group: userData.group,
+          role: userData.role,
+          showName: userData.showName,
           showEmail: userData.showEmail,
           showPhoneNumber: userData.showPhoneNumber,
         });
@@ -63,108 +89,178 @@ const UserForm = () => {
   }
 
   return (
-    <div className="container mx-auto p-8 md:p-16">
-      <h1 className="mb-4">Päivitä omat tietosi</h1>
-      <p className="mb-4 md:w-2/3">
-        Merkitse ruksi kentän vieressä olevaan laatikkoon, mikäli tiedon saa
-        näyttää Yhteystiedot-sivulla muille OSElaisille. Täytä ainakin tähdellä
-        merkityt kohdat.
-      </p>
+    <div className="container max-w-screen-md p-8 md:p-16">
+      <h1 className="mb-4">Omat tiedot</h1>
 
-      <form action={formAction}>
-        {/*--- First name ---*/}
-        <label className="flex gap-1 font-bold mt-4">
-          <p>Etunimi</p>
-          <p className="text-orange">*</p>
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="firstName"
-            className="border md:w-1/3 border-grey rounded-full py-1 px-4 text-sm"
-            type="text"
-            name="firstName"
-            placeholder={user?.firstName || "Etunimi"}
-            required
-          />
-          <div className="flex items-center gap-1">
-            <input type="checkbox" name="showFirstName" id="showFirstName" />
-            <label className="text-xs">Saa näyttää</label>
-          </div>
+      <>
+        <div>
+          <p className="mb-4">
+            Avonainen silmän kuva tietokentän vieressä tarkoittaa, että tiedon
+            saa näyttää Yhteystiedot-sivulla muille OSElaisille. Voit muokata
+            tätä ja itse tietokenttää kynäikonin kautta.
+          </p>
+          <p className="mb-4">
+            Viikkoryhmäsi sekä roolisi OSEssa näkyvät yhteystiedoissa
+            automaattisesti, jos annat luvan näyttää nimesi siellä. Ole
+            yhteydessä sihteeriin, jos haluat muokata nimeäsi.
+          </p>
         </div>
 
-        {/*--- Last name ---*/}
-        <label className="flex gap-1 font-bold mt-4">
-          <p>Sukunimi</p>
-          <p className="text-orange">*</p>
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="lastName"
-            className="border md:w-1/3 border-grey rounded-full py-1 px-4 text-sm"
-            type="text"
-            name="lastName"
-            placeholder={user?.lastName || "Sukunimi"}
-            required
-          />
-          <div className="flex items-center gap-1">
-            <input type="checkbox" name="showLastName" id="showLastName" />
-            <label className="text-xs">Saa näyttää</label>
-          </div>
-        </div>
+        {/*--- Dog owner ---*/}
+        <h2>Koiranohjaaja</h2>
+        <div className="divide-y divide-greylight">
+          {/*--- Name ---*/}
+          {!edit.editName ? (
+            <>
+              <div className="flex items-end justify-between">
+                <UserInfoField
+                  title="Nimi"
+                  content={`${user?.firstName} ${user?.lastName}`}
+                />
+                <div className="flex gap-2 py-2">
+                  {user?.showName ? (
+                    <TbEye className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  ) : (
+                    <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  )}
 
-        {/*--- Sähköposti ---*/}
-        <label className="flex gap-1 font-bold mt-4">
-          <p>Sähköposti</p>
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="email"
-            className="border md:w-1/3 border-grey rounded-full py-1 px-4 text-sm"
-            type="email"
-            name="email"
-            placeholder={user?.email || "Sähköposti"}
-          />
-          <div className="flex items-center gap-1">
-            <input type="checkbox" name="showEmail" id="showEmail" />
-            <label className="text-xs">Saa näyttää</label>
-          </div>
-        </div>
+                  <MdOutlineEdit
+                    onClick={() =>
+                      setEdit((edit) => ({
+                        ...edit,
+                        editName: !edit.editName,
+                      }))
+                    }
+                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>{/*--- Editin section here ---*/}</>
+          )}
 
-        {/*--- Phone number ---*/}
-        <label className="flex gap-1 font-bold mt-4">
-          <p>Puhelinnumero</p>
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="phoneNumber"
-            className="border md:w-1/3 border-grey rounded-full py-1 px-4 text-sm"
-            type="text"
-            name="phoneNumber"
-            placeholder={user?.phoneNumber || "Puhelinnumero"}
-          />
-          <div className="flex items-center gap-1">
-            <input
-              type="checkbox"
-              name="showPhoneNumber"
-              id="showPhoneNumber"
-            />
-            <label className="text-xs">Saa näyttää</label>
-          </div>
+          {/*--- Email ---*/}
+          {!edit.editEmail ? (
+            <>
+              <div className="flex items-end justify-between">
+                <UserInfoField title="Sähköposti" content={user?.email} />
+                <div className="flex gap-2 py-2">
+                  {user?.showEmail ? (
+                    <TbEye className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  ) : (
+                    <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  )}
+                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
+                  <MdOutlineEdit
+                    onClick={() =>
+                      setEdit((edit) => ({
+                        ...edit,
+                        editEmail: !edit.editEmail,
+                      }))
+                    }
+                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {/*--- Phone number ---*/}
+          {!edit.editPhoneNumber ? (
+            <>
+              <div className="flex items-end justify-between">
+                <UserInfoField
+                  title="Puhelinnumero"
+                  content={user?.phoneNumber}
+                />
+                <div className="flex gap-2 py-2">
+                  {user?.showPhoneNumber ? (
+                    <TbEye className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  ) : (
+                    <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  )}
+                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
+                  <MdOutlineEdit
+                    onClick={() =>
+                      setEdit((edit) => ({
+                        ...edit,
+                        editPhoneNumber: !edit.editPhoneNumber,
+                      }))
+                    }
+                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>{/*--- Editin section here ---*/}</>
+          )}
+
+          {/*--- Group ---*/}
+          {!edit.editGroup ? (
+            <>
+              <div className="flex items-end justify-between">
+                <UserInfoField title="Treeniryhmä" content="MaA" />
+                <div className="flex gap-2 py-2">
+                  {/*--- If ok to show name, it is also ok to show the group ---*/}
+                  {user?.firstName ? (
+                    <TbEye className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  ) : (
+                    <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  )}
+                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
+                  <MdOutlineEdit
+                    onClick={() =>
+                      setEdit((edit) => ({
+                        ...edit,
+                        editGroup: !edit.editGroup,
+                      }))
+                    }
+                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>{/*--- Editin section here ---*/}</>
+          )}
+
+          {/*--- Roles in OSE ---*/}
+          {!edit.editRole ? (
+            <>
+              <div className="flex items-end justify-between">
+                <UserInfoField
+                  title="Rooli OSEssa"
+                  content="Rahastonhoitaja, webmaster"
+                />
+                <div className="flex gap-2 py-2">
+                  {/*--- If ok to show name, it is also ok to show the roles ---*/}
+                  {user?.firstName ? (
+                    <TbEye className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  ) : (
+                    <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
+                  )}
+                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
+                  <MdOutlineEdit
+                    onClick={() =>
+                      setEdit((edit) => ({
+                        ...edit,
+                        editRole: !edit.editRole,
+                      }))
+                    }
+                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>{/*--- Editin section here ---*/}</>
+          )}
         </div>
-        <div className="flex gap-2">
-          <input
-            type="button"
-            value="Peruuta"
-            onClick={handleCancel}
-            className="bg-grey hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm mt-8"
-          />
-          <input
-            type="submit"
-            value="Tallenna"
-            className="bg-orange hover:bg-blue active:bg-grey text-white px-5 py-2 rounded-full text-sm mt-8"
-          />
-        </div>
-      </form>
+      </>
     </div>
   );
 };
