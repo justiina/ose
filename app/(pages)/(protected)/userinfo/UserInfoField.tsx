@@ -8,7 +8,7 @@ type InputFieldType = {
 const UserInfoField: React.FC<InputFieldType> = ({ title, content }) => {
   return (
     <div className="py-2 px-4">
-      <p className="font-bold text-orange">{title}</p>
+      <p className="font-bold text-grey">{title}</p>
       <p className="text-xl">{content}</p>
     </div>
   );

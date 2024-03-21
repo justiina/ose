@@ -107,7 +107,7 @@ const UserForm = () => {
         </div>
 
         {/*--- Dog owner ---*/}
-        <h2>Koiranohjaaja</h2>
+        <h2 className="text-orange">Koiranohjaaja</h2>
         <div className="divide-y divide-greylight">
           {/*--- Name ---*/}
           {!edit.editName ? (
@@ -123,7 +123,6 @@ const UserForm = () => {
                   ) : (
                     <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
                   )}
-
                   <MdOutlineEdit
                     onClick={() =>
                       setEdit((edit) => ({
@@ -151,7 +150,6 @@ const UserForm = () => {
                   ) : (
                     <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
                   )}
-                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
                   <MdOutlineEdit
                     onClick={() =>
                       setEdit((edit) => ({
@@ -182,7 +180,6 @@ const UserForm = () => {
                   ) : (
                     <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
                   )}
-                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
                   <MdOutlineEdit
                     onClick={() =>
                       setEdit((edit) => ({
@@ -211,7 +208,6 @@ const UserForm = () => {
                   ) : (
                     <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
                   )}
-                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
                   <MdOutlineEdit
                     onClick={() =>
                       setEdit((edit) => ({
@@ -243,7 +239,6 @@ const UserForm = () => {
                   ) : (
                     <TbEyeClosed className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue" />
                   )}
-                  <RiDeleteBinLine className="text-2xl text-grey cursor-pointer hover:text-orange active:text-orange" />
                   <MdOutlineEdit
                     onClick={() =>
                       setEdit((edit) => ({
