@@ -1,21 +1,25 @@
-import { Timestamp } from "firebase/firestore";
-
-export const convertTimeStampToJS = (time: Timestamp) => {
-  // Convert timestamp into a user-friendly view
+export const showDateAndTime = (time: string | null) => {
+  // Convert JavaScript timestamp into a user-frienly view
   if (time !== null && time !== undefined) {
-    const firebaseTime = new Date(
-      time.seconds * 1000 + time.nanoseconds / 1000000
-    );
-    return (
-      firebaseTime.getDate() +
-      "." +
-      (firebaseTime.getMonth() + 1) +
-      "." +
-      firebaseTime.getFullYear() +
-      String(" klo ") +
-      firebaseTime.getHours() +
-      "." +
-      String(firebaseTime.getMinutes()).padStart(2, "0")
-    );
+    // Separate date components
+    const date = new Date(time);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Add 1 because month is zero-based
+    const day = date.getDate();
+
+    // Format the date
+    const formattedDate = day + "." + month + "." + year;
+
+    // Separate time components
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    // Format hours and minutes with leading zeros
+    const formattedHours = hours < 10 ? "0" + hours : hours;
+    const formattedMins = minutes < 10 ? "0" + minutes : minutes;
+
+    return formattedDate + " klo " + formattedHours + "." + formattedMins;
   }
 };
+
+

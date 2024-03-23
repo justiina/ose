@@ -1,5 +1,4 @@
 "use client";
-import { useFormState } from "react-dom";
 import { getUserInfo, updateUserInfo } from "@/app/actions";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
@@ -9,8 +8,7 @@ import { MdOutlineEdit } from "react-icons/md";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { TbEye } from "react-icons/tb";
 import { TbEyeClosed } from "react-icons/tb";
-import { RiDeleteBinLine } from "react-icons/ri";
-import { setuid } from "process";
+import Dropdown, { MultiDropdown } from "@/app/components/Dropdown";
 
 interface UserType {
   firstName: string;
@@ -18,7 +16,7 @@ interface UserType {
   email: string;
   phoneNumber: string;
   group: string;
-  role: {};
+  role: string[];
   showName: boolean | undefined;
   showEmail: boolean;
   showPhoneNumber: boolean;
@@ -43,22 +41,33 @@ const UserForm = () => {
     editRole: false,
   });
   const [isEdited, setIsEdited] = useState<boolean>(false);
-
-  const [state, formAction] = useFormState<any, FormData>(
-    updateUserInfo,
-    undefined
-  );
   const [selectedRadio, setSelectedRadio] = useState<string>("");
 
-  if (state?.error) {
-    toast.error(state.error, { id: "updateError" });
-  }
+  // List of training groups for dropdown list
+  const groupOptions = ["MaA", "MaB", "TiA", "TiB", "Raahe", "Ei ryhmää"];
 
-  if (state?.message) {
-    toast.success(state.message, { id: "updateSuccess" });
-    setUser(null);
-    window.location.reload();
-  }
+  // List of member roles in OSE for dropdown list
+  const roleOptions = [
+    "Hallituksen jäsen",
+    "Hallituksen puheenjohtaja",
+    "Hallituksen varapuheenjohtaja",
+    "Sihteeri",
+    "Rahastonhoitaja",
+    "Koesihteeri",
+    "Koulutusvastaava",
+    "Talkoopistevastaava",
+    "Kouluttaja",
+    "Hälytoimikunnan puheenjohtaja",
+    "Hälytoimikunnan jäsen",
+    "Varustevastaava",
+    "Kartta- ja viestisovellusyhteyshenkilö",
+    "Varainhankintatoimikunnan jäsen",
+    "Web-master",
+    "Koulutustoimikunnan jäsen",
+    "Vapepa-yhteyshenkilö",
+    "Vapepan edustaja",
+    "SPeKL:n edustaja",
+  ];
 
   // Fetch the user data
   useEffect(() => {
@@ -71,7 +80,7 @@ const UserForm = () => {
           email: userData.email || "",
           phoneNumber: userData.phoneNumber || "",
           group: userData.group || "",
-          role: userData.role || {},
+          role: userData.role || [],
           showName: userData.showName || false,
           showEmail: userData.showEmail || false,
           showPhoneNumber: userData.showPhoneNumber || false,
@@ -118,6 +127,13 @@ const UserForm = () => {
           showEmail: value === "showEmail",
         }));
         break;
+      case "showPhoneNumber":
+      case "dontShowPhoneNumber":
+        setUser((prevUser) => ({
+          ...(prevUser as UserType),
+          showPhoneNumber: value === "showPhoneNumber",
+        }));
+        break;
     }
   };
 
@@ -129,10 +145,36 @@ const UserForm = () => {
     }));
     setIsEdited(true); // Set isEdited to true when a field is edited
   };
+  const handleDropdownSelect = (selected: string | string[]) => {
+    if (typeof selected === "string") {
+      setUser((prevUser) => ({
+        ...(prevUser as UserType),
+        group: selected,
+      }));
+    } else if (Array.isArray(selected)) {
+      setUser((prevUser) => ({
+        ...(prevUser as UserType),
+        role: selected,
+      }));
+    }
+  };
 
   const handleCancel = () => {
     setUser(null);
     window.location.reload();
+  };
+
+  const handleSave = async () => {
+    if (user !== null) {
+      const updateOk = await updateUserInfo(user);
+      if (updateOk) {
+        toast.success("Tietojen päivittäminen onnistui!");
+        setUser(null);
+        window.location.reload();
+      } else {
+        toast.error(updateOk, { id: "updateError" });
+      }
+    }
   };
 
   if (isLoading) {
@@ -175,16 +217,7 @@ const UserForm = () => {
                       <TbEyeClosed className="text-2xl text-grey" />
                     )}
                     <MdOutlineEdit
-                      onClick={() =>
-                        setEdit((edit) => ({
-                          ...edit,
-                          editName: true,
-                          editEmail: false,
-                          editPhoneNumber: false,
-                          editGroup: false,
-                          editRole: false,
-                        }))
-                      }
+                      onClick={() => handleEditToggle("editName")}
                       className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
                     />
                   </div>
@@ -247,16 +280,7 @@ const UserForm = () => {
                       <TbEyeClosed className="text-2xl text-grey" />
                     )}
                     <MdOutlineEdit
-                      onClick={() =>
-                        setEdit((edit) => ({
-                          ...edit,
-                          editName: false,
-                          editEmail: true,
-                          editPhoneNumber: false,
-                          editGroup: false,
-                          editRole: false,
-                        }))
-                      }
+                      onClick={() => handleEditToggle("editEmail")}
                       className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
                     />
                   </div>
@@ -315,100 +339,184 @@ const UserForm = () => {
           </div>
 
           {/*--- Phone number ---*/}
-          {!edit.editPhoneNumber ? (
-            <>
-              <div className="flex items-end justify-between">
-                <UserInfoField
-                  title="Puhelinnumero"
-                  content={user?.phoneNumber}
-                />
-                <div className="flex gap-2 py-2">
-                  {user?.showPhoneNumber ? (
-                    <TbEye className="text-2xl text-grey" />
-                  ) : (
-                    <TbEyeClosed className="text-2xl text-grey" />
-                  )}
-                  <MdOutlineEdit
-                    onClick={() =>
-                      setEdit((edit) => ({
-                        ...edit,
-                        editPhoneNumber: !edit.editPhoneNumber,
-                      }))
-                    }
-                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+          <div>
+            {!edit.editPhoneNumber ? (
+              <>
+                <div className="flex items-end justify-between">
+                  <UserInfoField
+                    title="Puhelinnumero"
+                    content={user?.phoneNumber}
                   />
+                  <div className="flex gap-2 py-2">
+                    {user?.showPhoneNumber ? (
+                      <TbEye className="text-2xl text-grey" />
+                    ) : (
+                      <TbEyeClosed className="text-2xl text-grey" />
+                    )}
+                    <MdOutlineEdit
+                      onClick={() => handleEditToggle("editPhoneNumber")}
+                      className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                    />
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>{/*--- Editing section here ---*/}</>
-          )}
+              </>
+            ) : (
+              <>
+                {/*--- Edit phone number ---*/}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <UserInfoField title="Puhelinnumero" content="" />
+                    <input
+                      id="phoneNumber"
+                      className="border border-grey rounded-full mb-4 py-1 px-4 text-sm"
+                      type="text"
+                      name="phoneNumber"
+                      value={user?.phoneNumber || ""}
+                      onChange={handleInputChange}
+                    />
+                  </div>
 
-          {/*--- Group ---*/}
-          {!edit.editGroup ? (
-            <>
-              <div className="flex items-end justify-between">
-                <UserInfoField title="Treeniryhmä" content="MaA" />
-                <div className="flex gap-2 py-2">
-                  {/*--- If ok to show name, it is also ok to show the group ---*/}
-                  {user?.showName ? (
-                    <TbEye className="text-2xl text-grey" />
-                  ) : (
-                    <TbEyeClosed className="text-2xl text-grey" />
-                  )}
-                  <MdOutlineEdit
-                    onClick={() =>
-                      setEdit((edit) => ({
-                        ...edit,
-                        editGroup: !edit.editGroup,
-                      }))
-                    }
-                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
-                  />
+                  <div className="flex gap-2 py-2">
+                    <IoIosCheckmarkCircle
+                      onClick={() => handleEditToggle("editPhoneNumber")}
+                      className="text-3xl cursor-pointer text-blue hover:text-green"
+                    />
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>{/*--- Editing section here ---*/}</>
-          )}
+                <div className="flex gap-6 pb-4">
+                  <p>Näytetäänkö yhteystiedoissa?</p>
+                  <div className="flex gap-4">
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        id="showPhoneNumber"
+                        value="showPhoneNumber"
+                        checked={selectedRadio === "showPhoneNumber"}
+                        onChange={() => handleRadioChange("showPhoneNumber")}
+                      />
+                      Kyllä
+                    </label>
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        name="dontShowPhoneNumber"
+                        value="dontShowPhoneNumber"
+                        checked={selectedRadio === "dontShowPhoneNumber"}
+                        onChange={() =>
+                          handleRadioChange("dontShowPhoneNumber")
+                        }
+                      />
+                      Ei
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/*--- Training group ---*/}
+          <div>
+            {!edit.editGroup ? (
+              <>
+                <div className="flex items-end justify-between">
+                  <UserInfoField
+                    title="Viikkoryhmä"
+                    content={
+                      user?.group.length === 0 ? "Valitse ryhmä" : user?.group
+                    }
+                  />
+                  <div className="flex gap-2 py-2">
+                    {user?.showName ? (
+                      <TbEye className="text-2xl text-grey" />
+                    ) : (
+                      <TbEyeClosed className="text-2xl text-grey" />
+                    )}
+                    <MdOutlineEdit
+                      onClick={() => handleEditToggle("editGroup")}
+                      className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/*--- Edit training group ---*/}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <UserInfoField title="Viikkoryhmä" content="" />
+                    <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                      <Dropdown
+                        options={groupOptions}
+                        onSelect={handleDropdownSelect}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 py-2">
+                    <IoIosCheckmarkCircle
+                      onClick={() => handleEditToggle("editGroup")}
+                      className="text-3xl cursor-pointer text-blue hover:text-green"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           {/*--- Roles in OSE ---*/}
-          {!edit.editRole ? (
-            <>
-              <div className="flex items-end justify-between">
-                <UserInfoField
-                  title="Rooli OSEssa"
-                  content="Rahastonhoitaja, webmaster"
-                />
-                <div className="flex gap-2 py-2">
-                  {/*--- If ok to show name, it is also ok to show the roles ---*/}
-                  {user?.showName ? (
-                    <TbEye className="text-2xl text-grey" />
-                  ) : (
-                    <TbEyeClosed className="text-2xl text-grey" />
-                  )}
-                  <MdOutlineEdit
-                    onClick={() =>
-                      setEdit((edit) => ({
-                        ...edit,
-                        editRole: !edit.editRole,
-                      }))
-                    }
-                    className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
-                  />
+          <div>
+            {!edit.editRole ? (
+              <>
+                <div className="flex items-end justify-between">
+                  <UserInfoField title="Roolit OSEssa" content={user?.role} />
+                  <div className="flex gap-2 py-2">
+                    {user?.showName ? (
+                      <TbEye className="text-2xl text-grey" />
+                    ) : (
+                      <TbEyeClosed className="text-2xl text-grey" />
+                    )}
+                    <MdOutlineEdit
+                      onClick={() => handleEditToggle("editRole")}
+                      className="text-2xl text-grey cursor-pointer hover:text-blue active:text-blue"
+                    />
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>{/*--- Editing section here ---*/}</>
-          )}
+              </>
+            ) : (
+              <>
+                {/*--- Edit roles ---*/}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <UserInfoField title="Roolit OSEssa" content="" />
+                    <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                      <MultiDropdown
+                        options={roleOptions}
+                        onSelect={handleDropdownSelect}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 py-2">
+                    <IoIosCheckmarkCircle
+                      onClick={() => handleEditToggle("editRole")}
+                      className="text-3xl cursor-pointer text-blue hover:text-green"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         {isEdited && (
           <div className="flex gap-2 justify-center mt-4">
-            <button className="bg-grey hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4">
+            <button
+              onClick={handleCancel}
+              className="bg-grey hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4"
+            >
               Peruuta
             </button>
-            <button className="bg-orange hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4">
+            <button
+              onClick={handleSave}
+              className="bg-orange hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4"
+            >
               Tallenna
             </button>
           </div>

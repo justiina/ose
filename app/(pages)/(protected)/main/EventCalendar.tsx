@@ -10,7 +10,7 @@ import {
   subMonths,
 } from "date-fns";
 import React, { useMemo, useState, useEffect } from "react";
-import { getEvents } from "@/app/firebase/firestoreFunctions";
+import { getEvents } from "@/app/actions";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
@@ -19,6 +19,7 @@ import { FaPlus } from "react-icons/fa";
 import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
+import toast from "react-hot-toast";
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -66,15 +67,21 @@ function EventCalendar() {
   // Fetch the events data
   useEffect(() => {
     const fetchData = async () => {
-      const eventData = await getEvents("events");
-      setEvents(
-        eventData?.map(
-          (event: { date: string | number | Date; type: string }) => ({
-            date: new Date(event.date),
-            type: event.type,
-          })
-        )
-      );
+      try {
+        const eventData = await getEvents();
+        if ("error" in eventData) {
+          toast.error(eventData.error, { id: "fetchError" });
+        } else {
+          const eventArray: EventType[] = eventData.map(
+            (doc) => doc as EventType
+          );
+          setEvents(eventArray);
+        }
+      } catch (error: any) {
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "fetchError2",
+        });
+      }
     };
     fetchData();
   }, []);

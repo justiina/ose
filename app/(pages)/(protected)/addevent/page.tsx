@@ -9,9 +9,14 @@ const AddEvent = async () => {
     redirect("/");
   }
 
+  let uid = session?.userId;
+  if (uid === undefined) {
+    uid = "undefined";
+  }
+
   return (
     <div>
-      <AddEventForm />
+      <AddEventForm currentUser={uid} />
     </div>
   );
 };

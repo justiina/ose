@@ -1,10 +1,9 @@
 "use server";
-
 import { sessionOptions, SessionData, defaultSession } from "@/app/lib";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { auth } from "@/app/firebase/firebaseConfig";
+import { auth } from "@/app/firebaseConfig";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -14,14 +13,12 @@ import {
   getDocs,
   query,
   where,
-  Timestamp,
   orderBy,
   doc,
   getDoc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "@/app/firebase/firebaseConfig";
-import toast from "react-hot-toast";
+import { db } from "@/app/firebaseConfig";
 
 // USER FUNCTIONS
 
@@ -56,7 +53,7 @@ export const login = async (
     }
     return userCredential.user;
   } catch (error: any) {
-    return { error: "Väärä sähköposti tai salasana!\nYritä uudestaan." };
+    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
   } finally {
     if (redirectPath) {
       revalidatePath(redirectPath);
@@ -95,103 +92,87 @@ export const getUserInfo = async () => {
   }
 };
 
-export const updateUserInfo = async (
-  prevState: { error: undefined | string; message: undefined | string },
-  formData: FormData
-) => {
+export const updateUserInfo = async <T extends DocumentData>(
+  data: T
+): Promise<boolean | any> => {
   const session = await getSession();
   const uid = session.userId;
-  const formFirstName = formData.get("firstName") as string;
-  const formLastName = formData.get("lastName") as string;
-  const formEmail = formData.get("email") as string;
-  const formPhoneNumber = formData.get("phoneNumber") as string;
-  const formShowName = formData.get("showName") as boolean | null;
-  const formShowEmail = formData.get("showEmail") as string | null;
-  const formShowPhoneNumber = formData.get("showPhoneNumber") as string | null;
 
   if (uid !== undefined) {
     try {
       const docRef = doc(db, "users", uid);
-      await updateDoc(docRef, {
-        firstName: formFirstName,
-        lastName: formLastName,
-        email: formEmail,
-        phoneNumber: formPhoneNumber,
-        showName: formShowName,
-        showEmail: formShowEmail,
-        showPhoneNumber: formShowPhoneNumber,
-      });
-      return { message: "Tietojen päivitys onnistui!" };
+      await updateDoc(docRef, data);
+      return true;
     } catch (error: any) {
       console.log(error);
       return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
     }
+  } else return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+};
+
+export const getUserName = async (uid: string | null) => {
+  try {
+    if (uid === null || uid === undefined) {
+      return "";
+    } else {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const userName = docSnap.data().firstName;
+        return userName;
+      }
+    }
+  } catch (error: any) {
+    console.log(error);
   }
 };
 
 // EVENT FUNCTIONS
 
 export const saveEvent = async <T extends DocumentData>(
-  collectionName: string,
   data: T
 ): Promise<boolean | any> => {
   try {
-    await addDoc(collection(db, collectionName), data);
+    await addDoc(collection(db, "events"), data);
     return true;
-  } catch (error) {
-    console.log("Something went wrong: ", error);
-    return error;
+  } catch (error: any) {
+    return {
+      error: "Tapahtuman tallennus epäonnistui!\nYritä myöhemmin uudestaan.",
+    };
   }
 };
 
-export const getEvents = async (
-  collectionName: string
-): Promise<DocumentData | null> => {
+export const getEvents = async () => {
   try {
-    const q = query(
-      collection(db, collectionName),
-      orderBy("time"),
-      orderBy("type")
-    );
+    const q = query(collection(db, "events"), orderBy("time"), orderBy("type"));
     const querySnapshot = await getDocs(q);
-    const eventData: DocumentData[] = [];
+    const eventData: DocumentData[] | { error: string } = [];
     querySnapshot.forEach((doc) => {
       eventData.push(doc.data() as DocumentData);
     });
     return eventData;
-  } catch (error) {
-    console.error("Error getting document:", error);
-    toast.error(
-      "Tapahtumien lataus ei onnistunut! Yritä myöhemmin uudestaan.",
-      { id: "download" }
-    );
-    return null;
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
 
 export const getEventsByDate = async (
-  collectionName: string,
   date: string
 ): Promise<DocumentData | null> => {
   try {
     const q = query(
-      collection(db, collectionName),
+      collection(db, "events"),
       where("date", "==", date),
       orderBy("time"),
       orderBy("type")
     );
     const querySnapshot = await getDocs(q);
-    const eventData: DocumentData[] = [];
+    const eventData: DocumentData[] | { error: string } = [];
     querySnapshot.forEach((doc) => {
       eventData.push(doc.data() as DocumentData);
     });
     return eventData;
-  } catch (error) {
-    console.error("Error getting document:", error);
-    toast.error(
-      "Tapahtumien lataus ei onnistunut! Yritä myöhemmin uudestaan.",
-      { id: "download" }
-    );
-    return null;
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };

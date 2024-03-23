@@ -1,23 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getEventsByDate } from "@/app/firebase/firestoreFunctions";
+import { getEventsByDate, getUserName } from "@/app/actions";
+import { showDateAndTime } from "@/app/components/Functions";
 import { MdAccessTime } from "react-icons/md";
 import { IoLocationOutline } from "react-icons/io5";
 
-type Props = {
-  date: string | null;
-};
-
 type EventType = {
+  created: string | null;
+  createdBy: string | null;
   title: string | null;
   type: string | null;
   date: string | null;
   time: string | null;
   place: string | null;
+  placeLink: string | null;
   details: string | null;
 };
 
-const DayCard = ({ date }: Props) => {
+const DayCard = ({ date }: { date: string | null }) => {
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -27,14 +27,17 @@ const DayCard = ({ date }: Props) => {
       const [day, month, year] = date.split(".");
       const eventDate: string = `${year}-${month}-${day}`;
       const fetchData = async () => {
-        const eventData = await getEventsByDate("events", eventDate);
+        const eventData = await getEventsByDate(eventDate);
         setEvents(
           eventData?.map((event: EventType) => ({
+            created: showDateAndTime(event.created),
+            createdBy: getUserName(event.createdBy),
             title: event.title,
+            type: event.type,
             date: event.date,
             time: event.time,
-            type: event.type,
             place: event.place,
+            placeLinki: event.placeLink,
             details: event.details,
           }))
         );
@@ -88,6 +91,10 @@ const DayCard = ({ date }: Props) => {
                 <div className="mx-6 my-4">
                   <h2>{event.title}</h2>
                   <p className="my-1">{event.details}</p>
+                </div>
+                <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
+                  <p>Lisätty: {event.createdBy}</p>
+                  <p>{event.created}</p>
                 </div>
               </div>
             ))}

@@ -3,11 +3,12 @@ import React, { ChangeEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import useAutoSizeTextArea from "@/app/customHooks/useAutoSizeTextArea";
-import { saveEvent } from "@/app/firebase/firestoreFunctions";
-import { serverTimestamp } from "firebase/firestore";
+import { saveEvent } from "@/app/actions";
 import Dropdown from "@/app/components/Dropdown";
 
 interface FormDataType {
+  created: Date;
+  createdBy: string;
   title: string;
   date: string;
   time: string;
@@ -17,9 +18,12 @@ interface FormDataType {
   details: string;
 }
 
-const AddEventForm = () => {
+const AddEventForm = ({ currentUser }: { currentUser: string }) => {
+  const currentDate = new Date();
+  const timestamp = currentDate.getTime();
   const [formData, setFormData] = useState({
-    created: serverTimestamp(),
+    created: timestamp,
+    createdBy: currentUser,
     title: "",
     date: "",
     time: "",
@@ -52,10 +56,9 @@ const AddEventForm = () => {
   const handleInputChange =
     (fieldName: keyof FormDataType) =>
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
-      if(fieldName==="date") {
-        const [day, time] = e.target.value.split("T")
-        setFormData({...formData, date: day, time: time})
-
+      if (fieldName === "date") {
+        const [day, time] = e.target.value.split("T");
+        setFormData({ ...formData, date: day, time: time });
       } else {
         setFormData({ ...formData, [fieldName]: e.target.value });
       }
@@ -99,21 +102,24 @@ const AddEventForm = () => {
       toast.error("Täytä pakolliset kentät!");
       return;
     } else {
-      const saveOk = await saveEvent("events", formData);
+      const saveOk = await saveEvent(formData);
       if (saveOk) {
         router.push("/main");
         toast.success("Tapahtuman tallentaminen onnistui!");
       } else {
-        toast.error("Jotain meni vikaan, yritä myöhemmin uudestaan.");
-        console.log("Something went wrong: ", saveOk);
+        toast.error(saveOk, { id: "saveError" });
+        return;
       }
     }
   };
 
   // Cancel add event and go back to main page
   const clearAndRedirect = () => {
+    const currentDate = new Date();
+    const timestamp = currentDate.getTime();
     setFormData({
-      created: serverTimestamp(),
+      created: timestamp,
+      createdBy: "",
       title: "",
       date: "",
       time: "",
@@ -131,14 +137,14 @@ const AddEventForm = () => {
       <p className="mb-4">Täytä ainakin tähdellä merkityt kohdat.</p>
       <div>
         {/*---Title---*/}
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="lg:col-span-2 flex gap-1">
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Tapahtuman nimi</label>
             <p className="text-orange">*</p>
           </div>
           <input
             id="name"
-            className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
+            className="border border-grey bg-white rounded-lg py-1 px-4 mb-2"
             type="text"
             name="name"
             placeholder="Esim. Hakutreeni tai Viikkotreeni"
@@ -148,8 +154,8 @@ const AddEventForm = () => {
         </div>
 
         {/*---Date---*/}
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="lg:col-span-2 flex gap-1">
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Aika</label>
             <p className="text-orange">*</p>
           </div>
@@ -164,8 +170,8 @@ const AddEventForm = () => {
         </div>
 
         {/*---Type---*/}
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="md:col-span-2 flex gap-1">
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Tapahtuman tyyppi</label>
             <p className="text-orange">*</p>
           </div>
@@ -175,9 +181,9 @@ const AddEventForm = () => {
           </div>
         </div>
 
-        {/*---Place---*/}
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="lg:col-span-2 flex gap-1">
+        {/*---Location---*/}
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Paikan nimi</label>
           </div>
           <input
@@ -191,8 +197,8 @@ const AddEventForm = () => {
           />
         </div>
 
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="lg:col-span-2 flex gap-1">
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Paikan karttalinkki</label>
           </div>
           <input
@@ -207,8 +213,8 @@ const AddEventForm = () => {
         </div>
 
         {/*---Details---*/}
-        <div className="lg:grid lg:grid-cols-12">
-          <div className="md:col-span-2 flex gap-1">
+        <div className="flex flex-col lg:w-2/3">
+          <div className="flex gap-1">
             <label className="font-bold">Kuvaus</label>
           </div>
           <textarea
