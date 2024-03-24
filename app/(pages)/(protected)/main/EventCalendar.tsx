@@ -16,10 +16,16 @@ import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
+import { EventColorAndIconMap } from "./EventColorAndIconMap";
 import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
+
+interface EventType {
+  date: Date;
+  type: string;
+}
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -38,16 +44,7 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-interface EventType {
-  date: Date;
-  type: string;
-}
-
-interface EventCalendarPropsType {
-  events: EventType[];
-}
-
-function EventCalendar() {
+function EventCalendar({ uid }: { uid: string |undefined }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -113,18 +110,6 @@ function EventCalendar() {
   const currentYear = currentDate.getFullYear();
   const monthName = MONTHNAMES[currentMonthIndex];
 
-  // Define mapping between event titles and background colors
-  const eventColorMap: { [key: string]: string } = {
-    MaA: "bg-blue",
-    MaB: "bg-blue",
-    TiA: "bg-blue",
-    TiB: "bg-blue",
-    Avoin: "bg-green",
-    Laji: "bg-purple",
-    Häly: "bg-orange",
-    Muu: "bg-yellow",
-  };
-
   const goToPreviousMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));
   };
@@ -176,7 +161,7 @@ function EventCalendar() {
           <div className="col-span-1 flex justify-end">
             <button
               onClick={() => router.push("/addevent")}
-              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-orange hover:bg-grey text-background"
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-blue hover:bg-bluehover active:bg-grey text-background"
             >
               <FaPlus />
             </button>
@@ -215,7 +200,8 @@ function EventCalendar() {
                 {format(day, "d")}
                 {todaysEvents.map((event, index) => {
                   const backgroundColor =
-                    eventColorMap[event.type] || "bg-grey";
+                    EventColorAndIconMap[event.type].color || "bg-grey";
+
                   return (
                     <div
                       key={`event-${index}`}
@@ -232,7 +218,7 @@ function EventCalendar() {
       </div>
       {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
-        <DayCard date={eventDate} />
+        <DayCard date={eventDate} uid={uid} />
       </Dialog>
     </>
   );

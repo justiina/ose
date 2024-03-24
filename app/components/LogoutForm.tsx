@@ -1,11 +1,16 @@
 import { logout } from "@/app/actions";
 import { MdLogout } from "react-icons/md";
 
-const LogoutForm = ({ showText }: { showText: boolean }) => {
+type LogoutType = {
+  showText: boolean;
+  addClassName: string;
+};
+
+const LogoutForm = ({ showText, addClassName }: LogoutType) => {
   if (showText) {
     return (
       <form action={logout}>
-        <button className="flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-2 hover:bg-orange hover:text-background">
+        <button className={addClassName}>
           <MdLogout className="text-2xl" />
           Kirjaudu ulos
         </button>

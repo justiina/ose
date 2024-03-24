@@ -506,16 +506,16 @@ const UserForm = () => {
           </div>
         </div>
         {isEdited && (
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex justify-end mt-8">
             <button
               onClick={handleCancel}
-              className="bg-grey hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4"
+              className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
             >
               Peruuta
             </button>
             <button
               onClick={handleSave}
-              className="bg-orange hover:bg-blue active:bg-blue text-white px-5 py-2 rounded-full text-sm mt-4"
+              className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
             >
               Tallenna
             </button>

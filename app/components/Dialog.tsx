@@ -1,6 +1,7 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useEffect } from "react";
+import { FaPlus } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 
 type Props = {
@@ -13,6 +14,7 @@ export default function Dialog({ title, onClose, children }: Props) {
   const searchParams = useSearchParams();
   const dialogRef = useRef<null | HTMLDialogElement>(null);
   const showDialog = searchParams?.get("showDialog");
+  const router = useRouter();
 
   useEffect(() => {
     if (showDialog === "y") {
@@ -47,11 +49,18 @@ export default function Dialog({ title, onClose, children }: Props) {
               onClick={closeDialog}
               className="mb-2 py-1 px-2 cursor-pointer text-white"
             >
-              <IoClose className="text-2xl"/>
+              <IoClose className="text-2xl" />
             </button>
           </div>
-          <div className="px-5 pb-6">
-            {children}
+          <div className="px-5 pb-6">{children}</div>
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={() => router.push("/addevent")}
+              className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
+            >
+              <FaPlus />
+              Lisää tapahtuma
+            </button>
           </div>
         </div>
       </dialog>

@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   addDoc,
+  deleteDoc,
   collection,
   DocumentData,
   getDocs,
@@ -17,6 +18,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  DocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "@/app/firebaseConfig";
 
@@ -167,12 +169,26 @@ export const getEventsByDate = async (
       orderBy("type")
     );
     const querySnapshot = await getDocs(q);
-    const eventData: DocumentData[] | { error: string } = [];
-    querySnapshot.forEach((doc) => {
-      eventData.push(doc.data() as DocumentData);
+    const eventData: (DocumentData & { id: string })[] = [];
+    querySnapshot.forEach((doc: DocumentSnapshot<DocumentData>) => {
+      eventData.push({ id: doc.id, ...doc.data() });
     });
     return eventData;
   } catch (error: any) {
-    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+    return {
+      error: "Tapahtuman tallennus epäonnistui!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
+export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
+  try {
+    const docRef = doc(db, "events", eventId);
+    await deleteDoc(docRef);
+    return true;
+  } catch (error: any) {
+    return {
+      error: "Jotain meni vikaan!\nYritä uudestaan.",
+    };
   }
 };

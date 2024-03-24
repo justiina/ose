@@ -21,9 +21,12 @@ const config: Config = {
       colors: {
         background: "#F2F2F2",
         grey: "#42464D",
+        greyhover: "#2f3237",
         greylight: "#C6C7C9",
         blue: "#0470C0",
+        bluehover: "#035696",
         orange: "#F35B18",
+        orangehover: "#DA490B",
         green: "#39A845",
         purple: "#D21BEF",
         yellow: "#F5B715",

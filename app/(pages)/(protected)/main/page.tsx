@@ -11,7 +11,7 @@ const Main = async () => {
 
   return (
     <div className="container mx-auto p-8">
-      <EventCalendar />
+      <EventCalendar uid={session.userId} />
     </div>
   );
 };
