@@ -1,11 +1,16 @@
 "use server";
+
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { EventType, EventsByDateType, AddEventType } from "./components/Types";
+/*
 import { sessionOptions, SessionData, defaultSession } from "@/app/lib";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getIronSession } from "iron-session";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { auth } from "@/app/firebaseConfig";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+
 import {
   addDoc,
   deleteDoc,
@@ -21,56 +26,37 @@ import {
   DocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "@/app/firebaseConfig";
+*/
 
 // USER FUNCTIONS
-
-export const getSession = async () => {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  if (!session.isLoggedIn) {
-    session.isLoggedIn = defaultSession.isLoggedIn;
-  }
-  return session;
-};
-
 export const login = async (
   prevState: { error: undefined | string },
   formData: FormData
 ) => {
-  const session = await getSession();
-  const formEmail = formData.get("email") as string;
-  const formPassword = formData.get("password") as string;
-  let redirectPath: string | null = null;
+  const supabase = createClient();
+  const data = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      formEmail,
-      formPassword
-    );
-    if (userCredential.user) {
-      session.userId = userCredential.user.uid;
-      session.isLoggedIn = true;
-      session.save();
-      redirectPath = "/main";
-    }
-    return userCredential.user;
-  } catch (error: any) {
+  const { error } = await supabase.auth.signInWithPassword(data);
+  if (error) {
     return { error: "Jotain meni vikaan!\nYritä uudestaan." };
-  } finally {
-    if (redirectPath) {
-      revalidatePath(redirectPath);
-      redirect(redirectPath);
-    }
   }
+
+  revalidatePath("/main");
+  redirect("/main");
 };
 
 export const logout = async () => {
-  const session = await getSession();
-  signOut(auth);
-  session.destroy();
-  redirect("/");
+  const supabase = createClient();
+  const { error } = await supabase.auth.signOut();
+  if (!error) {
+    redirect("/");
+  }
 };
 
+/*
 // USER INFO IN FIRESTORE
 export const getUserInfo = async () => {
   const session = await getSession();
@@ -128,31 +114,17 @@ export const getUserName = async (uid: string | null) => {
     console.log(error);
   }
 };
+*/
 
 // EVENT FUNCTIONS
 
-export const saveEvent = async <T extends DocumentData>(
-  data: T
-): Promise<boolean | any> => {
-  try {
-    await addDoc(collection(db, "events"), data);
-    return true;
-  } catch (error: any) {
-    return {
-      error: "Tapahtuman tallennus epäonnistui!\nYritä myöhemmin uudestaan.",
-    };
-  }
-};
-
 export const getEvents = async () => {
+  const supabase = createClient();
   try {
-    const q = query(collection(db, "events"), orderBy("time"), orderBy("type"));
-    const querySnapshot = await getDocs(q);
-    const eventData: DocumentData[] | { error: string } = [];
-    querySnapshot.forEach((doc) => {
-      eventData.push(doc.data() as DocumentData);
-    });
-    return eventData;
+    const { data: eventData } = await supabase.from("events").select("*");
+    if (eventData) {
+      return eventData;
+    }
   } catch (error: any) {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
@@ -160,26 +132,66 @@ export const getEvents = async () => {
 
 export const getEventsByDate = async (
   date: string
-): Promise<DocumentData | null> => {
+): Promise<EventsByDateType> => {
+  const supabase = createClient();
   try {
-    const q = query(
-      collection(db, "events"),
-      where("date", "==", date),
-      orderBy("time"),
-      orderBy("type")
-    );
-    const querySnapshot = await getDocs(q);
-    const eventData: (DocumentData & { id: string })[] = [];
-    querySnapshot.forEach((doc: DocumentSnapshot<DocumentData>) => {
-      eventData.push({ id: doc.id, ...doc.data() });
-    });
-    return eventData;
+    const { data: eventData, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("date", date)
+      .order("time", { ascending: true })
+      .order("type", { ascending: true });
+    if (error) {
+      throw new Error(error.message);
+    }
+    if (eventData) {
+      return { eventData, error: null };
+    }
+    return { eventData: null, error: null };
   } catch (error: any) {
     return {
-      error: "Tapahtuman tallennus epäonnistui!\nYritä myöhemmin uudestaan.",
+      eventData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
     };
   }
 };
+
+export const saveEvent = async (data: AddEventType): Promise<boolean | any> => {
+  // Remove properties with empty strings or zero values
+  const cleanData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== "" && value !== 0)
+  );
+
+  const supabase = createClient();
+  try {
+    const { error } = await supabase.from("events").insert(cleanData);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+/*
 
 export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
   try {
@@ -192,3 +204,4 @@ export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
     };
   }
 };
+*/

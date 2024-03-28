@@ -44,7 +44,7 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-function EventCalendar({ uid }: { uid: string |undefined }) {
+function EventCalendar({ uid }: { uid: string | undefined }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -66,13 +66,15 @@ function EventCalendar({ uid }: { uid: string |undefined }) {
     const fetchData = async () => {
       try {
         const eventData = await getEvents();
-        if ("error" in eventData) {
-          toast.error(eventData.error, { id: "fetchError" });
-        } else {
-          const eventArray: EventType[] = eventData.map(
-            (doc) => doc as EventType
-          );
-          setEvents(eventArray);
+        if (eventData !== undefined) {
+          if ("error" in eventData) {
+            toast.error(eventData.error, { id: "fetchError" });
+          } else {
+            const eventArray: EventType[] = eventData.map(
+              (doc) => doc as EventType
+            );
+            setEvents(eventArray);
+          }
         }
       } catch (error: any) {
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {

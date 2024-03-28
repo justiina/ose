@@ -1,11 +1,12 @@
-import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import UserForm from "./UserForm";
 
 const UserInfo = async () => {
-  // check that the user is logged in
-  const session = await getSession();
-  if (!session.isLoggedIn) {
+  // Check that the user is signed-in
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
     redirect("/");
   }
 

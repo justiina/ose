@@ -1,14 +1,16 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import Image from "next/image";
 import LoginForm from "./LoginForm";
-import { getSession } from "@/app/actions";
-import { redirect } from "next/navigation";
 
 const Login = async () => {
   // redirect to main if user is logged in
-  const session = await getSession();
-  if (session.isLoggedIn) {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (data?.user) {
     redirect("/main");
   }
+
   return (
     <div className="flex flex-col md:mt-32 md:flex-row justify-center items-center">
       <div className="flex p-4">

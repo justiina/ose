@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getEventsByDate, getUserName, deleteEvent } from "@/app/actions";
+import { getEventsByDate, deleteEvent } from "@/app/actions";
+//import { getEventsByDate, getUserName, deleteEvent } from "@/app/actions";
 import { showDateAndTime } from "@/app/components/Functions";
+import { EventType } from "@/app/components/Types";
 import { MdAccessTime, MdOutlineEdit } from "react-icons/md";
 import { IoLocationOutline, IoTrash } from "react-icons/io5";
 import { EventColorAndIconMap } from "./EventColorAndIconMap";
@@ -12,20 +14,6 @@ import Link from "next/link";
 type PropsType = {
   date: string | null;
   uid: string | undefined;
-};
-
-type EventType = {
-  id: string | null;
-  created: string | null;
-  createdBy: string | null;
-  createdByName: string | null;
-  title: string | null;
-  type: string | null;
-  date: string | null;
-  time: string | null;
-  place: string | null;
-  placeLink: string | null;
-  details: string | null;
 };
 
 const DayCard = ({ date, uid }: PropsType) => {
@@ -40,22 +28,27 @@ const DayCard = ({ date, uid }: PropsType) => {
       const [day, month, year] = date.split(".");
       const eventDate: string = `${year}-${month}-${day}`;
       const fetchData = async () => {
-        const eventData = await getEventsByDate(eventDate);
-        setEvents(
-          eventData?.map((event: EventType) => ({
-            id: event.id,
-            created: showDateAndTime(event.created),
-            createdBy: event.createdBy,
-            createdByName: getUserName(event.createdBy),
-            title: event.title,
-            type: event.type,
-            date: event.date,
-            time: event.time,
-            place: event.place,
-            placeLinki: event.placeLink,
-            details: event.details,
-          }))
-        );
+        const { eventData, error } = await getEventsByDate(eventDate);
+        if (eventData) {
+          setEvents(
+            eventData.map((event: EventType) => ({
+              id: event.id,
+              created: showDateAndTime(event.created) || null,
+              createdBy: event.createdBy,
+              //createdByName: getUserName(event.createdBy),
+              createdByName: event.createdBy,
+              title: event.title,
+              type: event.type,
+              date: event.date,
+              time: event.time,
+              place: event.place,
+              placeLink: event.placeLink,
+              details: event.details,
+              individuals: event.individuals,
+              duration: event.duration,
+            }))
+          );
+        }
       };
       fetchData();
     }
@@ -69,10 +62,15 @@ const DayCard = ({ date, uid }: PropsType) => {
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteId) {
-      deleteEvent(deleteId);
-      setShowConfirmation(false);
+      const deleteOk = await deleteEvent(deleteId);
+      if (deleteOk) {
+        setShowConfirmation(false);
+      } else {
+        toast.error(deleteOk, { id: "saveError" });
+        return;
+      }
     }
   };
 

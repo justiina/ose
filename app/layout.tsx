@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
-import { getSession } from "./actions";
+//import { getSession } from "./actions";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,12 +17,11 @@ const RootLayout = async ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const session = await getSession();
 
   return (
     <html lang="fi">
       <body className="md:flex max-w-full box-border">
-        {session.isLoggedIn && <Navbar />}
+        <Navbar />
         <div className="grow">{children}</div>
         <Toaster position="top-center" />
       </body>

@@ -1,30 +1,17 @@
 "use client";
 import React, { ChangeEvent, useRef, useState } from "react";
+import { AddEventType } from "@/app/components/Types";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import useAutoSizeTextArea from "@/app/customHooks/useAutoSizeTextArea";
 import { saveEvent } from "@/app/actions";
 import Dropdown from "@/app/components/Dropdown";
 
-interface FormDataType {
-  created: Date;
-  createdBy: string;
-  title: string;
-  date: string;
-  time: string;
-  type: string;
-  place: string;
-  placeLink: string;
-  details: string;
-  individuals: number;
-  duration: number;
-}
-
 const AddEventForm = ({ currentUser }: { currentUser: string }) => {
   const currentDate = new Date();
   const timestamp = currentDate.getTime();
   const [formData, setFormData] = useState({
-    created: timestamp,
+    created: timestamp.toString(),
     createdBy: currentUser,
     title: "",
     date: "",
@@ -60,7 +47,7 @@ const AddEventForm = ({ currentUser }: { currentUser: string }) => {
 
   // Add input value to formData
   const handleInputChange =
-    (fieldName: keyof FormDataType) =>
+    (fieldName: keyof AddEventType) =>
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
       if (fieldName === "date") {
         const [day, time] = e.target.value.split("T");
@@ -130,7 +117,7 @@ const AddEventForm = ({ currentUser }: { currentUser: string }) => {
     const currentDate = new Date();
     const timestamp = currentDate.getTime();
     setFormData({
-      created: timestamp,
+      created: "",
       createdBy: "",
       title: "",
       date: "",

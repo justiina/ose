@@ -32,7 +32,7 @@ const LoginForm = () => {
           required
         />
 
-        <button className="px-4 py-2 mt-4 bg-orange text-white rounded-lg hover:bg-orangehover active:bg-grey">
+        <button className="px-4 py-2 mt-4 bg-orange text-white rounded-full hover:bg-orangehover active:bg-grey">
           Kirjaudu sisään
         </button>
       </form>

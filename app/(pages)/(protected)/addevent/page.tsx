@@ -1,22 +1,18 @@
-import { getSession } from "@/app/actions";
 import AddEventForm from "./AddEventForm";
 import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 
 const AddEvent = async () => {
-  // check that the user is logged in
-  const session = await getSession();
-  if (!session.isLoggedIn) {
+  // Check that the user is signed-in
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
     redirect("/");
-  }
-
-  let uid = session?.userId;
-  if (uid === undefined) {
-    uid = "undefined";
   }
 
   return (
     <div>
-      <AddEventForm currentUser={uid} />
+      <AddEventForm currentUser={data.user.id} />
     </div>
   );
 };

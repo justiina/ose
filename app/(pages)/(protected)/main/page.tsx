@@ -1,17 +1,18 @@
-import EventCalendar from "./EventCalendar";
-import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
+import EventCalendar from "./EventCalendar";
 
 const Main = async () => {
-  // check that the user is logged in
-  const session = await getSession();
-  if (!session.isLoggedIn) {
+  // Check that the user is signed-in
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) {
     redirect("/");
   }
 
   return (
     <div className="container mx-auto p-8">
-      <EventCalendar uid={session.userId} />
+      <EventCalendar uid={data.user.id} />
     </div>
   );
 };
