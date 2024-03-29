@@ -22,10 +22,16 @@ import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
 
-interface EventType {
+type EventType = {
   date: Date;
   type: string;
-}
+};
+
+
+type PropsType = {
+  uid: string | undefined;
+};
+
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -44,7 +50,7 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-function EventCalendar({ uid }: { uid: string | undefined }) {
+function EventCalendar({ uid }: PropsType) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);

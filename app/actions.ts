@@ -3,7 +3,13 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { EventType, EventsByDateType, AddEventType } from "./components/Types";
+import {
+  UserType,
+  EventType,
+  EventsByDateType,
+  AddEventType,
+  GetUserType,
+} from "./components/Types";
 /*
 import { sessionOptions, SessionData, defaultSession } from "@/app/lib";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -43,7 +49,6 @@ export const login = async (
   if (error) {
     return { error: "Jotain meni vikaan!\nYritä uudestaan." };
   }
-
   revalidatePath("/main");
   redirect("/main");
 };
@@ -56,29 +61,84 @@ export const logout = async () => {
   }
 };
 
-/*
-// USER INFO IN FIRESTORE
-export const getUserInfo = async () => {
-  const session = await getSession();
-  const uid = session.userId;
-  if (uid !== undefined) {
+// USER INFO FROM SUPABASE
+export const getUserInfo = async (): Promise<GetUserType> => {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user !== undefined) {
+    const uid = user?.id;
     try {
-      const docRef = doc(db, "users", uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        revalidatePath("/userinfo");
-        return userData;
+      const { data: userData, error } = await supabase
+        .from("users")
+        .select()
+        .eq("id", uid);
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (userData && userData.length > 0) {
+        const userObject = userData[0];
+        const mappedUserData: UserType = {
+          id: userObject.id,
+          created: userObject.created,
+          firstName: userObject.firstName,
+          lastName: userObject.lastName,
+          email: userObject.email,
+          phoneNumber: userObject.phoneNumber,
+          group: userObject.group,
+          role: userObject.role,
+          showName: userObject.showName || false, // default to false if not provided
+          showEmail: userObject.showEmail || false, // default to false if not provided
+          showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
+        };
+        return { userData: mappedUserData, error: null };
       } else {
-        return null;
+        return { userData: null, error: null };
       }
     } catch (error: any) {
-      return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+      return {
+        userData: null,
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
     }
   } else {
-    return null;
+    return { userData: null, error: "User not found" };
   }
 };
+
+export const updateUserInfo = async (
+  data: Partial<UserType>
+): Promise<boolean | string> => {
+  const supabase = createClient();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user !== undefined) {
+      const uid = user?.id;
+      const { data: userData, error } = await supabase
+        .from("users")
+        .update(data)
+        .eq("id", uid)
+        .select();
+      if (error) {
+        console.log(error);
+        return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+      }
+      if (userData) {
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error("Error updating user info:", error);
+    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+  }
+  // Return a default value if none of the conditions are met
+  return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+};
+
+/*
 
 export const updateUserInfo = async <T extends DocumentData>(
   data: T
@@ -190,18 +250,3 @@ export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
-
-/*
-
-export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
-  try {
-    const docRef = doc(db, "events", eventId);
-    await deleteDoc(docRef);
-    return true;
-  } catch (error: any) {
-    return {
-      error: "Jotain meni vikaan!\nYritä uudestaan.",
-    };
-  }
-};
-*/

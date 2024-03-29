@@ -1,5 +1,6 @@
 "use client";
 import { getUserInfo, updateUserInfo } from "@/app/actions";
+import { UserType } from "@/app/components/Types";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
@@ -10,25 +11,13 @@ import { TbEye } from "react-icons/tb";
 import { TbEyeClosed } from "react-icons/tb";
 import Dropdown, { MultiDropdown } from "@/app/components/Dropdown";
 
-interface UserType {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  group: string;
-  role: string[];
-  showName: boolean | undefined;
-  showEmail: boolean;
-  showPhoneNumber: boolean;
-}
-
-interface EditType {
+type EditType = {
   editName: boolean;
   editEmail: boolean;
   editPhoneNumber: boolean;
   editGroup: boolean;
   editRole: boolean;
-}
+};
 
 const UserForm = () => {
   const [user, setUser] = useState<UserType | null>(null);
@@ -69,22 +58,17 @@ const UserForm = () => {
     "SPeKL:n edustaja",
   ];
 
-  // Fetch the user data
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await getUserInfo();
-      if (userData !== null) {
-        setUser({
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          email: userData.email || "",
-          phoneNumber: userData.phoneNumber || "",
-          group: userData.group || "",
-          role: userData.role || [],
-          showName: userData.showName || false,
-          showEmail: userData.showEmail || false,
-          showPhoneNumber: userData.showPhoneNumber || false,
-        });
+      try {
+        const userData = await getUserInfo();
+        if (userData.error) {
+          toast.error(userData.error, { id: "fetchError" });
+        } else {
+          setUser(userData.userData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
       setIsLoading(false);
     };
@@ -167,11 +151,12 @@ const UserForm = () => {
   const handleSave = async () => {
     if (user !== null) {
       const updateOk = await updateUserInfo(user);
-      if (updateOk) {
+      if (updateOk === true) {
         toast.success("Tietojen päivittäminen onnistui!");
         setUser(null);
         window.location.reload();
-      } else {
+      }
+      if (typeof updateOk === "string") {
         toast.error(updateOk, { id: "updateError" });
       }
     }
@@ -272,7 +257,10 @@ const UserForm = () => {
             {!edit.editEmail ? (
               <>
                 <div className="flex items-end justify-between">
-                  <UserInfoField title="Sähköposti" content={user?.email} />
+                  <UserInfoField
+                    title="Sähköposti"
+                    content={user?.email || ""}
+                  />
                   <div className="flex gap-2 py-2">
                     {user?.showEmail ? (
                       <TbEye className="text-2xl text-grey" />
@@ -345,7 +333,7 @@ const UserForm = () => {
                 <div className="flex items-end justify-between">
                   <UserInfoField
                     title="Puhelinnumero"
-                    content={user?.phoneNumber}
+                    content={user?.phoneNumber || ""}
                   />
                   <div className="flex gap-2 py-2">
                     {user?.showPhoneNumber ? (
@@ -421,9 +409,7 @@ const UserForm = () => {
                 <div className="flex items-end justify-between">
                   <UserInfoField
                     title="Viikkoryhmä"
-                    content={
-                      user?.group.length === 0 ? "Valitse ryhmä" : user?.group
-                    }
+                    content={user?.group || ""}
                   />
                   <div className="flex gap-2 py-2">
                     {user?.showName ? (
@@ -467,7 +453,10 @@ const UserForm = () => {
             {!edit.editRole ? (
               <>
                 <div className="flex items-end justify-between">
-                  <UserInfoField title="Roolit OSEssa" content={user?.role} />
+                  <UserInfoField
+                    title="Roolit OSEssa"
+                    content={user?.role || ""}
+                  />
                   <div className="flex gap-2 py-2">
                     {user?.showName ? (
                       <TbEye className="text-2xl text-grey" />

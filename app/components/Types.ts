@@ -1,3 +1,22 @@
+export type UserType = {
+  id: string | null;
+  created: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  group: string | null;
+  role: string[] | null;
+  showName: boolean | undefined;
+  showEmail: boolean | undefined;
+  showPhoneNumber: boolean | undefined;
+};
+
+export type GetUserType = {
+  userData: UserType | null;
+  error: string | null;
+};
+
 export type EventType = {
   id: string | null;
   created: string | null;
@@ -14,8 +33,7 @@ export type EventType = {
   duration: number | null;
 };
 
-export type AddEventType = Omit<EventType, 'id' | 'createdByName'>;
-
+export type AddEventType = Omit<EventType, "id" | "createdByName">;
 
 export type EventsByDateType = {
   eventData: EventType[] | null;
