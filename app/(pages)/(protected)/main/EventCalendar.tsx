@@ -16,7 +16,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
-import { EventColorAndIconMap } from "./EventColorAndIconMap";
+import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
 import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
@@ -27,11 +27,9 @@ type EventType = {
   type: string;
 };
 
-
 type PropsType = {
-  uid: string | undefined;
+  currentUser: string | undefined;
 };
-
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -50,7 +48,7 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-function EventCalendar({ uid }: PropsType) {
+function EventCalendar({ currentUser }: PropsType) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -226,7 +224,7 @@ function EventCalendar({ uid }: PropsType) {
       </div>
       {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
-        <DayCard date={eventDate} uid={uid} />
+        <DayCard currentUser={currentUser} />
       </Dialog>
     </>
   );

@@ -12,7 +12,7 @@ const Main = async () => {
 
   return (
     <div className="container mx-auto p-8">
-      <EventCalendar uid={data.user.id} />
+      <EventCalendar currentUser={data.user.id} />
     </div>
   );
 };

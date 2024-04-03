@@ -1,19 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Define props interface for the dropdown components
 interface DropdownProps {
   options: string[];
   onSelect: (selectedOption: string) => void;
+  value?: string | null;
 }
 
 interface MultiDropdownProps {
   options: string[];
   onSelect: (selectedOptions: string[]) => void;
+  value?: string[];
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ options, onSelect }) => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+const Dropdown: React.FC<DropdownProps> = ({
+  options,
+  onSelect,
+  value = null,
+}) => {
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    value || null
+  );
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    setSelectedOption(value || null);
+  }, [value]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -50,8 +62,10 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onSelect }) => {
 export const MultiDropdown: React.FC<MultiDropdownProps> = ({
   options,
   onSelect,
+  value = [],
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] =
+    useState<string[]>(value);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const toggleDropdown = () => {

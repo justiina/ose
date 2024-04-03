@@ -52,16 +52,7 @@ export default function Dialog({ title, onClose, children }: Props) {
               <IoClose className="text-2xl" />
             </button>
           </div>
-          <div className="px-5 pb-6">{children}</div>
-          <div className="flex justify-center mb-4">
-            <button
-              onClick={() => router.push("/addevent")}
-              className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
-            >
-              <FaPlus />
-              Lisää tapahtuma
-            </button>
-          </div>
+          <div className="px-5">{children}</div>
         </div>
       </dialog>
     ) : null;

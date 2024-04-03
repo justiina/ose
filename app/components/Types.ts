@@ -30,9 +30,15 @@ export type EventType = {
   placeLink: string | null;
   details: string | null;
   individuals: number | null;
-  duration: number | null;
+  duration: string | null;
 };
 
+export type EditEventTypeForm = Omit<EventType, "createdByName">;
+
+export type EditEventType = {
+  eventData: EventType | null;
+  error: string | null;
+};
 export type AddEventType = Omit<EventType, "id" | "createdByName">;
 
 export type EventsByDateType = {

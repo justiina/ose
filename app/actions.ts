@@ -5,34 +5,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   UserType,
-  EventType,
   EventsByDateType,
   AddEventType,
+  EditEventType,
   GetUserType,
+  EventType,
 } from "./components/Types";
-/*
-import { sessionOptions, SessionData, defaultSession } from "@/app/lib";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { getIronSession } from "iron-session";
-import { cookies, headers } from "next/headers";
-import { auth } from "@/app/firebaseConfig";
-
-import {
-  addDoc,
-  deleteDoc,
-  collection,
-  DocumentData,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  doc,
-  getDoc,
-  updateDoc,
-  DocumentSnapshot,
-} from "firebase/firestore";
-import { db } from "@/app/firebaseConfig";
-*/
 
 // USER FUNCTIONS
 export const login = async (
@@ -134,47 +112,33 @@ export const updateUserInfo = async (
     console.error("Error updating user info:", error);
     return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
   }
-  // Return a default value if none of the conditions are met
+  // Return notification if none of the conditions are met
   return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
 };
 
-/*
-
-export const updateUserInfo = async <T extends DocumentData>(
-  data: T
-): Promise<boolean | any> => {
-  const session = await getSession();
-  const uid = session.userId;
-
-  if (uid !== undefined) {
-    try {
-      const docRef = doc(db, "users", uid);
-      await updateDoc(docRef, data);
-      return true;
-    } catch (error: any) {
-      console.log(error);
-      return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
-    }
-  } else return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-};
-
-export const getUserName = async (uid: string | null) => {
+export const getFirstName = async (uid: string | null): Promise<string> => {
+  const supabase = createClient();
   try {
     if (uid === null || uid === undefined) {
       return "";
     } else {
-      const docRef = doc(db, "users", uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const userName = docSnap.data().firstName;
-        return userName;
+      const { data: userData } = await supabase
+        .from("users")
+        .select("firstName")
+        .eq("id", uid)
+        .single();
+      const firstName = userData?.firstName;
+      if (firstName) {
+        return firstName;
+      } else {
+        return "";
       }
     }
-  } catch (error: any) {
-    console.log(error);
+  } catch (error) {
+    console.error("Error updating user info:", error);
+    return "";
   }
 };
-*/
 
 // EVENT FUNCTIONS
 
@@ -203,6 +167,33 @@ export const getEventsByDate = async (
       .order("type", { ascending: true });
     if (error) {
       throw new Error(error.message);
+    }
+    if (eventData) {
+      return { eventData, error: null };
+    }
+    return { eventData: null, error: null };
+  } catch (error: any) {
+    return {
+      eventData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
+export const getEventById = async (id: string): Promise<EditEventType> => {
+  const supabase = createClient();
+  try {
+    const { data: eventData, error } = await supabase
+      .from("events")
+      .select()
+      .eq("id", id)
+      .single();
+    if (error) {
+      console.log(error);
+      return {
+        eventData: null,
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
     }
     if (eventData) {
       return { eventData, error: null };
@@ -249,4 +240,31 @@ export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
   } catch (error) {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
+};
+
+export const updateEvent = async (
+  updatedData: Partial<EventType>
+): Promise<boolean | string> => {
+  const supabase = createClient();
+  try {
+    const id = updatedData.id;
+    if (id) {
+      const { data, error } = await supabase
+        .from("events")
+        .update(updatedData)
+        .eq("id", id)
+      if (error) {
+        console.log(error);
+        return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+      }
+      if (data) {
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error("Error updating user info:", error);
+    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+  }
+  // Return notification if none of the conditions are met
+  return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
 };

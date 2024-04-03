@@ -96,4 +96,12 @@ export const AllRoutes: RoutesType[] = [
     showOnSmallScreen: false,
     withNavBar: true,
   },
+  {
+    icon: null,
+    title: "Muokkaa tapahtumaa",
+    route: "/editevent",
+    showOnNavBar: false,
+    showOnSmallScreen: false,
+    withNavBar: true,
+  },
 ];

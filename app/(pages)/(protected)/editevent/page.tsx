@@ -1,3 +1,4 @@
+import EditEventForm from "./EditEventForm";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
@@ -9,7 +10,11 @@ const EditEvent = async () => {
     redirect("/");
   }
 
-  return <div>EditEvent</div>;
+  return (
+    <div>
+      <EditEventForm currentUser={data.user.id}/>
+    </div>
+  );
 };
 
 export default EditEvent;

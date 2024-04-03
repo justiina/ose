@@ -22,4 +22,39 @@ export const showDateAndTime = (time: string | null) => {
   }
 };
 
-
+export const selectEventType = (selectedOption: string) => {
+  let selected: string = "";
+  switch (selectedOption) {
+    case "MaA-treeni":
+      selected = "MaA";
+      break;
+    case "MaB-treeni":
+      selected = "MaB";
+      break;
+    case "TiA-treeni":
+      selected = "TiA";
+      break;
+    case "TiB-treeni":
+      selected = "TiB";
+      break;
+    case "Kokeet":
+      selected = "Koe";
+      break;
+    case "Virta":
+      selected = "Virta";
+      break;
+    case "Hälytreeni":
+      selected = "Häly";
+      break;
+    case "Lajitreeni":
+      selected = "Laji";
+      break;
+    case "Avoin treeni":
+      selected = "Avoin";
+      break;
+    default:
+      selected = "Muu";
+      break;
+  }
+  return selected;
+};

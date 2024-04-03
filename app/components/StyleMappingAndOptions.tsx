@@ -6,7 +6,6 @@ import { PiMedalBold } from "react-icons/pi";
 import { GoBellFill } from "react-icons/go";
 
 // Define mapping between event titles and background color and icon
-
 export const EventColorAndIconMap: {
   [key: string]: { color: string; icon: JSX.Element };
 } = {
@@ -27,3 +26,17 @@ export const EventColorAndIconMap: {
     icon: <MdOutlineToday className="text-2xl" />,
   },
 };
+
+// List event types for dropdown list in AddEvent and EditEvent
+export const eventTypeOptions = [
+  "MaA-treeni",
+  "MaB-treeni",
+  "TiA-treeni",
+  "TiB-treeni",
+  "Kokeet",
+  "Virta",
+  "Hälytreeni",
+  "Lajitreeni",
+  "Avoin treeni",
+  "Muu",
+];

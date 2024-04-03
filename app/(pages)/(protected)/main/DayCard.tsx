@@ -1,59 +1,58 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getEventsByDate, deleteEvent } from "@/app/actions";
-//import { getEventsByDate, getUserName, deleteEvent } from "@/app/actions";
+import { getEventsByDate, deleteEvent, getFirstName } from "@/app/actions";
 import { showDateAndTime } from "@/app/components/Functions";
 import { EventType } from "@/app/components/Types";
 import { MdAccessTime, MdOutlineEdit } from "react-icons/md";
 import { IoLocationOutline, IoTrash } from "react-icons/io5";
-import { EventColorAndIconMap } from "./EventColorAndIconMap";
+import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { FaPlus } from "react-icons/fa";
+import { useSearchParams, useRouter } from "next/navigation";
 
-type PropsType = {
-  date: string | null;
-  uid: string | undefined;
-};
-
-const DayCard = ({ date, uid }: PropsType) => {
+const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const searchParams = useSearchParams()!;
+  const dateParams: string | null = searchParams.get("date");
+  const router = useRouter();
 
   // Fetch the events data
   useEffect(() => {
-    if (date !== null) {
-      const [day, month, year] = date.split(".");
-      const eventDate: string = `${year}-${month}-${day}`;
+    if (dateParams !== null) {
       const fetchData = async () => {
-        const { eventData, error } = await getEventsByDate(eventDate);
+        const { eventData, error } = await getEventsByDate(dateParams);
         if (eventData) {
-          setEvents(
-            eventData.map((event: EventType) => ({
-              id: event.id,
-              created: showDateAndTime(event.created) || null,
-              createdBy: event.createdBy,
-              //createdByName: getUserName(event.createdBy),
-              createdByName: event.createdBy,
-              title: event.title,
-              type: event.type,
-              date: event.date,
-              time: event.time,
-              place: event.place,
-              placeLink: event.placeLink,
-              details: event.details,
-              individuals: event.individuals,
-              duration: event.duration,
-            }))
+          const eventsWithCreatorNames = await Promise.all(
+            eventData.map(async (event: EventType) => {
+              const firstName = await getFirstName(event.createdBy);
+              return {
+                id: event.id,
+                created: showDateAndTime(event.created) || null,
+                createdBy: event.createdBy,
+                createdByName: firstName,
+                title: event.title,
+                type: event.type,
+                date: event.date,
+                time: event.time,
+                place: event.place,
+                placeLink: event.placeLink,
+                details: event.details,
+                individuals: event.individuals,
+                duration: event.duration,
+              };
+            })
           );
+          setEvents(eventsWithCreatorNames);
         }
       };
       fetchData();
     }
     setLoading(false);
-  }, [date, events]);
+  }, [dateParams, events]);
 
   const handleDelete = (eventId: string | null) => {
     if (eventId !== null) {
@@ -77,12 +76,6 @@ const DayCard = ({ date, uid }: PropsType) => {
   const cancelDelete = () => {
     setShowConfirmation(false);
     setDeleteId(null);
-  };
-
-  const handleEdit = (eventId: string | null) => {
-    if (eventId !== null) {
-      redirect(`/editevent?${eventId}`);
-    }
   };
 
   return (
@@ -117,18 +110,22 @@ const DayCard = ({ date, uid }: PropsType) => {
                 <div className="mx-6 my-4">
                   <div className="flex justify-between">
                     <h2>{event.title}</h2>
-                    <div className="flex gap-2">
-                      <IoTrash
-                        onClick={() => handleDelete(event.id)}
-                        className="cursor-pointer hover:text-orange text-grey text-2xl"
-                      />
-                      <Link
-                        href={`http://localhost:3000/editevent?${event.id}`}
-                        className="cursor-pointer hover:text-blue text-grey text-2xl"
-                      >
-                        <MdOutlineEdit />
-                      </Link>
-                    </div>
+
+                    {/*--- Show delete and edit buttons only if currentUser has created it --- */}
+                    {currentUser === event.createdBy && (
+                      <div className="flex gap-2">
+                        <IoTrash
+                          onClick={() => handleDelete(event.id)}
+                          className="cursor-pointer hover:text-orange text-grey text-2xl"
+                        />
+                        <Link
+                          href={`http://localhost:3000/editevent?event=${event.id}`}
+                          className="cursor-pointer hover:text-blue text-grey text-2xl"
+                        >
+                          <MdOutlineEdit />
+                        </Link>
+                      </div>
+                    )}
                   </div>
                   <p className="my-1">{event.details}</p>
                 </div>
@@ -169,6 +166,15 @@ const DayCard = ({ date, uid }: PropsType) => {
       ) : (
         <p>Ei tapahtumia</p>
       )}
+      <div className="flex justify-center my-6">
+        <button
+          onClick={() => router.push(`/addevent?date=${dateParams}`)}
+          className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
+        >
+          <FaPlus />
+          Lisää tapahtuma
+        </button>
+      </div>
     </div>
   );
 };
