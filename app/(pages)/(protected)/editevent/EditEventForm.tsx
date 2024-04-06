@@ -6,7 +6,7 @@ import { selectEventType } from "@/app/components/Functions";
 import { eventTypeOptions } from "@/app/components/StyleMappingAndOptions";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { EventType, EditEventTypeForm } from "@/app/components/Types";
-import { redirect, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import useAutoSizeTextArea from "@/app/customHooks/useAutoSizeTextArea";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -17,7 +17,6 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
   const eventParams: string | null = searchParams.get("event");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [event, setEvent] = useState<EditEventTypeForm | null>(null);
-  const [tempEvent, setTempEvent] = useState<EditEventTypeForm | null>(null);
   const [defaultTime, setDefaultTime] = useState<string | null>(null);
 
   // Initialise router
@@ -25,7 +24,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
 
   // Set up the auto height of textarea used in details section
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  useAutoSizeTextArea("details", textAreaRef.current, tempEvent?.details ?? "");
+  useAutoSizeTextArea("details", textAreaRef.current, event?.details ?? "");
 
   // Fetch the events data
   useEffect(() => {
@@ -34,8 +33,15 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
         const { eventData, error } = await getEventById(eventParams);
         if (eventData) {
           setEvent(eventData);
-          setTempEvent(eventData);
           setDefaultTime(eventData?.date + "T" + eventData?.time);
+
+          // Allow only user who created the event to edit it
+          if (currentUser !== eventData?.createdBy) {
+            toast.error("Vain tapahtuman luoja voi muokata sitä.", {
+              id: "uidError",
+            });
+            router.push("/main");
+          }
         }
         if (error) {
           toast.error(error, { id: "fetchError" });
@@ -46,46 +52,35 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
     setIsLoading(false);
   }, []);
 
-  // Add input value to tempEvent
+  // Add input value to event
   const handleInputChange =
     (fieldName: keyof EventType) =>
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
       if (fieldName === "date") {
         const [day, time] = e.target.value.split("T");
-        setTempEvent({ ...tempEvent!, date: day, time: time });
+        setEvent({ ...event!, date: day, time: time });
       } else {
-        setTempEvent({ ...tempEvent!, [fieldName]: e.target.value });
+        setEvent({ ...event!, [fieldName]: e.target.value });
       }
     };
 
   // Edit event type
   const selectType = (selectedOption: string) => {
     const selected = selectEventType(selectedOption);
-    setTempEvent({ ...tempEvent!, type: selected });
+    setEvent({ ...event!, type: selected });
   };
 
   if (isLoading) {
     return <LoadingIndicator />;
   }
 
-  /*
-  // Allow only user who created the event to edit it
-  if (currentUser !== tempEvent?.createdBy) {
-    toast.error("Vain tapahtuman luoja voi muokata sitä.", {
-      id: "uidError",
-    });
-    console.log(currentUser)
-    console.log(tempEvent?.createdBy)
-    //router.push("/main");
-  }
-*/
   // Save form data to Firebase
   const saveAndRedirect = async () => {
-    if (!tempEvent?.title || !tempEvent.date || !tempEvent.type) {
+    if (!event?.title || !event.date || !event.type) {
       toast.error("Täytä ainakin pakolliset kentät!");
       return;
     } else {
-      const updateOk = await updateEvent(tempEvent);
+      const updateOk = await updateEvent(event);
       if (updateOk) {
         router.push("/main");
         toast.success("Tapahtuman päivitys onnistui!");
@@ -99,7 +94,6 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
   // Cancel add event and go back to main page
   const clearAndRedirect = () => {
     setEvent(null);
-    setTempEvent(null);
     router.push("/main");
   };
 
@@ -120,7 +114,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             type="text"
             name="title"
             placeholder="Esim. Hakutreeni tai Viikkotreeni"
-            value={tempEvent?.title ?? ""}
+            value={event?.title ?? ""}
             onChange={handleInputChange("title")}
           />
         </div>
@@ -152,7 +146,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             <Dropdown
               options={eventTypeOptions}
               onSelect={selectType}
-              value={tempEvent?.type || ""}
+              value={event?.type || ""}
             />
           </div>
         </div>
@@ -167,7 +161,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
             type="text"
             name="place"
-            value={tempEvent?.place ?? ""}
+            value={event?.place ?? ""}
             placeholder="Paikan nimi"
             onChange={handleInputChange("place")}
           />
@@ -182,7 +176,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2"
             type="text"
             name="placeLink"
-            value={tempEvent?.placeLink ?? ""}
+            value={event?.placeLink ?? ""}
             placeholder="Karttalinkki"
             onChange={handleInputChange("placeLink")}
           />
@@ -198,7 +192,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             id="details"
             className="col-span-6 overflow-hidden border min-h-12 border-grey bg-white rounded-lg py-1 px-4 mb-2"
             name="details"
-            value={tempEvent?.details ?? ""}
+            value={event?.details ?? ""}
             placeholder="Lyhyt kuvaus suunnitellusta tapahtumasta"
             onChange={handleInputChange("details")}
           />
@@ -217,7 +211,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             type="number"
             name="individuals"
             placeholder="Lukumäärä"
-            value={tempEvent?.individuals ?? ""}
+            value={event?.individuals ?? ""}
             onChange={handleInputChange("individuals")}
           />
         </div>
@@ -234,7 +228,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
               id="duration"
               aria-label="Duration"
               type="time"
-              defaultValue={tempEvent?.duration || ""}
+              defaultValue={event?.duration || ""}
               onChange={handleInputChange("duration")}
             />
           </div>

@@ -87,7 +87,7 @@ function EventCalendar({ currentUser }: PropsType) {
       }
     };
     fetchData();
-  }, []);
+  }, [dateParams]);
 
   const daysInMonth = eachDayOfInterval({
     start: firstDayOfMonth,
