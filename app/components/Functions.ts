@@ -22,6 +22,15 @@ export const showDateAndTime = (time: string | null) => {
   }
 };
 
+export const showDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // Add 1 because month is zero-based
+  const day = date.getDate();
+  const formattedMonth = month < 10 ? "0" + month : month;
+  const formattedDay = day < 10 ? "0" + day : day;
+  return year + "-" + formattedMonth + "-" + formattedDay;
+};
+
 export const selectEventType = (selectedOption: string) => {
   let selected: string = "";
   switch (selectedOption) {

@@ -4,11 +4,13 @@ import Image from "next/image";
 import LoginForm from "./LoginForm";
 
 const Login = async () => {
-  // redirect to main if user is logged in
+  // Redirect to main if user is logged in
   const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (data?.user) {
-    redirect("/main");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    return redirect("/main");
   }
 
   return (

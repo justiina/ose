@@ -3,11 +3,13 @@ import { createClient } from "@/utils/supabase/server";
 import UserForm from "./UserForm";
 
 const UserInfo = async () => {
-  // Check that the user is signed-in
+  // Check that the user is signed in, redirect to login page if not
   const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return redirect("/");
   }
 
   return (

@@ -3,16 +3,18 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
 const EditEvent = async () => {
-  // Check that the user is signed-in
+  // Check that the user is signed in, redirect to login page if not
   const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return redirect("/");
   }
 
   return (
     <div>
-      <EditEventForm currentUser={data.user.id}/>
+      <EditEventForm currentUser={user.id} />
     </div>
   );
 };

@@ -52,7 +52,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
       fetchData();
     }
     setLoading(false);
-  }, [dateParams, events]);
+  }, [dateParams]);
 
   const handleDelete = (eventId: string | null) => {
     if (eventId !== null) {

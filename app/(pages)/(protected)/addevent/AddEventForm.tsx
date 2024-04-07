@@ -7,7 +7,7 @@ import useAutoSizeTextArea from "@/app/customHooks/useAutoSizeTextArea";
 import { saveEvent } from "@/app/actions";
 import Dropdown from "@/app/components/Dropdown";
 import { eventTypeOptions } from "@/app/components/StyleMappingAndOptions";
-import { selectEventType } from "@/app/components/Functions";
+import { selectEventType, showDate } from "@/app/components/Functions";
 
 type PropsType = {
   currentUser: string;
@@ -23,8 +23,8 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
     created: timestamp.toString(),
     createdBy: currentUser,
     title: "",
-    date: "",
-    time: "",
+    date: dateParams || showDate(currentDate),
+    time: "18:00",
     type: "",
     place: "",
     placeLink: "",
@@ -32,7 +32,6 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
     individuals: 0,
     duration: "",
   });
-  const [defaultDate, setDefaultDate] = useState<string | null>(null);
 
   // Set up the auto height of textarea used in details section
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -40,19 +39,6 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
 
   // Initialise router
   const router = useRouter();
-
-  useEffect(() => {
-    if (dateParams !== null) {
-      setDefaultDate(`${dateParams}T18:00`);
-    } else {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth() + 1; // Add 1 because month is zero-based
-      const day = currentDate.getDate();
-      const formattedMonth = month < 10 ? "0" + month : month;
-      const formattedDay = day < 10 ? "0" + day : day;
-      setDefaultDate(`${year}-${formattedMonth}-${formattedDay}T18:00`);
-    }
-  }, [dateParams, currentDate]);
 
   // Add input value to formData
   const handleInputChange =
@@ -141,7 +127,7 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
               id="datetimeInput"
               aria-label="Date and time"
               type="datetime-local"
-              defaultValue={defaultDate || ""}
+              defaultValue={`${formData.date}T${formData.time}` || ""}
               onChange={handleInputChange("date")}
             />
           </div>
