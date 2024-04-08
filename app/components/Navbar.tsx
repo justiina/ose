@@ -38,7 +38,10 @@ const Navbar = () => {
       {/*--- Big screen navbar on the side ---*/}
       <nav className="hidden md:grid grid-rows-10 min-h-screen bg-grey text-background font-sans text-lg p-4">
         <div className="row-span-3 flex justify-between">
-          <img src="/images/logo300.png" className="h-28"></img>
+          <img
+            src="https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/logo300.png?t=2024-04-08T10%3A03%3A54.657Z"
+            className="h-28"
+          ></img>
         </div>
         <div className="row-span-5 flex flex-col justify-evenly">
           <Link

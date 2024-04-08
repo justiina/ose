@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import Image from "next/image";
 import LoginForm from "./LoginForm";
 
 const Login = async () => {
@@ -16,15 +15,13 @@ const Login = async () => {
   return (
     <div className="flex flex-col md:mt-32 md:flex-row justify-center items-center">
       <div className="flex p-4">
-        <Image
-          src="/images/logo300.png"
+        <img
+          src="https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/logo300.png?t=2024-04-08T10%3A03%3A54.657Z"
           width={0}
           height={0}
           sizes="100vw"
           style={{ width: 180, height: "auto" }}
           alt="logo"
-          placeholder="blur"
-          blurDataURL={"/images/logo300.png"}
         />
       </div>
       <div className="p-4 md:w-1/3">

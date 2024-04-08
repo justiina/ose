@@ -27,10 +27,6 @@ type EventType = {
   type: string;
 };
 
-type PropsType = {
-  currentUser: string | undefined;
-};
-
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
 const MONTHNAMES = [
@@ -48,7 +44,7 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-function EventCalendar({ currentUser }: PropsType) {
+function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -211,7 +207,7 @@ function EventCalendar({ currentUser }: PropsType) {
                   return (
                     <div
                       key={`event-${index}`}
-                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full mx-4 py-0.5`}
+                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full lg:mx-4 py-0.5`}
                     >
                       {event.type}
                     </div>
