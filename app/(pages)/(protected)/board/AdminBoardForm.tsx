@@ -1,13 +1,12 @@
 "use client";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
-//import { saveFile } from "@/app/actions";
 import { createClient } from "@/utils/supabase/client";
 import { FileObject } from "@supabase/storage-js";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
+import { IoTrash } from "react-icons/io5";
 
 type FileType = {
   title: string;
@@ -32,7 +31,8 @@ const AdminBoardForm = () => {
     title: "",
   });
   const [files, setFiles] = useState<FileObject[]>([]);
-  const router = useRouter();
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const getFiles = async () => {
@@ -68,6 +68,7 @@ const AdminBoardForm = () => {
       setUploadBoardFile(file);
     }
   };
+
   const goToFileUrl = async (fileName: string) => {
     const { data, error } = await supabase.storage
       .from("hallitus")
@@ -80,6 +81,33 @@ const AdminBoardForm = () => {
     if (data) {
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     }
+  };
+
+  const handleDelete = async (fileName: string) => {
+    setShowConfirmation(true);
+    setDeleteId(fileName);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      const { error } = await supabase.storage
+        .from("hallitus")
+        .remove([`poytakirjat/${deleteId}`]);
+
+      if (error) {
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "delError",
+        });
+      } else {
+        toast.success("Tiedoston poistaminen onnistui!", { id: "delSuccess" });
+        window.location.reload();
+      }
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmation(false);
+    setDeleteId(null);
   };
 
   const cancel = () => {
@@ -131,13 +159,14 @@ const AdminBoardForm = () => {
   return (
     <div className="container max-w-screen-md p-8 md:p-16">
       <div className="mb-8">
-        <h1 className="mb-4 text-orange">Hallituksen kokousten pöytäkirjat</h1>
+        <h1 className="mb-4">Hallituksen kokousten pöytäkirjat</h1>
         <div className="mx-8">
           <table className="mb-8">
             <tr>
               <th scope="col">#</th>
               <th scope="col">Päivämäärä</th>
               <th scope="col">Pöytäkirja</th>
+              <th scope="col"></th>
             </tr>
             {files.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
@@ -159,11 +188,40 @@ const AdminBoardForm = () => {
                         pdf
                       </button>
                     </td>
+                    <td>
+                      <IoTrash
+                        onClick={() => handleDelete(file.name)}
+                        className="cursor-pointer hover:text-orange text-grey text-2xl"
+                      />
+                    </td>
                   </tr>
                 </>
               );
             })}
           </table>
+          {showConfirmation && (
+            <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-xl mb-4">
+                  Haluatko varmasti poistaa tiedoston?
+                </h2>
+                <div className="flex justify-end">
+                  <button
+                    onClick={cancelDelete}
+                    className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  >
+                    Peruuta
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {!showAddBoardForm && (
             <button
               onClick={() => setShowAddBoardForm(!showAddBoardForm)}
@@ -185,6 +243,22 @@ const AdminBoardForm = () => {
                     HUOM! Tällä hetkellä onnistuu vain pdf-tiedostojen
                     lisääminen.
                   </p>
+                  {/*---Choose the file---*/}
+                  <div className="flex flex-col mb-4">
+                    <div className="flex gap-1">
+                      <label className="font-bold">
+                        Valitse tiedosto (pdf)
+                      </label>
+                      <p className="text-orange">*</p>
+                    </div>
+                    <input
+                      type="file"
+                      id="board"
+                      name="board"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                    />
+                  </div>
                   {/*---Date---*/}
                   <div className="flex flex-col lg:w-2/3">
                     <div className="flex gap-1">
@@ -200,24 +274,8 @@ const AdminBoardForm = () => {
                       />
                     </div>
                   </div>
-                  {/*---Choose the file---*/}
-                  <div className="flex flex-col">
-                    <div className="flex gap-1">
-                      <label className="font-bold">
-                        Valitse tiedosto (pdf)
-                      </label>
-                      <p className="text-orange">*</p>
-                    </div>
-                    <input
-                      type="file"
-                      id="board"
-                      name="board"
-                      accept="application/pdf"
-                      onChange={handleFileChange}
-                    />
-                  </div>
                   {/*---Save or cancel---*/}
-                  <div className="flex lg:w-2/3 justify-end mt-4">
+                  <div className="flex justify-end lg:w-2/3 mt-4">
                     <button
                       onClick={cancel}
                       className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
@@ -238,7 +296,7 @@ const AdminBoardForm = () => {
         </div>
       </div>
       <div className="mb-8">
-        <h1 className="mb-4 text-orange">Sihteerikirjeet</h1>
+        <h1 className="mb-4">Sihteerikirjeet</h1>
         <div className="mx-8">
           <div className="mb-4">
             <h2>Sihteerikirje 1/2024</h2>
