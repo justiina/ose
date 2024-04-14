@@ -36,7 +36,7 @@ const Navbar = () => {
   return showNavbar.includes(currentPath) ? (
     <>
       {/*--- Big screen navbar on the side ---*/}
-      <nav className="hidden md:grid grid-rows-10 min-h-screen bg-grey text-background font-sans text-lg p-4">
+      <nav className="hidden lg:grid grid-rows-10 min-h-screen w-72 bg-grey text-background font-sans text-lg p-4">
         <div className="row-span-3 flex justify-between">
           <img
             src="https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/logo300.png?t=2024-04-08T10%3A03%3A54.657Z"
@@ -132,7 +132,7 @@ const Navbar = () => {
       </nav>
 
       {/*--- Medium and small screen navbar at the top ---*/}
-      <nav className="flex flex-1 md:hidden justify-between items-center bg-grey text-background font-sans text-lg p-4">
+      <nav className="flex flex-1 lg:hidden justify-between items-center bg-grey text-background font-sans text-lg p-4">
         <button
           onClick={toggleHamburger}
           className="items-center cursor-pointer rounded-full px-2 py-2 hover:bg-background hover:text-grey"
@@ -196,7 +196,7 @@ const Navbar = () => {
 
       {/*--- Show all routes on the side if hamburger open  ---*/}
       {hamburgerOpen && (
-        <nav className="grid fixed left-0 h-screen p-4 bg-grey text-background md:hidden">
+        <nav className="grid fixed left-0 h-screen p-4 bg-grey text-background lg:hidden">
           <div>
             <Link
               href="/main"

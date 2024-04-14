@@ -20,7 +20,7 @@ const RootLayout = async ({
 
   return (
     <html lang="fi">
-      <body className="md:flex max-w-full box-border">
+      <body className="lg:flex max-w-full box-border">
         <Navbar />
         <div className="grow">{children}</div>
         <Toaster position="top-center" />

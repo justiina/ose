@@ -19,7 +19,7 @@ const LogoutForm = ({ showText, addClassName }: LogoutType) => {
   } else {
     return (
       <form action={logout}>
-        <button className="items-center cursor-pointer rounded-full px-2 py-2 hover:bg-orange hover:text-background">
+        <button className={addClassName}>
           <MdLogout className="text-2xl" />
         </button>
       </form>

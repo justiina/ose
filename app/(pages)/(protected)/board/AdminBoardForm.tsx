@@ -1,7 +1,11 @@
 "use client";
+import LoadingIndicator from "@/app/components/LoadingIndicator";
 //import { saveFile } from "@/app/actions";
 import { createClient } from "@/utils/supabase/client";
-import { ChangeEvent, ChangeEventHandler, useState } from "react";
+import { FileObject } from "@supabase/storage-js";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 
@@ -17,23 +21,41 @@ type UploadInfoType = {
 
 const AdminBoardForm = () => {
   const supabase = createClient();
+  const [fetchLoading, setFetchLoading] = useState<boolean>(true);
   const [showAddBoardForm, setShowAddBoardForm] = useState<boolean>(false);
   const [showAddLetterForm, setShowAddLetterForm] = useState<boolean>(false);
-  const [uploadBoardInfo, setUploadBoardInfo] = useState<UploadInfoType>({
-    filename: "",
-    title: "",
-  });
+  const [fileNameBoard, setFileNameBoard] = useState<string>("");
   const [uploadBoardFile, setUploadBoardFile] = useState<File | null>(null);
   const [boardUploading, setBoardUploading] = useState<boolean>(false);
   const [uploadLetterInfo, setUploadLetterInfo] = useState<UploadInfoType>({
     filename: "",
     title: "",
   });
-  const [files, setFiles] = useState<FileType[]>([]);
+  const [files, setFiles] = useState<FileObject[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const getFiles = async () => {
+      const { data, error } = await supabase.storage
+        .from("hallitus")
+        .list("poytakirjat", { sortBy: { column: "name", order: "asc" } });
+
+      if (data !== null) {
+        setFiles(data);
+        setFetchLoading(false);
+      } else {
+        console.log(error);
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "uploadError",
+        });
+      }
+    };
+    getFiles();
+  }, []);
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
-    setUploadBoardInfo({ ...uploadBoardInfo, filename: `${date}-kokous.pdf` });
+    setFileNameBoard(`${date}-kokous.pdf`);
   };
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -46,30 +68,39 @@ const AdminBoardForm = () => {
       setUploadBoardFile(file);
     }
   };
+  const goToFileUrl = async (fileName: string) => {
+    const { data, error } = await supabase.storage
+      .from("hallitus")
+      .createSignedUrl(`poytakirjat/${fileName}`, 1800); // url expires in 30min
+    if (error) {
+      toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+        id: "urlError",
+      });
+    }
+    if (data) {
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   const cancel = () => {
     setShowAddBoardForm(!showAddBoardForm);
-    setUploadBoardInfo({ filename: "", title: "" });
+    setFileNameBoard("");
   };
 
   const save = async () => {
     // Check that all the required info is provided
     try {
       setBoardUploading(true);
-      if (
-        uploadBoardInfo.filename === "" ||
-        uploadBoardInfo.title === "" ||
-        uploadBoardFile === null
-      ) {
+      if (fileNameBoard === "" || uploadBoardFile === null) {
         toast.error("Täytä kaikki kentät!", { id: "infoError" });
       } else {
         const { error: uploadError } = await supabase.storage
           .from("hallitus")
-          .upload(`poytakirjat/${uploadBoardInfo.filename}`, uploadBoardFile);
+          .upload(`poytakirjat/${fileNameBoard}`, uploadBoardFile);
         if (uploadError) {
           if (uploadError.message === "The resource already exists") {
             toast.error(
-              "Samalle kokouspäivämäärälle voi lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
+              "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
               { id: "uploadError" }
             );
           } else {
@@ -93,16 +124,46 @@ const AdminBoardForm = () => {
     }
   };
 
+  if (fetchLoading) {
+    return <LoadingIndicator />;
+  }
+
   return (
     <div className="container max-w-screen-md p-8 md:p-16">
       <div className="mb-8">
         <h1 className="mb-4 text-orange">Hallituksen kokousten pöytäkirjat</h1>
         <div className="mx-8">
-          <div className="mb-4">
-            <h2>Kokous 1/2024</h2>
-            <h2>Kokous 2/2024</h2>
-            <h2>Kokous 3/2024</h2>
-          </div>
+          <table className="mb-8">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Päivämäärä</th>
+              <th scope="col">Pöytäkirja</th>
+            </tr>
+            {files.map((file, index) => {
+              if (file.name === ".emptyFolderPlaceholder") return false;
+              const [year, month, day] = file.name
+                .replace("-kokous.pdf", "")
+                .split("-");
+              const date = `${day}.${month}.${year}`;
+              return (
+                <>
+                  <tr>
+                    <td>{index}</td>
+                    <td>{date}</td>
+                    <td>
+                      <button
+                        className="text-blue"
+                        onClick={() => goToFileUrl(file.name)}
+                        key={index}
+                      >
+                        pdf
+                      </button>
+                    </td>
+                  </tr>
+                </>
+              );
+            })}
+          </table>
           {!showAddBoardForm && (
             <button
               onClick={() => setShowAddBoardForm(!showAddBoardForm)}
@@ -119,33 +180,11 @@ const AdminBoardForm = () => {
                 "Ladataan ..."
               ) : (
                 <>
-                  {/*---Title---*/}
                   <h2 className="mb-2 text-orange">Uuden pöytäkirjan lisäys</h2>
                   <p className="mb-4">
-                    Täytä kaikki kentät. Tällä hetkellä onnistuu vain
-                    pdf-tiedostojen lisääminen.
+                    HUOM! Tällä hetkellä onnistuu vain pdf-tiedostojen
+                    lisääminen.
                   </p>
-                  <div className="flex flex-col lg:w-2/3">
-                    <div className="flex gap-1">
-                      <label className="font-bold">
-                        Otsikko (tämä näkyy yllä olevassa listassa)
-                      </label>
-                      <p className="text-orange">*</p>
-                    </div>
-                    <input
-                      id="title"
-                      className="border border-grey bg-white rounded-lg py-1 px-4 mb-2"
-                      type="text"
-                      name="title"
-                      placeholder="Esim. Kokous 1/2024"
-                      onChange={(e) =>
-                        setUploadBoardInfo({
-                          ...uploadBoardInfo,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
                   {/*---Date---*/}
                   <div className="flex flex-col lg:w-2/3">
                     <div className="flex gap-1">

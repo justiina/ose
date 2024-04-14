@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply bg-background
+    @apply bg-background;
   }
   h1 {
     @apply text-2xl font-heading text-grey;
@@ -17,5 +17,15 @@
   }
   p {
     @apply text-base font-sans;
+  }
+  table {
+    @apply w-full border-collapse;
+  }
+  td {
+    @apply py-2 px-4 border-b border-greylight text-left;
+  }
+
+  th {
+    @apply py-2 px-4  bg-orange text-white text-left;
   }
 }
