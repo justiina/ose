@@ -35,7 +35,6 @@ export const logout = async () => {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
   if (!error) {
-    revalidatePath("/");
     redirect("/");
   }
 };

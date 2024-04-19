@@ -131,7 +131,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                 </div>
 
                 {showConfirmation && (
-                  <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="fixed top-0 left-0 w-full h-full backdrop:bg-gray-800/50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-lg">
                       <h2 className="text-xl mb-4">
                         Haluatko varmasti poistaa tapahtuman?
