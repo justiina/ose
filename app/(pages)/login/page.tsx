@@ -13,7 +13,7 @@ const Login = async () => {
   }
 
   return (
-    <div className="flex flex-col md:mt-32 md:flex-row justify-center items-center">
+    <div className="flex flex-col lg:mt-32 lg:flex-row items-center">
       <div className="flex p-4">
         <img
           src="https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/logo300.png?t=2024-04-08T10%3A03%3A54.657Z"

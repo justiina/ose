@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import UnderConstruction from "@/app/components/UnderConstruction";
 
 const CallOutGroup = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -11,7 +12,7 @@ const CallOutGroup = async () => {
     return redirect("/");
   }
 
-  return <div>CallOutGroup</div>;
+  return <div><UnderConstruction /></div>;
 };
 
 export default CallOutGroup;

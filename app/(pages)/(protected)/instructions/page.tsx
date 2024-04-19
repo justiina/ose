@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import UnderConstruction from "@/app/components/UnderConstruction";
 
 const Instructions = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -11,7 +12,7 @@ const Instructions = async () => {
     return redirect("/");
   }
 
-  return <div>Instructions</div>;
+  return <div><UnderConstruction /></div>;
 };
 
 export default Instructions;
