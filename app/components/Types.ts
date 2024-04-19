@@ -22,9 +22,9 @@ export type EventType = {
   created: string | null;
   createdBy: string | null;
   createdByName: string | null;
-  title: string | null;
-  date: string | null;
-  time: string | null;
+  title: string;
+  date: string;
+  time: string;
   type: string | null;
   place: string | null;
   placeLink: string | null;

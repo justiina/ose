@@ -140,6 +140,22 @@ export const getFirstName = async (uid: string | null): Promise<string> => {
   }
 };
 
+export const getAllUsersWithConsent = async () => {
+  const supabase = createClient();
+  try {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("*")
+      .eq("showName", true)
+      .order("lastName", { ascending: true });
+    if (userData) {
+      return userData;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
 // EVENT FUNCTIONS
 
 export const getEvents = async () => {
@@ -204,6 +220,22 @@ export const getEventById = async (id: string): Promise<EditEventType> => {
       eventData: null,
       error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
     };
+  }
+};
+
+export const getGroupEvents = async () => {
+  const supabase = createClient();
+  try {
+    const { data: eventData } = await supabase
+      .from("events")
+      .select("*")
+      .in("type", ["MaA", "MaB", "TiA", "TiB", "Raahe"])
+      .order("date", { ascending: false });
+    if (eventData) {
+      return eventData;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
 

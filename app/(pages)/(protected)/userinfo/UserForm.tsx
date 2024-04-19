@@ -10,6 +10,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { TbEye } from "react-icons/tb";
 import { TbEyeClosed } from "react-icons/tb";
 import Dropdown, { MultiDropdown } from "@/app/components/Dropdown";
+import { roleOptions } from "@/app/components/StyleMappingAndOptions";
 
 type EditType = {
   editName: boolean;
@@ -35,29 +36,6 @@ const UserForm = () => {
   // List of training groups for dropdown list
   const groupOptions = ["MaA", "MaB", "TiA", "TiB", "Raahe", "Ei ryhmää"];
 
-  // List of member roles in OSE for dropdown list
-  const roleOptions = [
-    "Hallituksen jäsen",
-    "Hallituksen puheenjohtaja",
-    "Hallituksen varapuheenjohtaja",
-    "Sihteeri",
-    "Rahastonhoitaja",
-    "Koesihteeri",
-    "Koulutusvastaava",
-    "Talkoopistevastaava",
-    "Kouluttaja",
-    "Hälytoimikunnan puheenjohtaja",
-    "Hälytoimikunnan jäsen",
-    "Varustevastaava",
-    "Kartta- ja viestisovellusyhteyshenkilö",
-    "Varainhankintatoimikunnan jäsen",
-    "Web-master",
-    "Koulutustoimikunnan jäsen",
-    "Vapepa-yhteyshenkilö",
-    "Vapepan edustaja",
-    "SPeKL:n edustaja",
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,6 +52,14 @@ const UserForm = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(()=>{
+    if(user?.showEmail && !user.showName || user?.showPhoneNumber && !user.showName ) {
+      toast.error("Anna lupa näyttää nimesi, jotta voit näyttää myös yhteystietosi.", {id: "check"})
+      setUser({...user, showEmail: false})
+      setUser({...user, showPhoneNumber: false})
+    }
+  },[user])
 
   // Function to toggle edit mode for a field and set isEdited to true
   const handleEditToggle = (field: keyof EditType) => {
@@ -452,7 +438,7 @@ const UserForm = () => {
           <div>
             {!edit.editRole ? (
               <>
-                <div className="flex items-end justify-between">
+                <div className="flex items-center justify-between">
                   <UserInfoField
                     title="Roolit OSEssa"
                     content={user?.role || ""}

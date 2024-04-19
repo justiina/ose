@@ -10,7 +10,7 @@ const UserInfoField: React.FC<InputFieldType> = ({ title, content }) => {
     // Render content of strings
     if (typeof content === "string") {
       return <p className="text-xl">{content}</p>;
-
+    
       // Map through array content
     } else if (Array.isArray(content)) {
       if (content.length === 0) {

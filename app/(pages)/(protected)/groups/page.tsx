@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import EventsByTypeForm from "./EventsByTypeForm";
 
 const Groups = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -11,7 +12,11 @@ const Groups = async () => {
     return redirect("/");
   }
 
-  return <div>Groups</div>;
+  return (
+    <div>
+      <EventsByTypeForm currentUser={user.id}/>
+    </div>
+  );
 };
 
 export default Groups;

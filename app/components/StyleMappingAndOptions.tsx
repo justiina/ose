@@ -40,3 +40,27 @@ export const eventTypeOptions = [
   "Avoin treeni",
   "Muu",
 ];
+
+// List member roles in OSE for dropdown list
+export const roleOptions = [
+  "Hallituksen jäsen",
+  "Hallituksen puheenjohtaja",
+  "Hallituksen varapuheenjohtaja",
+  "Hälytoimikunnan jäsen",
+  "Hälytoimikunnan puheenjohtaja",
+  "Kartta- ja viestisovellusyhteyshenkilö",
+  "Koesihteeri",
+  "Kouluttaja",
+  "Koulutustoimikunnan jäsen",
+  "Koulutusvastaava",
+  "Rahastonhoitaja",
+  "Sihteeri",
+  "SPeKL:n edustaja",
+  "Talkoopistevastaava",
+  "Treeniryhmän yhteyshenkilö",
+  "Vapepan edustaja",
+  "Vapepa-yhteyshenkilö",
+  "Varainhankintatoimikunnan jäsen",
+  "Varustevastaava",
+  "Web-master",
+];

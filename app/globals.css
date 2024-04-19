@@ -26,6 +26,6 @@
   }
 
   th {
-    @apply py-2 px-4  bg-orange text-white text-left;
+    @apply py-2 px-4 bg-orange text-white text-left;
   }
 }

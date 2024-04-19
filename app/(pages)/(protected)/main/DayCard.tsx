@@ -67,7 +67,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
       if (deleteOk) {
         setShowConfirmation(false);
       } else {
-        toast.error(deleteOk, { id: "saveError" });
+        toast.error(deleteOk, { id: "delError" });
         return;
       }
     }
@@ -154,8 +154,16 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                   </div>
                 )}
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
-                  <p>Lisätty: {event.createdByName}</p>
-                  <p>{event.created}</p>
+                  {event.createdByName ? (
+                    <>
+                      <p>Lisännyt: {event.createdByName}</p>
+                      <p>{event.created}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>Lisätty: {event.created}</p>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

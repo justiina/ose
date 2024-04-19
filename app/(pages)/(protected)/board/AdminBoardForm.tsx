@@ -18,30 +18,44 @@ type UploadInfoType = {
   title: string;
 };
 
+type DeleteFileType = {
+  bucket: string;
+  path: string;
+};
+
 const AdminBoardForm = () => {
   const supabase = createClient();
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
+  const [fetchLettersLoading, setFetchLettersLoading] = useState<boolean>(true);
+
   const [showAddBoardForm, setShowAddBoardForm] = useState<boolean>(false);
   const [showAddLetterForm, setShowAddLetterForm] = useState<boolean>(false);
+
   const [fileNameBoard, setFileNameBoard] = useState<string>("");
+  const [fileNameLetter, setFileNameLetter] = useState<string>("");
+
   const [uploadBoardFile, setUploadBoardFile] = useState<File | null>(null);
+  const [uploadLetterFile, setUploadLetterFile] = useState<File | null>(null);
+
   const [boardUploading, setBoardUploading] = useState<boolean>(false);
-  const [uploadLetterInfo, setUploadLetterInfo] = useState<UploadInfoType>({
-    filename: "",
-    title: "",
-  });
-  const [files, setFiles] = useState<FileObject[]>([]);
+  const [letterUploading, setLetterUploading] = useState<boolean>(false);
+
+  const [boardFiles, setBoardFiles] = useState<FileObject[]>([]);
+  const [letters, setLetters] = useState<FileObject[]>([]);
+
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteFile, setDeleteFile] = useState<DeleteFileType | null>(null);
+
+  const router = useRouter()
 
   useEffect(() => {
-    const getFiles = async () => {
+    const getBoardFiles = async () => {
       const { data, error } = await supabase.storage
         .from("hallitus")
         .list("poytakirjat", { sortBy: { column: "name", order: "asc" } });
 
       if (data !== null) {
-        setFiles(data);
+        setBoardFiles(data);
         setFetchLoading(false);
       } else {
         console.log(error);
@@ -50,12 +64,33 @@ const AdminBoardForm = () => {
         });
       }
     };
-    getFiles();
+    const getLetterFiles = async () => {
+      const { data, error } = await supabase.storage
+        .from("hallitus")
+        .list("sihteerikirjeet", { sortBy: { column: "name", order: "asc" } });
+      if (data !== null) {
+        setLetters(data);
+        setFetchLettersLoading(false);
+      } else {
+        console.log(error);
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "uploadError",
+        });
+      }
+    };
+
+    getBoardFiles();
+    getLetterFiles();
   }, []);
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value;
-    setFileNameBoard(`${date}-kokous.pdf`);
+    if (e.target.id === "datetimeBoard") {
+      const date = e.target.value;
+      setFileNameBoard(`${date}-kokous.pdf`);
+    } else if (e.target.id === "datetimeLetter") {
+      const date = e.target.value;
+      setFileNameLetter(`${date}-sihteerikirje.pdf`);
+    }
   };
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -63,36 +98,39 @@ const AdminBoardForm = () => {
       toast.error("Valitse tiedosto, jotta voit ladata sen sivustolle.", {
         id: "loadError",
       });
-    } else {
+    } else if (e.target.id === "board") {
       const file = e.target.files[0];
       setUploadBoardFile(file);
+    } else if (e.target.id === "letter") {
+      const file = e.target.files[0];
+      setUploadLetterFile(file);
     }
   };
 
-  const goToFileUrl = async (fileName: string) => {
+  const goToFileUrl = async (bucket: string, path: string) => {
     const { data, error } = await supabase.storage
-      .from("hallitus")
-      .createSignedUrl(`poytakirjat/${fileName}`, 1800); // url expires in 30min
+      .from(bucket)
+      .createSignedUrl(path, 1800); // url expires in 30min
     if (error) {
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
     }
     if (data) {
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      router.push(data.signedUrl);
     }
   };
 
-  const handleDelete = async (fileName: string) => {
+  const handleDelete = async (bucket: string, path: string) => {
     setShowConfirmation(true);
-    setDeleteId(fileName);
+    setDeleteFile({ ...deleteFile, bucket: bucket, path: path });
   };
 
   const confirmDelete = async () => {
-    if (deleteId) {
+    if (deleteFile) {
       const { error } = await supabase.storage
-        .from("hallitus")
-        .remove([`poytakirjat/${deleteId}`]);
+        .from(deleteFile.bucket)
+        .remove([deleteFile.path]);
 
       if (error) {
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
@@ -107,52 +145,96 @@ const AdminBoardForm = () => {
 
   const cancelDelete = () => {
     setShowConfirmation(false);
-    setDeleteId(null);
+    setDeleteFile(null);
   };
 
-  const cancel = () => {
-    setShowAddBoardForm(!showAddBoardForm);
-    setFileNameBoard("");
-  };
-
-  const save = async () => {
-    // Check that all the required info is provided
-    try {
-      setBoardUploading(true);
-      if (fileNameBoard === "" || uploadBoardFile === null) {
-        toast.error("Täytä kaikki kentät!", { id: "infoError" });
-      } else {
-        const { error: uploadError } = await supabase.storage
-          .from("hallitus")
-          .upload(`poytakirjat/${fileNameBoard}`, uploadBoardFile);
-        if (uploadError) {
-          if (uploadError.message === "The resource already exists") {
-            toast.error(
-              "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-              { id: "uploadError" }
-            );
-          } else {
-            toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-              id: "uploadError",
-            });
-          }
-        } else {
-          toast.success("Tapahtuman tallentaminen onnistui!");
-          setShowAddBoardForm(false);
-          window.location.reload();
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-        id: "uploadError2",
-      });
-    } finally {
-      setBoardUploading(false);
+  const cancel = (folder: string) => {
+    if (folder === "poytakirjat") {
+      setShowAddBoardForm(!showAddBoardForm);
+      setFileNameBoard("");
+    } else if (folder === "sihteerikirjeet") {
+      setShowAddLetterForm(!showAddLetterForm);
+      setFileNameLetter("");
     }
   };
 
-  if (fetchLoading) {
+  const save = async (bucket: string, folder: string) => {
+    if (folder === "poytakirjat") {
+      try {
+        // Check that all the required info is provided
+        if (fileNameBoard === "" || uploadBoardFile === null) {
+          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
+            id: "infoError",
+          });
+        } else {
+          const { error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(`${folder}/${fileNameBoard}`, uploadBoardFile);
+          if (uploadError) {
+            if (uploadError.message === "The resource already exists") {
+              toast.error(
+                "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
+                { id: "uploadError" }
+              );
+            } else {
+              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+                id: "uploadError",
+              });
+            }
+          } else {
+            toast.success("Tiedoston tallentaminen onnistui!");
+            setShowAddBoardForm(false);
+            window.location.reload();
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "uploadError2",
+        });
+      } finally {
+        setBoardUploading(false);
+      }
+    } else if (folder === "sihteerikirjeet") {
+      try {
+        // Check that all the required info is provided
+        if (fileNameLetter === "" || uploadLetterFile === null) {
+          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
+            id: "infoError",
+          });
+        } else {
+          const { error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(`${folder}/${fileNameLetter}`, uploadLetterFile);
+          if (uploadError) {
+            if (uploadError.message === "The resource already exists") {
+              toast.error(
+                "Samalle päivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
+                { id: "uploadError" }
+              );
+            } else {
+              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+                id: "uploadError",
+              });
+            }
+          } else {
+            toast.success("Tiedoston tallentaminen onnistui!");
+            setShowAddLetterForm(false);
+            window.location.reload();
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+          id: "uploadError2",
+        });
+      } finally {
+        setLetterUploading(false);
+      }
+    }
+  };
+
+  if (fetchLoading || fetchLettersLoading) {
     return <LoadingIndicator />;
   }
 
@@ -160,7 +242,7 @@ const AdminBoardForm = () => {
     <div className="container max-w-screen-md p-8 md:p-16">
       <div className="mb-8">
         <h1 className="mb-4">Hallituksen kokousten pöytäkirjat</h1>
-        <div className="mx-8">
+        <div className="md:mx-8">
           <table className="mb-8">
             <tr>
               <th scope="col">#</th>
@@ -168,7 +250,7 @@ const AdminBoardForm = () => {
               <th scope="col">Pöytäkirja</th>
               <th scope="col"></th>
             </tr>
-            {files.map((file, index) => {
+            {boardFiles.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
               const [year, month, day] = file.name
                 .replace("-kokous.pdf", "")
@@ -182,7 +264,9 @@ const AdminBoardForm = () => {
                     <td>
                       <button
                         className="text-blue"
-                        onClick={() => goToFileUrl(file.name)}
+                        onClick={() =>
+                          goToFileUrl("hallitus", `poytakirjat/${file.name}`)
+                        }
                         key={index}
                       >
                         pdf
@@ -190,7 +274,9 @@ const AdminBoardForm = () => {
                     </td>
                     <td>
                       <IoTrash
-                        onClick={() => handleDelete(file.name)}
+                        onClick={() =>
+                          handleDelete("hallitus", `poytakirjat/${file.name}`)
+                        }
                         className="cursor-pointer hover:text-orange text-grey text-2xl"
                       />
                     </td>
@@ -238,7 +324,7 @@ const AdminBoardForm = () => {
                 "Ladataan ..."
               ) : (
                 <>
-                  <h2 className="mb-2 text-orange">Uuden pöytäkirjan lisäys</h2>
+                  <h2 className="mb-2 text-blue">Uuden pöytäkirjan lisäys</h2>
                   <p className="mb-4">
                     HUOM! Tällä hetkellä onnistuu vain pdf-tiedostojen
                     lisääminen.
@@ -267,7 +353,8 @@ const AdminBoardForm = () => {
                     </div>
                     <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
                       <input
-                        id="datetimeInput"
+                        id="datetimeBoard"
+                        name="datetimeBoard"
                         aria-label="Date and time"
                         type="date"
                         onChange={handleDateChange}
@@ -277,13 +364,13 @@ const AdminBoardForm = () => {
                   {/*---Save or cancel---*/}
                   <div className="flex justify-end lg:w-2/3 mt-4">
                     <button
-                      onClick={cancel}
+                      onClick={() => cancel("poytakirjat")}
                       className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
                     >
                       Peruuta
                     </button>
                     <button
-                      onClick={save}
+                      onClick={() => save("hallitus", "poytakirjat")}
                       className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
                     >
                       Tallenna
@@ -297,12 +384,78 @@ const AdminBoardForm = () => {
       </div>
       <div className="mb-8">
         <h1 className="mb-4">Sihteerikirjeet</h1>
-        <div className="mx-8">
-          <div className="mb-4">
-            <h2>Sihteerikirje 1/2024</h2>
-            <h2>Sihteerikirje 2/2024</h2>
-            <h2>Sihteerikirje 3/2024</h2>
-          </div>
+        <div className="md:mx-8">
+          <table className="mb-8">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Päivämäärä</th>
+              <th scope="col">Sihteerikirje</th>
+              <th scope="col"></th>
+            </tr>
+            {letters.map((file, index) => {
+              if (file.name === ".emptyFolderPlaceholder") return false;
+              const [year, month, day] = file.name
+                .replace("-sihteerikirje.pdf", "")
+                .split("-");
+              const date = `${day}.${month}.${year}`;
+              return (
+                <>
+                  <tr>
+                    <td>{index}</td>
+                    <td>{date}</td>
+                    <td>
+                      <button
+                        className="text-blue"
+                        onClick={() =>
+                          goToFileUrl(
+                            "hallitus",
+                            `sihteerikirjeet/${file.name}`
+                          )
+                        }
+                        key={index}
+                      >
+                        pdf
+                      </button>
+                    </td>
+                    <td>
+                      <IoTrash
+                        onClick={() =>
+                          handleDelete(
+                            "hallitus",
+                            `sihteerikirjeet/${file.name}`
+                          )
+                        }
+                        className="cursor-pointer hover:text-orange text-grey text-2xl"
+                      />
+                    </td>
+                  </tr>
+                </>
+              );
+            })}
+          </table>
+          {showConfirmation && (
+            <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-xl mb-4">
+                  Haluatko varmasti poistaa tiedoston?
+                </h2>
+                <div className="flex justify-end">
+                  <button
+                    onClick={cancelDelete}
+                    className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  >
+                    Peruuta
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <button
             onClick={() => setShowAddLetterForm(!showAddLetterForm)}
             className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
@@ -310,6 +463,71 @@ const AdminBoardForm = () => {
             <FaPlus />
             Lisää tiedosto
           </button>
+
+          {showAddLetterForm && (
+            <div className="my-4 bg-white rounded-lg p-4 border border-grey">
+              {letterUploading ? (
+                "Ladataan ..."
+              ) : (
+                <>
+                  <h2 className="mb-2 text-blue">
+                    Uuden sihteerikirjeen lisäys
+                  </h2>
+                  <p className="mb-4">
+                    HUOM! Tällä hetkellä onnistuu vain pdf-tiedostojen
+                    lisääminen.
+                  </p>
+                  {/*---Choose the file---*/}
+                  <div className="flex flex-col mb-4">
+                    <div className="flex gap-1">
+                      <label className="font-bold">
+                        Valitse tiedosto (pdf)
+                      </label>
+                      <p className="text-orange">*</p>
+                    </div>
+                    <input
+                      type="file"
+                      id="letter"
+                      name="letter"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                  {/*---Date---*/}
+                  <div className="flex flex-col lg:w-2/3">
+                    <div className="flex gap-1">
+                      <label className="font-bold">Päiväys</label>
+                      <p className="text-orange">*</p>
+                    </div>
+                    <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                      <input
+                        id="datetimeLetter"
+                        name="datetimeLetter"
+                        aria-label="Date and time"
+                        type="date"
+                        onChange={handleDateChange}
+                      />
+                    </div>
+                  </div>
+                  {/*---Save or cancel---*/}
+                  <div className="flex justify-end lg:w-2/3 mt-4">
+                    <button
+                      onClick={() => cancel("sihteerikirjeet")}
+                      className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
+                    >
+                      Peruuta
+                    </button>
+                    <button
+                      onClick={() => save("hallitus", "sihteerikirjeet")}
+                      className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
+                    >
+                      Tallenna
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

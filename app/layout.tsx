@@ -17,12 +17,11 @@ const RootLayout = async ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-
   return (
     <html lang="fi">
       <body className="lg:flex max-w-full box-border">
         <Navbar />
-        <div className="grow">{children}</div>
+        <div className="grow lg:ml-72 max-lg:mt-16">{children}</div>
         <Toaster position="top-center" />
       </body>
     </html>

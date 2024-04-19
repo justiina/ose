@@ -1,7 +1,6 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useRef, useEffect } from "react";
-import { FaPlus } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 
 type Props = {
@@ -14,8 +13,7 @@ export default function Dialog({ title, onClose, children }: Props) {
   const searchParams = useSearchParams();
   const dialogRef = useRef<null | HTMLDialogElement>(null);
   const showDialog = searchParams?.get("showDialog");
-  const router = useRouter();
-
+  
   useEffect(() => {
     if (showDialog === "y") {
       dialogRef.current?.showModal();
