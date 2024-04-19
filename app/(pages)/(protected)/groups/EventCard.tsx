@@ -1,3 +1,4 @@
+"use client";
 import { deleteEvent } from "@/app/actions";
 import { EventType } from "@/app/components/Types";
 import Link from "next/link";

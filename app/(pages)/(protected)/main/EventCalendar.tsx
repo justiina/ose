@@ -21,6 +21,7 @@ import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
+import LoadingIndicator from "@/app/components/LoadingIndicator";
 
 type EventType = {
   date: Date;
@@ -53,6 +54,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   const dateParams: string | null = searchParams.get("date");
   const router = useRouter();
   const [events, setEvents] = useState<{ date: Date; type: string }[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (dateParams !== null && eventDate !== dateParams) {
@@ -74,6 +76,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
               (doc) => doc as EventType
             );
             setEvents(eventArray);
+            setIsLoading(false);
           }
         }
       } catch (error: any) {
@@ -128,6 +131,10 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     url.searchParams.delete("date");
     window.history.replaceState({}, "", url.toString());
   };
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <>
