@@ -1,4 +1,5 @@
 "use client";
+
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { createClient } from "@/utils/supabase/client";
 import { FileObject } from "@supabase/storage-js";
@@ -46,7 +47,11 @@ const AdminBoardForm = () => {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteFile, setDeleteFile] = useState<DeleteFileType | null>(null);
 
-  const router = useRouter()
+  const [email, setEmail] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+
+  const router = useRouter();
 
   useEffect(() => {
     const getBoardFiles = async () => {

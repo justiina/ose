@@ -34,8 +34,8 @@ export const login = async (
 export const logout = async () => {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
-  if (!error) {
-    //redirect("/");
+  if (error) {
+    throw new Error(error.message);
   }
 };
 
