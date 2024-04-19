@@ -1,5 +1,6 @@
 "use client";
 import { deleteEvent } from "@/app/actions";
+import { HOST } from "@/app/components/HostInfo";
 import { EventType } from "@/app/components/Types";
 import Link from "next/link";
 import { useState } from "react";
@@ -90,7 +91,7 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
                         className="cursor-pointer hover:text-orange text-grey text-2xl"
                       />
                       <Link
-                        href={`https://ose-eight.vercel.app/editevent?event=${event.id}`}
+                        href={`${HOST}/editevent?event=${event.id}`}
                         className="cursor-pointer hover:text-blue text-grey text-2xl"
                       >
                         <MdOutlineEdit />
@@ -137,16 +138,21 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
                       <p>-</p>
                     </p>
                   )}
+                  <div className="flex gap-2">
+                    <p className="flex gap-2 text-greylight">
+                      <GrGroup className="text-2xl" />
+                      {event.individuals ? (
+                        <p>{event.individuals}</p>
+                      ) : (
+                        <p>-</p>
+                      )}
+                    </p>
 
-                  <p className="flex gap-2 text-greylight">
-                    <GrGroup className="text-2xl" />
-                    {event.individuals ? <p>{event.individuals}</p> : <p>-</p>}
-                  </p>
-
-                  <p className="flex gap-2 text text-greylight">
-                    <MdTimelapse className="text-2xl" />
-                    {event.duration ? <p>{event.duration}</p> : <p>-</p>}
-                  </p>
+                    <p className="flex gap-2 text text-greylight">
+                      <MdTimelapse className="text-2xl" />
+                      {event.duration ? <p>{event.duration}</p> : <p>-</p>}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex justify-end mt-4 gap-1 text-greylight">

@@ -22,6 +22,7 @@ import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
+import { HOST } from "@/app/components/HostInfo";
 
 type EventType = {
   date: Date;
@@ -197,7 +198,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             const todaysEvents = eventsByDate[dateKey] || [];
             return (
               <Link
-                href={`https://ose-eight.vercel.app/main?showDialog=y&date=${dateKey}`}
+                href={`${HOST}/main?showDialog=y&date=${dateKey}`}
                 key={index}
                 className={
                   isToday(day)

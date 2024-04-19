@@ -56,6 +56,9 @@ const Groups = async () => {
   return (
     <div className="container mx-auto p-16">
       <h1 className="mb-4">Viikkotreenit ryhmittäin</h1>
+      <p className="mb-4">
+        Klikkaa ryhmän nimen kohdalta avataksesi ryhmäkohtaiset treenit.
+      </p>
       <EventCard
         events={events}
         heading="Maanantai A"

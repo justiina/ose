@@ -12,6 +12,7 @@ import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
 import { GrGroup } from "react-icons/gr";
+import { HOST } from "@/app/components/HostInfo";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -121,7 +122,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
                         <Link
-                          href={`https://ose-eight.vercel.app/editevent?event=${event.id}`}
+                          href={`${HOST}/editevent?event=${event.id}`}
                           className="cursor-pointer hover:text-blue text-grey text-2xl"
                         >
                           <MdOutlineEdit />
@@ -155,6 +156,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                     </div>
                   </div>
                 )}
+
                 <div className="flex mx-6 justify-between">
                   {event.placeLink ? (
                     <p className="flex gap-2">
@@ -167,16 +169,21 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                       <p>-</p>
                     </p>
                   )}
+                  <div className="flex gap-2">
+                    <p className="flex gap-2 text-greylight">
+                      <GrGroup className="text-2xl" />
+                      {event.individuals ? (
+                        <p>{event.individuals}</p>
+                      ) : (
+                        <p>-</p>
+                      )}
+                    </p>
 
-                  <p className="flex gap-2 text-greylight">
-                    <GrGroup className="text-2xl" />
-                    {event.individuals ? <p>{event.individuals}</p> : <p>-</p>}
-                  </p>
-
-                  <p className="flex gap-2 text text-greylight">
-                    <MdTimelapse className="text-2xl" />
-                    {event.duration ? <p>{event.duration}</p> : <p>-</p>}
-                  </p>
+                    <p className="flex gap-2 text text-greylight">
+                      <MdTimelapse className="text-2xl" />
+                      {event.duration ? <p>{event.duration}</p> : <p>-</p>}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
                   {event.createdByName ? (
