@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getEventsByDate, deleteEvent, getFirstName } from "@/app/actions";
 import { showDateAndTime } from "@/app/components/Functions";
 import { EventType } from "@/app/components/Types";
-import { MdAccessTime, MdOutlineEdit } from "react-icons/md";
+import { MdAccessTime, MdOutlineEdit, MdTimelapse } from "react-icons/md";
 import { IoLocationOutline, IoTrash } from "react-icons/io5";
 import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
 import toast from "react-hot-toast";
@@ -11,6 +11,7 @@ import Link from "next/link";
 import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
+import { GrGroup } from "react-icons/gr";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -154,17 +155,29 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                     </div>
                   </div>
                 )}
-                {event.placeLink ? (
-                  <p className="flex gap-2">
-                    <TbMap className="text-2xl" />
-                    <Link href={event.placeLink}>Karttalinkki</Link>
-                  </p>
-                ) : (
+                <div className="flex mx-6 justify-between">
+                  {event.placeLink ? (
+                    <p className="flex gap-2">
+                      <TbMap className="text-2xl" />
+                      <Link href={event.placeLink}>Karttalinkki</Link>
+                    </p>
+                  ) : (
+                    <p className="flex gap-2 text-greylight">
+                      <TbMap className="text-2xl" />
+                      <p>-</p>
+                    </p>
+                  )}
+
                   <p className="flex gap-2 text-greylight">
-                    <TbMap className="text-2xl" />
-                    <p>-</p>
+                    <GrGroup className="text-2xl" />
+                    {event.individuals ? <p>{event.individuals}</p> : <p>-</p>}
                   </p>
-                )}
+
+                  <p className="flex gap-2 text text-greylight">
+                    <MdTimelapse className="text-2xl" />
+                    {event.duration ? <p>{event.duration}</p> : <p>-</p>}
+                  </p>
+                </div>
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
                   {event.createdByName ? (
                     <>
