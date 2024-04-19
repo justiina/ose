@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
+import { TbMap } from "react-icons/tb";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -152,6 +153,17 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                       </div>
                     </div>
                   </div>
+                )}
+                {event.placeLink ? (
+                  <p className="flex gap-2">
+                    <TbMap className="text-2xl" />
+                    <Link href={event.placeLink}>Karttalinkki</Link>
+                  </p>
+                ) : (
+                  <p className="flex gap-2 text-greylight">
+                    <TbMap className="text-2xl" />
+                    <p>-</p>
+                  </p>
                 )}
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
                   {event.createdByName ? (
