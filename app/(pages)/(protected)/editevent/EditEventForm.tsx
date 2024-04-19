@@ -98,7 +98,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
   };
 
   return (
-    <div className="container mx-auto p-16">
+    <div className="container mx-auto p-8 lg:p-16">
       <h1 className="mb-4">Tapahtuman muokkaus</h1>
       <p className="mb-4">Täytä ainakin tähdellä merkityt kohdat.</p>
       <div>

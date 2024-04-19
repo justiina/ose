@@ -46,6 +46,9 @@ export const selectEventType = (selectedOption: string) => {
     case "TiB-treeni":
       selected = "TiB";
       break;
+    case "Raahen treeni":
+      selected = "Raahe";
+      break;
     case "Kokeet":
       selected = "Koe";
       break;

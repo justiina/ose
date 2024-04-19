@@ -153,7 +153,7 @@ const UserForm = () => {
   }
 
   return (
-    <div className="container max-w-screen-md p-8 md:p-16">
+    <div className="container max-w-screen-md p-8 lg:p-16">
       <h1 className="mb-4">Omat tiedot</h1>
       <div>
         <p className="mb-4">

@@ -52,7 +52,7 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
         onClick={() => {
           setShowData(!showData);
         }}
-        className="text-blue ml-8 mb-4 cursor-pointer hover:text-orange active:text-orange"
+        className="text-blue mb-4 cursor-pointer hover:text-orange active:text-orange"
       >
         {heading}
       </h2>
@@ -61,10 +61,7 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
           const [year, month, day] = event.date?.split("-");
           const date = `${day}.${month}.${year}`;
           return (
-            <div
-              className="lg:w-3/4 ml-8 mb-4 pb-1 bg-white rounded-xl"
-              key={index}
-            >
+            <div className="lg:w-3/4 mb-4 pb-1 bg-white rounded-xl" key={index}>
               <div className="flex justify-between bg-orange py-2 px-4 rounded-t-xl">
                 <div className="flex items-center justify-start ml-2 gap-1 text-white">
                   <MdAccessTime className="text-xl" />

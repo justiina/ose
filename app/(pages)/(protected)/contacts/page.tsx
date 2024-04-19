@@ -26,7 +26,7 @@ const Contacts = async () => {
   }
 
   return (
-    <div className="container max-w-screen p-8 md:p-16">
+    <div className="container max-w-screen p-8 lg:p-16">
       <div className="mb-8">
         <h1 className="mb-4">Yhteystiedot</h1>
 

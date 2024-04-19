@@ -13,6 +13,7 @@ export const EventColorAndIconMap: {
   MaB: { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
   TiA: { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
   TiB: { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
+  Raahe: { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
   Koe: { color: "bg-purple", icon: <PiMedalBold className="text-2xl" /> },
   Virta: {
     color: "bg-purple",
@@ -33,6 +34,7 @@ export const eventTypeOptions = [
   "MaB-treeni",
   "TiA-treeni",
   "TiB-treeni",
+  "Raahen treeni",
   "Kokeet",
   "Virta",
   "Hälytreeni",

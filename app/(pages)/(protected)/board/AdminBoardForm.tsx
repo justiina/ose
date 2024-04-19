@@ -47,10 +47,6 @@ const AdminBoardForm = () => {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteFile, setDeleteFile] = useState<DeleteFileType | null>(null);
 
-  const [email, setEmail] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-
   const router = useRouter();
 
   useEffect(() => {
@@ -244,7 +240,7 @@ const AdminBoardForm = () => {
   }
 
   return (
-    <div className="container max-w-screen-md p-8 md:p-16">
+    <div className="container max-w-screen-md p-8 lg:p-16">
       <div className="mb-8">
         <h1 className="mb-4">Hallituksen kokousten pöytäkirjat</h1>
         <div className="md:mx-8">

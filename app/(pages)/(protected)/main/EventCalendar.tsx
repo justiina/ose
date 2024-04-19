@@ -139,7 +139,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
 
   return (
     <>
-      <div className="container mx-auto md:p-4">
+      <div className="container mx-auto lg:p-4">
         {/*---Heading with month name and days---*/}
         <div className="grid grid-cols-12 mx-4">
           <div className="mb-4 flex justify-center gap-8 col-span-11">
