@@ -190,7 +190,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             const todaysEvents = eventsByDate[dateKey] || [];
             return (
               <Link
-                href={`https://ose-hq0256qdt-justiinas-projects.vercel.app/main?showDialog=y&date=${dateKey}`}
+                href={`https://ose-eight.vercel.app/main?showDialog=y&date=${dateKey}`}
                 key={index}
                 className={
                   isToday(day)

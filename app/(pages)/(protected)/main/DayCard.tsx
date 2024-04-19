@@ -119,7 +119,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
                         <Link
-                          href={`https://ose-hq0256qdt-justiinas-projects.vercel.app/editevent?event=${event.id}`}
+                          href={`https://ose-eight.vercel.app/editevent?event=${event.id}`}
                           className="cursor-pointer hover:text-blue text-grey text-2xl"
                         >
                           <MdOutlineEdit />
