@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 import { AddEventType } from "@/app/components/Types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -58,7 +58,7 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
     setFormData({ ...formData, type: selected });
   };
 
-  // Save form data to Firebase
+  // Save form data to Supabase
   const saveAndRedirect = async () => {
     if (!formData.title || !formData.date || !formData.type) {
       toast.error("Täytä ainakin pakolliset kentät!");
