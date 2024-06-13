@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LogoutForm from "./LogoutForm";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaDog } from "react-icons/fa6";
@@ -27,11 +27,26 @@ const Navbar = () => {
     "/main",
     "/userinfo",
   ];
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Open/close the hamburger menu when small/medium screen
   const toggleHamburger = () => {
     setHamburgerOpen(!hamburgerOpen);
   };
+
+  // Close hamburger menu by clicking outside of the open menu
+  const handleClickOutside = (event: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      setHamburgerOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return showNavbar.includes(currentPath) ? (
     <>
@@ -196,7 +211,10 @@ const Navbar = () => {
 
       {/*--- Show all routes on the side if hamburger open  ---*/}
       {hamburgerOpen && (
-        <nav className="grid gap-4 fixed left-0 bg-grey text-background lg:hidden p-4 rounded-ee-3xl">
+        <nav
+          ref={menuRef}
+          className="grid gap-4 fixed left-0 bg-grey text-background lg:hidden p-4 rounded-ee-3xl"
+        >
           <div>
             <Link
               href="/main"
