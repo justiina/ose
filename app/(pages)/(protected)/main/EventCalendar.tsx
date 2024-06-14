@@ -165,18 +165,61 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     });
 
     return (
+      <>
+        {/*---List of events in indicated year---*/}
+        {sortedKeys.map((monthYear) => {
+          const [month, year] = monthYear.split(" ");
+          const monthName = MONTHNAMES[parseInt(month) - 1];
+
+          return (
+            <div key={monthYear}>
+              <ul>
+                <h2 className="mt-4">{monthName}</h2>
+                {eventsByMonthAndYear[monthYear]
+                  .sort(
+                    (a, b) =>
+                      new Date(a.date).getTime() - new Date(b.date).getTime()
+                  )
+                  .map((event, index) => (
+                    <li
+                      key={index}
+                      className="grid grid-cols-5 md:max-w-2xl gap-4"
+                    >
+                      <span className="flex justify-end">
+                        {format(event.date, "d.M.")}
+                      </span>
+                      <span className="col-span-3">{event.title}</span>
+                      <span className="event-type">{event.type}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          );
+        })}
+      </>
+    );
+  };
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return (
+    <>
       <div className="container mx-auto lg:p-4">
-        {/*---Heading with year and the buttons---*/}
+        {/*---Heading with month name and year or only year if list view is selected---*/}
         <div className="grid grid-cols-12 mx-4">
           <div className="mb-4 flex justify-center gap-8 col-span-9 md:col-span-10">
             <button
-              onClick={goToPreviousYear}
+              onClick={showList ? goToPreviousYear : goToPreviousMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <IoIosArrowBack className="text-2xl" />
             </button>
             <div className="flex gap-2">
-              <h1 className="text-center">{currentYear}</h1>
+              <h1 className="text-center">
+                {showList ? currentYear : `${monthName} ${currentYear}`}
+              </h1>
               <button
                 onClick={goToToday}
                 className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
@@ -186,7 +229,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             </div>
 
             <button
-              onClick={goToNextYear}
+              onClick={showList ? goToNextYear : goToNextMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <IoIosArrowForward className="text-2xl" />
@@ -217,101 +260,9 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             </button>
           </div>
         </div>
-
-        {/*---List of events in indicated year---*/}
-        {sortedKeys.map((monthYear) => {
-          const [month, year] = monthYear.split(" ");
-          const monthName = MONTHNAMES[parseInt(month) - 1];
-
-          return (
-            <div key={monthYear}>
-              <ul>
-                <h2 className="mt-4">{monthName}</h2>
-                {eventsByMonthAndYear[monthYear]
-                  .sort(
-                    (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
-                  )
-                  .map((event, index) => (
-                    <li key={index} className="grid grid-cols-5 md:max-w-2xl gap-4">
-                      <span className="flex justify-end">
-                        {format(event.date, "d.M.")}
-                      </span>
-                      <span className="col-span-3">{event.title}</span>
-                      <span className="event-type">{event.type}</span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  if (isLoading) {
-    return <LoadingIndicator />;
-  }
-
-  return (
-    <>
-      {showList ? (
-        renderEventList()
-      ) : (
-        <div className="container mx-auto lg:p-4">
-          {/*---Heading with month name and days---*/}
-          <div className="grid grid-cols-12 mx-4">
-            <div className="mb-4 flex justify-center gap-8 col-span-9 md:col-span-10">
-              <button
-                onClick={goToPreviousMonth}
-                className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-              >
-                <IoIosArrowBack className="text-2xl" />
-              </button>
-              <div className="flex gap-2">
-                <h1 className="text-center">
-                  {monthName} {currentYear}
-                </h1>
-                <button
-                  onClick={goToToday}
-                  className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-                >
-                  <MdOutlineToday className="text-2xl" />
-                </button>
-              </div>
-
-              <button
-                onClick={goToNextMonth}
-                className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-              >
-                <IoIosArrowForward className="text-2xl" />
-              </button>
-            </div>
-            <div className="col-span-3 md:col-span-2 flex justify-end gap-2">
-              {showList ? (
-                <button
-                  onClick={() => setShowList(!showList)}
-                  className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-grey hover:bg-greyhover active:bg-grey text-background"
-                >
-                  <FaRegCalendarAlt />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowList(!showList)}
-                  className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-grey hover:bg-greyhover active:bg-grey text-background"
-                >
-                  <FaListUl />
-                </button>
-              )}
-
-              <button
-                onClick={() => router.push("/addevent")}
-                className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-blue hover:bg-bluehover active:bg-grey text-background"
-              >
-                <FaPlus />
-              </button>
-            </div>
-          </div>
+        {showList ? (
+          renderEventList()
+        ) : (
           <div className="grid grid-cols-7 md:gap-2 md:p-4">
             {WEEKDAYS.map((day) => {
               return (
@@ -340,7 +291,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                       : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white min-h-20"
                   }
                 >
-                  {/*---Add events from Firebase---*/}
+                  {/*---Add events from Supabase---*/}
                   {format(day, "d")}
                   {todaysEvents.map((event, index) => {
                     const backgroundColor =
@@ -359,8 +310,8 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
         <DayCard currentUser={currentUser} />
