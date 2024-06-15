@@ -1,6 +1,7 @@
 "use client";
 import { getUserInfo, updateUserInfo } from "@/app/actions";
 import { UserType } from "@/app/components/Types";
+import FilledButton from "@/app/components/Buttons";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
@@ -53,13 +54,19 @@ const UserForm = () => {
     fetchData();
   }, []);
 
-  useEffect(()=>{
-    if(user?.showEmail && !user.showName || user?.showPhoneNumber && !user.showName ) {
-      toast.error("Anna lupa näyttää nimesi, jotta voit näyttää myös yhteystietosi.", {id: "check"})
-      setUser({...user, showEmail: false})
-      setUser({...user, showPhoneNumber: false})
+  useEffect(() => {
+    if (
+      (user?.showEmail && !user.showName) ||
+      (user?.showPhoneNumber && !user.showName)
+    ) {
+      toast.error(
+        "Anna lupa näyttää nimesi, jotta voit näyttää myös yhteystietosi.",
+        { id: "check" }
+      );
+      setUser({ ...user, showEmail: false });
+      setUser({ ...user, showPhoneNumber: false });
     }
-  },[user])
+  }, [user]);
 
   // Function to toggle edit mode for a field and set isEdited to true
   const handleEditToggle = (field: keyof EditType) => {
@@ -481,19 +488,13 @@ const UserForm = () => {
           </div>
         </div>
         {isEdited && (
-          <div className="flex justify-end mt-8">
-            <button
-              onClick={handleCancel}
-              className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
-            >
-              Peruuta
-            </button>
-            <button
+          <div className="flex justify-end mt-8 gap-2">
+            <FilledButton onClick={handleCancel} title="Peruuta" color="grey" />
+            <FilledButton
               onClick={handleSave}
-              className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-            >
-              Tallenna
-            </button>
+              title="Tallenna"
+              color="orange"
+            />
           </div>
         )}
       </div>

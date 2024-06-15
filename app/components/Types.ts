@@ -25,7 +25,7 @@ export type EventType = {
   title: string;
   date: string;
   time: string;
-  type: string | null;
+  type: string;
   place: string | null;
   placeLink: string | null;
   details: string | null;

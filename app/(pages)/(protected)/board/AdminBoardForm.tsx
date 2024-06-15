@@ -8,6 +8,7 @@ import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
+import FilledButton from "@/app/components/Buttons";
 
 type FileType = {
   title: string;
@@ -286,37 +287,14 @@ const AdminBoardForm = () => {
               );
             })}
           </table>
-          {showConfirmation && (
-            <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-xl mb-4">
-                  Haluatko varmasti poistaa tiedoston?
-                </h2>
-                <div className="flex justify-end">
-                  <button
-                    onClick={cancelDelete}
-                    className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                  >
-                    Peruuta
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-                  >
-                    OK
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           {!showAddBoardForm && (
-            <button
-              onClick={() => setShowAddBoardForm(!showAddBoardForm)}
-              className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
-            >
-              <FaPlus />
-              Lisää tiedosto
-            </button>
+            <div className="flex justify-end">
+              <FilledButton
+                onClick={() => setShowAddBoardForm(!showAddBoardForm)}
+                title="Lisää tiedosto"
+                color="blue"
+              />
+            </div>
           )}
 
           {showAddBoardForm && (
@@ -363,19 +341,17 @@ const AdminBoardForm = () => {
                     </div>
                   </div>
                   {/*---Save or cancel---*/}
-                  <div className="flex justify-end lg:w-2/3 mt-4">
-                    <button
+                  <div className="flex justify-end lg:w-2/3 mt-4 gap-2">
+                    <FilledButton
                       onClick={() => cancel("poytakirjat")}
-                      className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
-                    >
-                      Peruuta
-                    </button>
-                    <button
+                      title="Peruuta"
+                      color="grey"
+                    />
+                    <FilledButton
                       onClick={() => save("hallitus", "poytakirjat")}
-                      className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-                    >
-                      Tallenna
-                    </button>
+                      title="Tallenna"
+                      color="orange"
+                    />
                   </div>
                 </>
               )}
@@ -440,31 +416,28 @@ const AdminBoardForm = () => {
                 <h2 className="text-xl mb-4">
                   Haluatko varmasti poistaa tiedoston?
                 </h2>
-                <div className="flex justify-end">
-                  <button
+                <div className="flex justify-end gap-2">
+                  <FilledButton
                     onClick={cancelDelete}
-                    className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                  >
-                    Peruuta
-                  </button>
-                  <button
+                    title="Peruuta"
+                    color="greylight"
+                  />
+                  <FilledButton
                     onClick={confirmDelete}
-                    className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-                  >
-                    OK
-                  </button>
+                    title="OK"
+                    color="orange"
+                  />
                 </div>
               </div>
             </div>
           )}
-          <button
-            onClick={() => setShowAddLetterForm(!showAddLetterForm)}
-            className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
-          >
-            <FaPlus />
-            Lisää tiedosto
-          </button>
-
+          <div className="flex justify-end">
+            <FilledButton
+              onClick={() => setShowAddLetterForm(!showAddLetterForm)}
+              title="Lisää tiedosto"
+              color="blue"
+            />
+          </div>
           {showAddLetterForm && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               {letterUploading ? (
@@ -511,19 +484,17 @@ const AdminBoardForm = () => {
                     </div>
                   </div>
                   {/*---Save or cancel---*/}
-                  <div className="flex justify-end lg:w-2/3 mt-4">
-                    <button
+                  <div className="flex justify-end lg:w-2/3 mt-4 gap-2">
+                    <FilledButton
                       onClick={() => cancel("sihteerikirjeet")}
-                      className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
-                    >
-                      Peruuta
-                    </button>
-                    <button
+                      title="Peruuta"
+                      color="grey"
+                    />
+                    <FilledButton
                       onClick={() => save("hallitus", "sihteerikirjeet")}
-                      className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-                    >
-                      Tallenna
-                    </button>
+                      title="Tallenna"
+                      color="orange"
+                    />
                   </div>
                 </>
               )}

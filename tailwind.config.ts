@@ -23,6 +23,7 @@ const config: Config = {
         grey: "#42464D",
         greyhover: "#2f3237",
         greylight: "#C6C7C9",
+        greylighthover: "#9E9FA0",
         blue: "#0470C0",
         bluehover: "#035696",
         orange: "#F35B18",

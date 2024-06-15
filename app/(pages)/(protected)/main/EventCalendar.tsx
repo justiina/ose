@@ -1,6 +1,7 @@
 "use client";
 import {
   addMonths,
+  addYears,
   eachDayOfInterval,
   endOfMonth,
   format,
@@ -8,26 +9,23 @@ import {
   isToday,
   startOfMonth,
   subMonths,
+  subYears,
 } from "date-fns";
 import React, { useMemo, useState, useEffect } from "react";
 import { getEvents } from "@/app/actions";
 import { useSearchParams, useRouter } from "next/navigation";
-import { IoIosArrowBack } from "react-icons/io";
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaListUl, FaRegCalendarAlt } from "react-icons/fa";
+import { LuFilter, LuFilterX } from "react-icons/lu";
 import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
+import { EventType } from "@/app/components/Types";
 import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { HOST } from "@/app/components/HostInfo";
-
-type EventType = {
-  date: Date;
-  type: string;
-};
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -54,8 +52,10 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   const searchParams = useSearchParams()!;
   const dateParams: string | null = searchParams.get("date");
   const router = useRouter();
-  const [events, setEvents] = useState<{ date: Date; type: string }[]>([]);
+  const [events, setEvents] = useState<EventType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showList, setShowList] = useState<boolean>(false);
+  const [filterActive, setFilterActive] = useState<boolean>(false);
 
   useEffect(() => {
     if (dateParams !== null && eventDate !== dateParams) {
@@ -127,10 +127,83 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     setCurrentDate(new Date());
   };
 
+  const goToPreviousYear = () => {
+    setCurrentDate(subYears(currentDate, 1));
+  };
+  const goToNextYear = () => {
+    setCurrentDate(addYears(currentDate, 1));
+  };
+
+  const filterEvents = () => {
+    setFilterActive(!filterActive);
+  };
+
   const closeModal = async () => {
     const url = new URL(window.location.href);
     url.searchParams.delete("date");
     window.history.replaceState({}, "", url.toString());
+  };
+
+  const renderEventList = () => {
+    const filteredEvents = events.filter((event) => {
+      return new Date(event.date).getFullYear() === currentDate.getFullYear();
+    });
+    const eventsByMonthAndYear = filteredEvents.reduce(
+      (acc: { [key: string]: EventType[] }, event) => {
+        const monthYear = format(event.date, "M yyyy");
+        if (!acc[monthYear]) {
+          acc[monthYear] = [];
+        }
+        acc[monthYear].push(event);
+        return acc;
+      },
+      {}
+    );
+
+    // Sort the eventsByMonthAndYear array
+    const sortedKeys = Object.keys(eventsByMonthAndYear).sort((a, b) => {
+      const [monthA, yearA] = a.split(" ");
+      const [monthB, yearB] = b.split(" ");
+      const dateA = new Date(parseInt(yearA), parseInt(monthA) - 1);
+      const dateB = new Date(parseInt(yearB), parseInt(monthB) - 1);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return (
+      <>
+        {/*---List of events in indicated year---*/}
+        {sortedKeys.map((monthYear) => {
+          const [month, year] = monthYear.split(" ");
+          const monthName = MONTHNAMES[parseInt(month) - 1];
+
+          return (
+            <div key={monthYear}>
+              <ul>
+                <h2 className="mt-4">{monthName}</h2>
+                {eventsByMonthAndYear[monthYear]
+                  .sort(
+                    (a, b) =>
+                      new Date(a.date).getTime() - new Date(b.date).getTime()
+                  )
+                  .map((event, index) => (
+                    <Link
+                      href={`${HOST}/main?showDialog=y&date=${event.date}`}
+                      key={index}
+                      className="grid grid-cols-5 sm:max-w-2xl gap-4 text-lg mb-1"
+                    >
+                      <span className="flex justify-end">
+                        {format(event.date, "d.M.")}
+                      </span>
+                      <span className="col-span-3">{event.title}</span>
+                      <span className="event-type">{event.type}</span>
+                    </Link>
+                  ))}
+              </ul>
+            </div>
+          );
+        })}
+      </>
+    );
   };
 
   if (isLoading) {
@@ -140,18 +213,18 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   return (
     <>
       <div className="container mx-auto lg:p-4">
-        {/*---Heading with month name and days---*/}
+        {/*---Heading with month name and year or only year if list view is selected---*/}
         <div className="grid grid-cols-12 mx-4">
-          <div className="mb-4 flex justify-center gap-8 col-span-11">
+          <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
             <button
-              onClick={goToPreviousMonth}
+              onClick={showList ? goToPreviousYear : goToPreviousMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <IoIosArrowBack className="text-2xl" />
             </button>
             <div className="flex gap-2">
               <h1 className="text-center">
-                {monthName} {currentYear}
+                {showList ? currentYear : `${monthName} ${currentYear}`}
               </h1>
               <button
                 onClick={goToToday}
@@ -162,69 +235,96 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             </div>
 
             <button
-              onClick={goToNextMonth}
+              onClick={showList ? goToNextYear : goToNextMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <IoIosArrowForward className="text-2xl" />
             </button>
           </div>
-          <div className="col-span-1 flex justify-end">
+
+          {/*---Buttons to filter events, show them in list and add---*/}
+          <div className="col-span-3 md:col-span-2 grid grid-cols-3 mb-4 border-2 border-greylight rounded-full">
+            <button
+              onClick={filterEvents}
+              className="flex justify-center items-center cursor-pointer rounded-l-full text-orange hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+            >
+              {filterActive ? (
+                <LuFilterX className="text-xl" />
+              ) : (
+                <LuFilter className="text-xl" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setShowList(!showList)}
+              className="flex justify-center items-center cursor-pointer text-grey hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+            >
+              {showList ? (
+                <FaRegCalendarAlt className="text-xl" />
+              ) : (
+                <FaListUl className="text-xl" />
+              )}
+            </button>
+
             <button
               onClick={() => router.push("/addevent")}
-              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-blue hover:bg-bluehover active:bg-grey text-background"
+              className="flex justify-center items-center cursor-pointer rounded-r-full text-blue hover:bg-greylight active:bg-greylight"
             >
-              <FaPlus />
+              <FaPlus className="text-lg" />
             </button>
           </div>
         </div>
+        {showList ? (
+          renderEventList()
+        ) : (
+          <div className="grid grid-cols-7 md:gap-2 md:p-4">
+            {WEEKDAYS.map((day) => {
+              return (
+                <div key={day} className="font-bold text-center">
+                  {day}
+                </div>
+              );
+            })}
 
-        <div className="grid grid-cols-7 md:gap-2 md:p-4">
-          {WEEKDAYS.map((day) => {
-            return (
-              <div key={day} className="font-bold text-center">
-                {day}
-              </div>
-            );
-          })}
+            {/*---Add empty boxes to start if month doesn't start on Monday---*/}
+            {Array.from({ length: startingDayIndex }).map((_, index) => {
+              return <div key={`empty-${index}`} className="min-h-20" />;
+            })}
 
-          {/*---Add empty boxes to start if month doesn't start on Monday---*/}
-          {Array.from({ length: startingDayIndex }).map((_, index) => {
-            return <div key={`empty-${index}`} className="min-h-20" />;
-          })}
+            {/*---Highlight today and show events---*/}
+            {daysInMonth.map((day, index) => {
+              const dateKey = format(day, "yyyy-MM-dd");
+              const todaysEvents = eventsByDate[dateKey] || [];
+              return (
+                <Link
+                  href={`${HOST}/main?showDialog=y&date=${dateKey}`}
+                  key={index}
+                  className={
+                    isToday(day)
+                      ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white min-h-20"
+                      : "cursor-pointer border-2 border-greylight md:rounded-md p-1 text-end bg-white min-h-20"
+                  }
+                >
+                  {/*---Add events from Supabase---*/}
+                  {format(day, "d")}
+                  {todaysEvents.map((event, index) => {
+                    const backgroundColor =
+                      EventColorAndIconMap[event.type].color || "bg-grey";
 
-          {/*---Highlight today and show events---*/}
-          {daysInMonth.map((day, index) => {
-            const dateKey = format(day, "yyyy-MM-dd");
-            const todaysEvents = eventsByDate[dateKey] || [];
-            return (
-              <Link
-                href={`${HOST}/main?showDialog=y&date=${dateKey}`}
-                key={index}
-                className={
-                  isToday(day)
-                    ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white min-h-20"
-                    : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white min-h-20"
-                }
-              >
-                {/*---Add events from Firebase---*/}
-                {format(day, "d")}
-                {todaysEvents.map((event, index) => {
-                  const backgroundColor =
-                    EventColorAndIconMap[event.type].color || "bg-grey";
-
-                  return (
-                    <div
-                      key={`event-${index}`}
-                      className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full lg:mx-4 py-0.5`}
-                    >
-                      {event.type}
-                    </div>
-                  );
-                })}
-              </Link>
-            );
-          })}
-        </div>
+                    return (
+                      <div
+                        key={`event-${index}`}
+                        className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full lg:mx-4 py-0.5`}
+                      >
+                        {event.type}
+                      </div>
+                    );
+                  })}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
       {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
