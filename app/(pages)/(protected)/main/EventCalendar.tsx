@@ -186,16 +186,17 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                       new Date(a.date).getTime() - new Date(b.date).getTime()
                   )
                   .map((event, index) => (
-                    <li
+                    <Link
+                      href={`${HOST}/main?showDialog=y&date=${event.date}`}
                       key={index}
-                      className="grid grid-cols-5 sm:max-w-2xl gap-4"
+                      className="grid grid-cols-5 sm:max-w-2xl gap-4 text-lg mb-1"
                     >
                       <span className="flex justify-end">
                         {format(event.date, "d.M.")}
                       </span>
                       <span className="col-span-3">{event.title}</span>
                       <span className="event-type">{event.type}</span>
-                    </li>
+                    </Link>
                   ))}
               </ul>
             </div>
@@ -245,7 +246,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
           <div className="col-span-3 md:col-span-2 grid grid-cols-3 mb-4 border-2 border-greylight rounded-full">
             <button
               onClick={filterEvents}
-              className="flex justify-center items-center cursor-pointer rounded-l-full text-blue hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+              className="flex justify-center items-center cursor-pointer rounded-l-full text-orange hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
             >
               {filterActive ? (
                 <LuFilterX className="text-xl" />
@@ -267,7 +268,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
 
             <button
               onClick={() => router.push("/addevent")}
-              className="flex justify-center items-center cursor-pointer rounded-r-full text-orange hover:bg-greylight active:bg-greylight"
+              className="flex justify-center items-center cursor-pointer rounded-r-full text-blue hover:bg-greylight active:bg-greylight"
             >
               <FaPlus className="text-lg" />
             </button>
