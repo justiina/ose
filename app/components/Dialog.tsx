@@ -41,11 +41,11 @@ export default function Dialog({ title, onClose, children }: Props) {
         className="z-10 rounded-xl backdrop:bg-gray-800/50"
       >
         <div className="w-[700px] max-w-full bg-background flex flex-col">
-          <div className="flex flex-row justify-between mb-4 pt-2 px-5 bg-orange">
-            <h1 className="mb-2 text-white">{title}</h1>
+          <div className="flex flex-row justify-between mb-4 py-2 px-5 bg-orange">
+            <h1 className="text-white">{title}</h1>
             <button
               onClick={closeDialog}
-              className="mb-2 py-1 px-2 cursor-pointer text-white"
+              className="cursor-pointer text-white"
             >
               <IoClose className="text-2xl" />
             </button>

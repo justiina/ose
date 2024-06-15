@@ -214,7 +214,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
       <div className="container mx-auto lg:p-4">
         {/*---Heading with month name and year or only year if list view is selected---*/}
         <div className="grid grid-cols-12 mx-4">
-          <div className="mb-4 flex justify-center gap-8 col-span-9 md:col-span-10">
+          <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
             <button
               onClick={showList ? goToPreviousYear : goToPreviousMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
