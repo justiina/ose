@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import useAutoSizeTextArea from "@/app/customHooks/useAutoSizeTextArea";
 import { saveEvent } from "@/app/actions";
 import Dropdown from "@/app/components/Dropdown";
+import FilledButton from "@/app/components/Buttons";
 import { eventTypeOptions } from "@/app/components/StyleMappingAndOptions";
 import { selectEventType, showDate } from "@/app/components/Functions";
 
@@ -221,19 +222,17 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
         </div>
 
         {/*---Save or cancel---*/}
-        <div className="flex lg:w-2/3 justify-end mt-4">
-          <button
+        <div className="flex lg:w-2/3 justify-end mt-4 gap-2">
+          <FilledButton
+            title="Peruuta"
+            color="grey"
             onClick={clearAndRedirect}
-            className="mr-2 px-4 py-2 text-white bg-grey rounded-lg hover:bg-greyhover"
-          >
-            Peruuta
-          </button>
-          <button
+          />
+          <FilledButton
+            title="Tallenna"
+            color="orange"
             onClick={saveAndRedirect}
-            className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-          >
-            Tallenna
-          </button>
+          />
         </div>
       </div>
     </div>

@@ -14,10 +14,10 @@ import {
 import React, { useMemo, useState, useEffect } from "react";
 import { getEvents } from "@/app/actions";
 import { useSearchParams, useRouter } from "next/navigation";
-import { IoIosArrowBack } from "react-icons/io";
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus, FaListUl, FaRegCalendarAlt } from "react-icons/fa";
+import { LuFilter, LuFilterX } from "react-icons/lu";
 import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
 import { EventType } from "@/app/components/Types";
 import Dialog from "@/app/components/Dialog";
@@ -55,6 +55,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   const [events, setEvents] = useState<EventType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showList, setShowList] = useState<boolean>(false);
+  const [filterActive, setFilterActive] = useState<boolean>(false);
 
   useEffect(() => {
     if (dateParams !== null && eventDate !== dateParams) {
@@ -133,6 +134,10 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     setCurrentDate(addYears(currentDate, 1));
   };
 
+  const filterEvents = () => {
+    setFilterActive(!filterActive);
+  };
+
   const closeModal = async () => {
     const url = new URL(window.location.href);
     url.searchParams.delete("date");
@@ -183,7 +188,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                   .map((event, index) => (
                     <li
                       key={index}
-                      className="grid grid-cols-5 md:max-w-2xl gap-4"
+                      className="grid grid-cols-5 sm:max-w-2xl gap-4"
                     >
                       <span className="flex justify-end">
                         {format(event.date, "d.M.")}
@@ -235,28 +240,36 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
               <IoIosArrowForward className="text-2xl" />
             </button>
           </div>
-          <div className="col-span-3 md:col-span-2 flex justify-end gap-2">
-            {showList ? (
-              <button
-                onClick={() => setShowList(!showList)}
-                className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-grey hover:bg-greyhover active:bg-grey text-background"
-              >
-                <FaRegCalendarAlt />
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowList(!showList)}
-                className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-grey hover:bg-greyhover active:bg-grey text-background"
-              >
-                <FaListUl />
-              </button>
-            )}
+
+          {/*---Buttons to filter events, show them in list and add---*/}
+          <div className="col-span-3 md:col-span-2 grid grid-cols-3 mb-4 border-2 border-greylight rounded-full">
+            <button
+              onClick={filterEvents}
+              className="flex justify-center items-center cursor-pointer rounded-l-full text-blue hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+            >
+              {filterActive ? (
+                <LuFilterX className="text-xl" />
+              ) : (
+                <LuFilter className="text-xl" />
+              )}
+            </button>
+
+            <button
+              onClick={() => setShowList(!showList)}
+              className="flex justify-center items-center cursor-pointer text-grey hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+            >
+              {showList ? (
+                <FaRegCalendarAlt className="text-xl" />
+              ) : (
+                <FaListUl className="text-xl" />
+              )}
+            </button>
 
             <button
               onClick={() => router.push("/addevent")}
-              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-blue hover:bg-bluehover active:bg-grey text-background"
+              className="flex justify-center items-center cursor-pointer rounded-r-full text-orange hover:bg-greylight active:bg-greylight"
             >
-              <FaPlus />
+              <FaPlus className="text-lg" />
             </button>
           </div>
         </div>
@@ -288,7 +301,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                   className={
                     isToday(day)
                       ? "cursor-pointer border-4 border-grey md:rounded-md p-1 text-end bg-white min-h-20"
-                      : "cursor-pointer border border-grey md:rounded-md p-1  text-end bg-white min-h-20"
+                      : "cursor-pointer border-2 border-greylight md:rounded-md p-1 text-end bg-white min-h-20"
                   }
                 >
                   {/*---Add events from Supabase---*/}
