@@ -11,6 +11,7 @@ import {
   GetUserType,
   EventType,
 } from "./components/Types";
+import { HOST } from "./components/HostInfo";
 
 // USER FUNCTIONS
 export const login = async (
@@ -37,6 +38,18 @@ export const logout = async () => {
   if (error) {
     throw new Error(error.message);
   }
+};
+
+export const resetPassword = async (
+  prevState: { error: undefined | string },
+  formData: FormData
+) => {
+  console.log("reset salasana");
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.resetPasswordForEmail(
+    formData.get("email") as string,
+    { redirectTo: `${HOST}/resetpassword`}
+  );
 };
 
 // USER INFO FROM SUPABASE
