@@ -4,10 +4,6 @@ import { login } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FilledButton from "@/app/components/Buttons";
-import Link from "next/link";
-import { HOST } from "@/app/components/HostInfo";
-import Dialog from "@/app/components/Dialog";
-import ForgotPasswordForm from "./ForgotPasswordForm";
 
 const LoginForm = () => {
   const [state, formAction] = useFormState<any, FormData>(login, undefined);
@@ -16,11 +12,6 @@ const LoginForm = () => {
   if (state?.error) {
     toast.error(state.error, { id: "login" });
   }
-
-  const closeModal = async () => {
-    const url = new URL(window.location.href);
-    window.history.replaceState({}, "", url.toString());
-  };
 
   return (
     <>
@@ -44,16 +35,12 @@ const LoginForm = () => {
 
         <FilledButton title="Kirjaudu sisään" color="orange" />
       </form>
-      <Link
-        href={`${HOST}/login?showDialog=y`}
-        className="grid md:w-4/5 mt-2 justify-center text-grey hover:text-orange text-sm"
+      <button
+        onClick={() => router.push("/forgotpassword")}
+        className="grid md:w-4/5 mt-2 text-grey hover:text-orange text-sm"
       >
         Unohtuiko salasana?
-      </Link>
-      {/*---Show forgot password dialog when clicked---*/}
-      <Dialog title={"Salasanan nollaus"} onClose={closeModal}>
-        <ForgotPasswordForm />
-      </Dialog>
+      </button>
     </>
   );
 };
