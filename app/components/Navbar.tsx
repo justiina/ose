@@ -10,6 +10,7 @@ import { FaSuitcase } from "react-icons/fa";
 import { GoBellFill } from "react-icons/go";
 import { FaBookOpen } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
+import { RiUserSettingsLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 
@@ -26,6 +27,7 @@ const Navbar = () => {
     "/instructions",
     "/main",
     "/userinfo",
+    "/useradmin",
   ];
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -137,6 +139,18 @@ const Navbar = () => {
             <FaUserCircle className="text-2xl" />
             Omat tiedot
           </Link>
+
+          <Link
+            href="/useradmin"
+            className={
+              currentPath?.startsWith("/useradmin")
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-blue text-background"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
+            }
+          >
+            <RiUserSettingsLine className="text-2xl" />
+            Käyttäjähallinta
+          </Link>
         </div>
         <div className="row-span-3 flex flex-col justify-evenly">
           <LogoutForm
@@ -201,6 +215,17 @@ const Navbar = () => {
           }
         >
           <FaUserCircle className="text-2xl" />
+        </Link>
+
+        <Link
+          href="/useradmin"
+          className={
+            currentPath?.startsWith("/useradmin")
+              ? "items-center cursor-pointer rounded-full px-2 py-2 bg-blue text-background"
+              : "items-center cursor-pointer rounded-full px-2 py-2 text-orange hover:bg-blue hover:text-background"
+          }
+        >
+          <RiUserSettingsLine className="text-2xl" />
         </Link>
 
         <LogoutForm
@@ -304,6 +329,19 @@ const Navbar = () => {
             >
               <FaUserCircle className="text-2xl" />
               Omat tiedot
+            </Link>
+          </div>
+          <div>
+            <Link
+              href="/useradmin"
+              className={
+                currentPath?.startsWith("/userinfo")
+                  ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-blue text-background"
+                  : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
+              }
+            >
+              <RiUserSettingsLine className="text-2xl" />
+              Käyttäjähallinta
             </Link>
           </div>
           <LogoutForm

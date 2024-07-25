@@ -10,14 +10,12 @@ import {
   EditEventType,
   GetUserType,
   EventType,
+  UserAuthType,
 } from "./components/Types";
 import { HOST } from "./components/HostInfo";
 
 // USER FUNCTIONS
-export const login = async (
-  prevState: { error: undefined | string },
-  formData: FormData
-) => {
+export const login = async (formData: FormData) => {
   const supabase = createClient();
   const data = {
     email: formData.get("email") as string,
@@ -40,19 +38,42 @@ export const logout = async () => {
   }
 };
 
-export const resetPassword = async (
-  prevState: { error: undefined | string },
-  formData: FormData
-) => {
+export const resetPassword = async (formData: FormData) => {
   console.log("reset salasana");
   const supabase = createClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(
     formData.get("email") as string,
-    { redirectTo: `${HOST}/resetpassword`}
+    { redirectTo: `${HOST}/resetpassword` }
   );
 };
 
-// USER INFO FROM SUPABASE
+// USER ADMIN
+export const createNewUser = async (
+  email: string,
+  firstName: string,
+  lastName: string,
+  isAdmin?: boolean
+) => {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email: email,
+    options: {
+      shouldCreateUser: true,
+    },
+  });
+};
+
+/*
+export const getAllUsers = async (): Promise<UserAuthType> => {
+  const supabase = createClient();
+  const {
+    data: { users },
+    error,
+  } = await supabase.auth.admin.listUsers();
+};
+*/
+
+// USER INFO FROM SUPABASE DATABASE
 export const getUserInfo = async (): Promise<GetUserType> => {
   const supabase = createClient();
   const {

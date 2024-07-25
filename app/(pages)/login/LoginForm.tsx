@@ -1,7 +1,6 @@
 "use client";
 import { useFormState } from "react-dom";
 import { login } from "@/app/actions";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FilledButton from "@/app/components/Buttons";
 import Link from "next/link";
@@ -11,7 +10,6 @@ import ForgotPasswordForm from "./ForgotPasswordForm";
 
 const LoginForm = () => {
   const [state, formAction] = useFormState<any, FormData>(login, undefined);
-  const router = useRouter();
 
   if (state?.error) {
     toast.error(state.error, { id: "login" });

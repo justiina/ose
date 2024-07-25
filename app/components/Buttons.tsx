@@ -6,6 +6,7 @@ type ButtonProps = {
   title: string;
   color: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  icon?: React.ReactNode;
 };
 
 type OwnLinkProps = {
@@ -15,17 +16,30 @@ type OwnLinkProps = {
 };
 
 // Define reusable classNames for each component that has same styling
-const filledClassName = (color: string): string => {
+const filledClassName = (color: string, isLink?: boolean): string => {
   let textColor: string = "";
   if (color === "greylight") {
     textColor = "grey";
-  } else textColor = "white";
-  return `px-4 py-2 bg-${color} text-${textColor} rounded-lg hover:bg-${color}hover active:bg-${color}hover`;
+  } else {
+    textColor = "white";
+  }
+
+  const flexJustification = isLink
+    ? ""
+    : "flex justify-center items-center gap-2 ";
+
+  return `${flexJustification} px-4 py-2 bg-${color} text-${textColor} rounded-lg hover:bg-${color}hover active:bg-${color}hover`;
 };
 
-const FilledButton: React.FC<ButtonProps> = ({ title, color, onClick }) => {
+const FilledButton: React.FC<ButtonProps> = ({
+  title,
+  color,
+  onClick,
+  icon,
+}) => {
   return (
     <button onClick={onClick} className={filledClassName(color)}>
+      {icon && <span>{icon}</span>}
       {title}
     </button>
   );
@@ -33,7 +47,7 @@ const FilledButton: React.FC<ButtonProps> = ({ title, color, onClick }) => {
 
 export const FilledLink: React.FC<OwnLinkProps> = ({ title, color, href }) => {
   return (
-    <Link href={href} className={filledClassName(color)}>
+    <Link href={href} className={filledClassName(color, true)}>
       {title}
     </Link>
   );

@@ -17,6 +17,18 @@ export type GetUserType = {
   error: string | null;
 };
 
+export type UserAuthType = {
+  id: string;
+  email: string;
+  options: {
+    data: {
+      isAdmin: boolean | null;
+      firstName: string;
+      lastName: string;
+    };
+  };
+};
+
 export type EventType = {
   id: string | null;
   created: string | null;
