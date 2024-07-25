@@ -13,6 +13,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
 import { GrGroup } from "react-icons/gr";
 import { HOST } from "@/app/components/HostInfo";
+import FilledButton from "@/app/components/Buttons";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -207,13 +208,11 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
         <p>Ei tapahtumia</p>
       )}
       <div className="flex justify-center my-6">
-        <button
+        <FilledButton
           onClick={() => router.push(`/addevent?date=${dateParams}`)}
-          className="flex gap-2 items-center px-4 py-2 bg-blue text-white rounded-lg hover:bg-bluehover"
-        >
-          <FaPlus />
-          Lisää tapahtuma
-        </button>
+          title="Lisää tapahtuma"
+          color="blue"
+        />
       </div>
     </div>
   );
