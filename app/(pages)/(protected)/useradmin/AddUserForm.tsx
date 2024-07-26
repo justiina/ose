@@ -3,6 +3,7 @@ import { createNewUser } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type AddUserProps = {
   cancel: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -17,6 +18,9 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
 
   const [selectedRadio, setSelectedRadio] = useState<string>("");
 
+  // Initialise router
+  const router = useRouter();
+
   const handleRadioChange = (value: string) => {
     setSelectedRadio(value);
     switch (value) {
@@ -29,30 +33,22 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
     }
   };
 
-  const sendInvitation = () => {
-    console.log(isAdmin);
-  };
-
-  /*
   const sendInvitation = async () => {
     if (!email || !firstName || !lastName) {
       toast.error("Täytä kaikki kentät!");
       return;
     } else {
       const saveOk = await createNewUser(email, firstName, lastName, isAdmin);
-      
       if (saveOk) {
+        window.location.reload();
         toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
       } else {
-        toast.error(saveOk, { id: "sendError" });
+        toast.error(saveOk, { id: "saveError" });
         return;
       }
-        
     }
-
-    createNewUser(email, firstName, lastName);
   };
-  */
+
   return (
     <div>
       <div className="my-4 bg-white rounded-lg p-4 border border-grey">
@@ -73,6 +69,8 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="text"
             name="firstName"
             placeholder="Etunimi"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             required
           />
 
@@ -87,6 +85,8 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="text"
             name="lastName"
             placeholder="Sukunimi"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             required
           />
 
@@ -100,6 +100,8 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="email"
             name="email"
             placeholder="Sähköposti"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           {/*---User role---*/}

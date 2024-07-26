@@ -15,7 +15,10 @@ import {
 import { HOST } from "./components/HostInfo";
 
 // USER FUNCTIONS
-export const login = async (formData: FormData) => {
+export const login = async (
+  prevState: { error: undefined | string },
+  formData: FormData
+) => {
   const supabase = createClient();
   const data = {
     email: formData.get("email") as string,
@@ -38,13 +41,21 @@ export const logout = async () => {
   }
 };
 
-export const resetPassword = async (formData: FormData) => {
+export const resetPassword = async (
+  prevState: { error: undefined | string },
+  formData: FormData
+) => {
   console.log("reset salasana");
   const supabase = createClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(
     formData.get("email") as string,
     { redirectTo: `${HOST}/resetpassword` }
   );
+  if (error) {
+    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
+  }
+  revalidatePath("/");
+  redirect("/");
 };
 
 // USER ADMIN
@@ -53,14 +64,22 @@ export const createNewUser = async (
   firstName: string,
   lastName: string,
   isAdmin?: boolean
-) => {
+): Promise<boolean | any> => {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOtp({
-    email: email,
-    options: {
-      shouldCreateUser: true,
-    },
-  });
+  try {
+    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${HOST}/resetpassword`,
+    });
+    if (data) {
+      console.log(data);
+      return true;
+    } else if (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
 };
 
 /*
