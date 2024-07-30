@@ -1,9 +1,9 @@
 "use client";
-import { createNewUser } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { addToInvitedUsers } from "@/app/actions";
 
 type AddUserProps = {
   cancel: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -16,7 +16,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
   const [email, setEmail] = useState<string>("");
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const [selectedRadio, setSelectedRadio] = useState<string>("");
+  const [selectedRadio, setSelectedRadio] = useState<string>("notAdmin");
 
   // Initialise router
   const router = useRouter();
@@ -38,14 +38,28 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
       toast.error("Täytä kaikki kentät!");
       return;
     } else {
-      const saveOk = await createNewUser(email, firstName, lastName, isAdmin);
-      if (saveOk) {
-        window.location.reload();
-        toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
-      } else {
-        toast.error(saveOk, { id: "saveError" });
-        return;
-      }
+      await fetch("api/send", {
+        method: "POST",
+        body: JSON.stringify({ email, firstName, lastName }),
+      }).then(() => {
+        saveAsInvited();
+      });
+    }
+  };
+
+  const saveAsInvited = async () => {
+    const saveOk = await addToInvitedUsers({
+      email,
+      firstName,
+      lastName,
+      isAdmin,
+    });
+    if (saveOk) {
+      window.location.reload();
+      toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
+    } else {
+      toast.error(saveOk, { id: "saveError" });
+      return;
     }
   };
 

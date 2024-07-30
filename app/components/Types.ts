@@ -29,6 +29,13 @@ export type UserAuthType = {
   };
 };
 
+export type InvitedUsersType = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  isAdmin: boolean | null;
+};
+
 export type EventType = {
   id: string | null;
   created: string | null;

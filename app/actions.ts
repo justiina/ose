@@ -11,6 +11,7 @@ import {
   GetUserType,
   EventType,
   UserAuthType,
+  InvitedUsersType,
 } from "./components/Types";
 import { HOST } from "./components/HostInfo";
 
@@ -26,6 +27,24 @@ export const login = async (
   };
 
   const { error } = await supabase.auth.signInWithPassword(data);
+  if (error) {
+    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
+  }
+  revalidatePath("/main");
+  redirect("/main");
+};
+
+export const signup = async (
+  prevState: { error: undefined | string },
+  formData: FormData
+) => {
+  const supabase = createClient();
+  const data = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const { error } = await supabase.auth.signUp(data);
   if (error) {
     return { error: "Jotain meni vikaan!\nYritä uudestaan." };
   }
@@ -59,25 +78,36 @@ export const resetPassword = async (
 };
 
 // USER ADMIN
-export const createNewUser = async (
-  email: string,
-  firstName: string,
-  lastName: string,
-  isAdmin?: boolean
+export const addToInvitedUsers = async (
+  data: InvitedUsersType
 ): Promise<boolean | any> => {
   const supabase = createClient();
   try {
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${HOST}/resetpassword`,
+    const { error } = await supabase.from("invitedUsers").insert(data);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const signupLink = async (email: string): Promise<string | any> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "signup",
+      email: email,
+      password: "secret",
     });
     if (data) {
-      console.log(data);
-      return true;
-    } else if (error) {
-      console.log(error);
-      throw new Error(error.message);
+      return data.properties?.action_link;
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
