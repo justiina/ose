@@ -2,7 +2,6 @@
 import FilledButton from "@/app/components/Buttons";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { addToInvitedUsers } from "@/app/actions";
 
 type AddUserProps = {
@@ -17,9 +16,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const [selectedRadio, setSelectedRadio] = useState<string>("notAdmin");
-
-  // Initialise router
-  const router = useRouter();
+  const token = crypto.randomUUID();
 
   const handleRadioChange = (value: string) => {
     setSelectedRadio(value);
@@ -40,7 +37,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
     } else {
       await fetch("api/send", {
         method: "POST",
-        body: JSON.stringify({ email, firstName, lastName }),
+        body: JSON.stringify({ token, email, firstName, lastName }),
       }).then(() => {
         saveAsInvited();
       });
@@ -49,6 +46,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
 
   const saveAsInvited = async () => {
     const saveOk = await addToInvitedUsers({
+      token,
       email,
       firstName,
       lastName,

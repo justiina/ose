@@ -1,42 +1,84 @@
 "use client";
-import { useFormState } from "react-dom";
-import { signup } from "@/app/actions";
-import toast from "react-hot-toast";
+import { getInvitedByToken, getInvitedUsers, signup } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
-import { useSearchParams } from "next/navigation";
+import { InvitedUserType } from "@/app/components/Types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import LoadingIndicator from "@/app/components/LoadingIndicator";
 
 const SignupForm = () => {
-  const [state, formAction] = useFormState<any, FormData>(signup, undefined);
+  const router = useRouter();
   const searchParams = useSearchParams()!;
-  const email: string | null = searchParams.get("email");
+  const token: string | null = searchParams.get("token");
+  const [user, setUser] = useState<InvitedUserType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
-  if (state?.error) {
-    toast.error(state.error, { id: "login" });
+  useEffect(() => {
+    const fetchInvitedUser = async () => {
+      if (!token) {
+        setError("Token puuttuu!");
+        setLoading(false);
+        return;
+      }
+      try {
+        const { userData, error } = await getInvitedByToken(token);
+        if (userData) {
+          setUser(userData);
+        } else {
+          setError("Virheellinen tai vanhentunut token");
+        }
+        if (error) {
+          toast.error(error, { id: "fetchError" });
+        }
+      } catch (error: any) {
+        setError(error);
+        console.error("Error fetching email:", error);
+      }
+      fetchInvitedUser();
+    };
+    setLoading(false);
+    console.log(user)
+  }, []);
+
+  const handleSignup = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    const formData = new FormData(event.target as HTMLFormElement);
+    const result = await signup({ error: undefined }, formData);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      router.push("/main");
+    }
+  };
+
+  if (loading) {
+    return <LoadingIndicator />;
   }
 
   return (
     <>
-      <form action={formAction} className="grid gap-1 mr-8 md:w-4/5">
-        <input
-          id="email"
-          //className="border border-grey rounded-lg py-1 px-4 text-sm"
-          type="email"
-          name="email"
-          placeholder="Sähköposti"
-          value={email || "ei mailia"}
-          required
-        />
-        <input
-          id="password"
-          className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
-          type="password"
-          name="password"
-          placeholder="Salasana"
-          required
-        />
+      {error ? (
+        <p className="text-orange">{error}</p>
+      ) : (
+        <div>
+          <p>{user?.email}</p>
+          <form onSubmit={handleSignup} className="grid gap-1 mr-8 md:w-4/5">
+            <input
+              id="password"
+              className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
+              type="password"
+              name="password"
+              placeholder="Salasana"
+              required
+            />
 
-        <FilledButton title="Rekisteröidy" color="orange" />
-      </form>
+            <FilledButton title="Rekisteröidy" color="orange" />
+          </form>
+        </div>
+      )}
     </>
   );
 };

@@ -1,6 +1,5 @@
 "use client";
 import { deleteEvent } from "@/app/actions";
-import { HOST } from "@/app/components/HostInfo";
 import { EventType } from "@/app/components/Types";
 import Link from "next/link";
 import { useState } from "react";
@@ -88,7 +87,7 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
                         className="cursor-pointer hover:text-orange text-grey text-2xl"
                       />
                       <Link
-                        href={`${HOST}/editevent?event=${event.id}`}
+                        href={`${process.env.NEXT_PUBLIC_BASE_URL}/editevent?event=${event.id}`}
                         className="cursor-pointer hover:text-blue text-grey text-2xl"
                       >
                         <MdOutlineEdit />

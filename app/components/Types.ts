@@ -29,11 +29,17 @@ export type UserAuthType = {
   };
 };
 
-export type InvitedUsersType = {
-  email: string;
-  firstName: string;
-  lastName: string;
+export type InvitedUserType = {
+  token: string | null;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
   isAdmin: boolean | null;
+};
+
+export type GetInvitedUserType = {
+  userData: InvitedUserType | null;
+  error: string | null;
 };
 
 export type EventType = {
@@ -58,6 +64,7 @@ export type EditEventType = {
   eventData: EventType | null;
   error: string | null;
 };
+
 export type AddEventType = Omit<EventType, "id" | "createdByName">;
 
 export type EventsByDateType = {
