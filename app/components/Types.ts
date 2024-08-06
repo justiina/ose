@@ -30,11 +30,11 @@ export type UserAuthType = {
 };
 
 export type InvitedUserType = {
-  token: string | null;
-  email: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  isAdmin: boolean | null;
+  token: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isAdmin: boolean;
 };
 
 export type GetInvitedUserType = {

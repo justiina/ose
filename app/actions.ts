@@ -10,7 +10,6 @@ import {
   EditEventType,
   GetUserType,
   EventType,
-  UserAuthType,
   InvitedUserType,
   GetInvitedUserType,
 } from "./components/Types";
@@ -35,18 +34,25 @@ export const login = async (
 };
 
 export const signup = async (
-  prevState: { error: undefined | string },
-  formData: FormData
+  email: string,
+  password: string,
+  isAdmin?: boolean
 ): Promise<{ error?: string }> => {
   const supabase = createClient();
   const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email,
+    password,
+    options: {
+      data: {
+        isAdmin,
+      },
+    },
   };
-
+  console.log(data);
   const { error } = await supabase.auth.signUp(data);
   if (error) {
-    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
+    console.log(error.message);
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
   return {};
 };
@@ -105,38 +111,8 @@ export const getInvitedUsers = async () => {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
-/*
-export const getInvitedByToken = async (
-  token: string
-): Promise<GetInvitedUserType> => {
-  const supabase = createClient();
-  try {
-    const { data: userData, error } = await supabase
-      .from("invitedUsers")
-      .select("*")
-      .eq("token", token)
-      .single();
-    if (error) {
-      console.log(error);
-      return {
-        userData: null,
-        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
-      };
-    }
-    if (userData) {
-      return { userData, error: null };
-    }
-    return { userData: null, error: null };
-  } catch (error: any) {
-    return {
-      userData: null,
-      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
-    };
-  }
-};
-*/
 
-export const getInvitedByToken = async (
+export const getInvitedUserByToken = async (
   token: string
 ): Promise<GetInvitedUserType> => {
   const supabase = createClient();
@@ -144,8 +120,7 @@ export const getInvitedByToken = async (
     const { data: userData, error } = await supabase
       .from("invitedUsers")
       .select()
-      .eq("token", token)
-      .single();
+      .eq("token", token);
     if (error) {
       console.log(error);
       return {
@@ -153,10 +128,22 @@ export const getInvitedByToken = async (
         error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
       };
     }
-    if (userData) {
-      return { userData, error: null };
+    if (userData && userData.length > 0) {
+      const userObject = userData[0];
+      const mappedUserData: InvitedUserType = {
+        token: userObject.token,
+        email: userObject.email,
+        firstName: userObject.firstName,
+        lastName: userObject.lastName,
+        isAdmin: userObject.isAdmin,
+      };
+      return { userData: mappedUserData, error: null };
+    } else {
+      return {
+        userData: null,
+        error: "Käyttäjätietoja ei löytynyt.\nYritä myöhemmin uudestaan.",
+      };
     }
-    return { userData: null, error: null };
   } catch (error: any) {
     return {
       userData: null,
