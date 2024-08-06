@@ -25,11 +25,6 @@ const Signup = async () => {
         />
       </div>
       <div className="flex flex-col p-4 lg:w-1/3">
-        <h1 className="mb-2">Rekisteröidy OSEn jäsensivustolle</h1>
-        <p className="mb-4">
-          Anna salasana alla olevalle sähköpostiosoitteelle, niin
-          sähköpostiosoitteesi rekisteröidään ja pääset kirjautumaan sivustolle.
-        </p>
         <SignupForm />
       </div>
     </div>

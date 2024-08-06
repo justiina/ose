@@ -25,7 +25,6 @@ import Link from "next/link";
 import DayCard from "./DayCard";
 import toast from "react-hot-toast";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
-import { HOST } from "@/app/components/HostInfo";
 
 const WEEKDAYS = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
 
@@ -187,7 +186,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                   )
                   .map((event, index) => (
                     <Link
-                      href={`${HOST}/main?showDialog=y&date=${event.date}`}
+                      href={`${process.env.NEXT_PUBLIC_BASE_URL}/main?showDialog=y&date=${event.date}`}
                       key={index}
                       className="grid grid-cols-5 sm:max-w-2xl gap-4 text-lg mb-1"
                     >
@@ -297,7 +296,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
               const todaysEvents = eventsByDate[dateKey] || [];
               return (
                 <Link
-                  href={`${HOST}/main?showDialog=y&date=${dateKey}`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/main?showDialog=y&date=${dateKey}`}
                   key={index}
                   className={
                     isToday(day)

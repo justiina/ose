@@ -7,6 +7,7 @@ type ButtonProps = {
   color: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   icon?: React.ReactNode;
+  type?: "button" | "submit" | "reset";
 };
 
 type OwnLinkProps = {
@@ -36,9 +37,10 @@ const FilledButton: React.FC<ButtonProps> = ({
   color,
   onClick,
   icon,
+  type = "submit",
 }) => {
   return (
-    <button onClick={onClick} className={filledClassName(color)}>
+    <button type={type} onClick={onClick} className={filledClassName(color)}>
       {icon && <span>{icon}</span>}
       {title}
     </button>
