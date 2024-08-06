@@ -12,7 +12,6 @@ import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
 import { GrGroup } from "react-icons/gr";
-import { HOST } from "@/app/components/HostInfo";
 import FilledButton from "@/app/components/Buttons";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
@@ -123,7 +122,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
                         <Link
-                          href={`${HOST}/editevent?event=${event.id}`}
+                          href={`${process.env.NEXT_PUBLIC_BASE_URL}/editevent?event=${event.id}`}
                           className="cursor-pointer hover:text-blue text-grey text-2xl"
                         >
                           <MdOutlineEdit />

@@ -4,7 +4,6 @@ import { login } from "@/app/actions";
 import toast from "react-hot-toast";
 import FilledButton from "@/app/components/Buttons";
 import Link from "next/link";
-import { HOST } from "@/app/components/HostInfo";
 import Dialog from "@/app/components/Dialog";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
@@ -43,7 +42,7 @@ const LoginForm = () => {
         <FilledButton title="Kirjaudu sisään" color="orange" />
       </form>
       <Link
-        href={`${HOST}/login?showDialog=y`}
+        href={`${process.env.NEXT_PUBLIC_BASE_URL}/login?showDialog=y`}
         className="grid md:w-4/5 mt-2 justify-center text-grey hover:text-orange text-sm"
       >
         Unohtuiko salasana?

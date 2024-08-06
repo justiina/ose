@@ -10,10 +10,9 @@ import {
   EditEventType,
   GetUserType,
   EventType,
-  UserAuthType,
-  InvitedUsersType,
+  InvitedUserType,
+  GetInvitedUserType,
 } from "./components/Types";
-import { HOST } from "./components/HostInfo";
 
 // USER FUNCTIONS
 export const login = async (
@@ -35,21 +34,27 @@ export const login = async (
 };
 
 export const signup = async (
-  prevState: { error: undefined | string },
-  formData: FormData
-) => {
+  email: string,
+  password: string,
+  isAdmin?: boolean
+): Promise<{ error?: string }> => {
   const supabase = createClient();
   const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email,
+    password,
+    options: {
+      data: {
+        isAdmin,
+      },
+    },
   };
-
+  console.log(data);
   const { error } = await supabase.auth.signUp(data);
   if (error) {
-    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
+    console.log(error.message);
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
-  revalidatePath("/main");
-  redirect("/main");
+  return {};
 };
 
 export const logout = async () => {
@@ -68,7 +73,7 @@ export const resetPassword = async (
   const supabase = createClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(
     formData.get("email") as string,
-    { redirectTo: `${HOST}/resetpassword` }
+    { redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/resetpassword` }
   );
   if (error) {
     return { error: "Jotain meni vikaan!\nYritä uudestaan." };
@@ -79,7 +84,7 @@ export const resetPassword = async (
 
 // USER ADMIN
 export const addToInvitedUsers = async (
-  data: InvitedUsersType
+  data: InvitedUserType
 ): Promise<boolean | any> => {
   const supabase = createClient();
   try {
@@ -95,20 +100,55 @@ export const addToInvitedUsers = async (
   }
 };
 
-export const signupLink = async (email: string): Promise<string | any> => {
+export const getInvitedUsers = async () => {
   const supabase = createClient();
   try {
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: "signup",
-      email: email,
-      password: "secret",
-    });
-    if (data) {
-      return data.properties?.action_link;
+    const { data: userData } = await supabase.from("invitedUsers").select("*");
+    if (userData) {
+      return userData;
     }
   } catch (error: any) {
-    console.log(error.message);
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const getInvitedUserByToken = async (
+  token: string
+): Promise<GetInvitedUserType> => {
+  const supabase = createClient();
+  try {
+    const { data: userData, error } = await supabase
+      .from("invitedUsers")
+      .select()
+      .eq("token", token);
+    if (error) {
+      console.log(error);
+      return {
+        userData: null,
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
+    }
+    if (userData && userData.length > 0) {
+      const userObject = userData[0];
+      const mappedUserData: InvitedUserType = {
+        token: userObject.token,
+        email: userObject.email,
+        firstName: userObject.firstName,
+        lastName: userObject.lastName,
+        isAdmin: userObject.isAdmin,
+      };
+      return { userData: mappedUserData, error: null };
+    } else {
+      return {
+        userData: null,
+        error: "Käyttäjätietoja ei löytynyt.\nYritä myöhemmin uudestaan.",
+      };
+    }
+  } catch (error: any) {
+    return {
+      userData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
   }
 };
 
