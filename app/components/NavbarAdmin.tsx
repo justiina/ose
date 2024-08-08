@@ -14,7 +14,7 @@ import { RiUserSettingsLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 
-const Navbar = () => {
+const NavbarAdmin = () => {
   const currentPath: string | null = usePathname();
   const [hamburgerOpen, setHamburgerOpen] = useState<boolean>(false);
   const showNavbar = [
@@ -27,6 +27,7 @@ const Navbar = () => {
     "/instructions",
     "/main",
     "/userinfo",
+    "/useradmin",
   ];
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -139,6 +140,17 @@ const Navbar = () => {
             Omat tiedot
           </Link>
 
+          <Link
+            href="/useradmin"
+            className={
+              currentPath?.startsWith("/useradmin")
+                ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-blue text-background"
+                : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
+            }
+          >
+            <RiUserSettingsLine className="text-2xl" />
+            Käyttäjähallinta
+          </Link>
         </div>
         <div className="row-span-3 flex flex-col justify-evenly">
           <LogoutForm
@@ -203,6 +215,17 @@ const Navbar = () => {
           }
         >
           <FaUserCircle className="text-2xl" />
+        </Link>
+
+        <Link
+          href="/useradmin"
+          className={
+            currentPath?.startsWith("/useradmin")
+              ? "items-center cursor-pointer rounded-full px-2 py-2 bg-blue text-background"
+              : "items-center cursor-pointer rounded-full px-2 py-2 text-orange hover:bg-blue hover:text-background"
+          }
+        >
+          <RiUserSettingsLine className="text-2xl" />
         </Link>
 
         <LogoutForm
@@ -308,6 +331,19 @@ const Navbar = () => {
               Omat tiedot
             </Link>
           </div>
+          <div>
+            <Link
+              href="/useradmin"
+              className={
+                currentPath?.startsWith("/userinfo")
+                  ? "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 bg-blue text-background"
+                  : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
+              }
+            >
+              <RiUserSettingsLine className="text-2xl" />
+              Käyttäjähallinta
+            </Link>
+          </div>
           <LogoutForm
             showText={true}
             addClassName="flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 hover:bg-orange"
@@ -317,4 +353,4 @@ const Navbar = () => {
     </>
   ) : null;
 };
-export default Navbar;
+export default NavbarAdmin;

@@ -12,6 +12,7 @@ const SignupForm = () => {
   const searchParams = useSearchParams()!;
   const token: string | null = searchParams.get("token");
   const [user, setUser] = useState<InvitedUserType | null>(null);
+  const [invitedError, setInvitedError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -25,7 +26,7 @@ const SignupForm = () => {
         try {
           const userData = await getInvitedUserByToken(token);
           if (userData.error) {
-            toast.error(userData.error, { id: "fetchError" });
+            setInvitedError(userData.error);
           } else {
             setUser(userData.userData);
           }
@@ -43,10 +44,7 @@ const SignupForm = () => {
     if (user !== null && !passwordError && !confirmPasswordError) {
       const result = await signup(user.email, password, user.isAdmin);
       if (result.error) {
-        console.log(result.error);
-        toast.error(
-          "Jotain meni vikaan!\nYritä myöhemmin uudestaan tai ole yhteydessä sihteeriin."
-        );
+        toast.error(result.error);
         router.push("/");
       } else {
         toast.success("Rekisteröityminen onnistui, tervetuloa sivustolle!");
@@ -96,41 +94,48 @@ const SignupForm = () => {
   return (
     <>
       <h1 className="mb-2">Rekisteröidy OSEn jäsensivustolle</h1>
-      <p className="mb-4">Anna salasana sähköpostiosoitteelle:</p>
-      <div>
-        <p className="mb-4 font-bold">{user?.email}</p>
-        <form onSubmit={handleSignup} className="grid gap-1 mr-8 md:w-4/5">
-          <input
-            id="password"
-            className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
-            type="password"
-            name="password"
-            placeholder="Salasana"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-          />
-          {passwordError && (
-            <p className="text-orange text-sm">{passwordError}</p>
-          )}
+      {invitedError !== null ? (
+        <p className="text-orange">{invitedError}</p>
+      ) : (
+        <>
+          {" "}
+          <p className="mb-4">Anna salasana sähköpostiosoitteelle:</p>
+          <div>
+            <p className="mb-4 font-bold">{user?.email}</p>
+            <form onSubmit={handleSignup} className="grid gap-1 mr-8 md:w-4/5">
+              <input
+                id="password"
+                className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
+                type="password"
+                name="password"
+                placeholder="Salasana"
+                value={password}
+                onChange={handlePasswordChange}
+                required
+              />
+              {passwordError && (
+                <p className="text-orange text-sm">{passwordError}</p>
+              )}
 
-          <input
-            id="confirm-password"
-            className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
-            type="password"
-            name="confirm-password"
-            placeholder="Vahvista salasana"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            required
-          />
-          {confirmPasswordError && (
-            <p className="text-orange text-sm">{confirmPasswordError}</p>
-          )}
+              <input
+                id="confirm-password"
+                className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
+                type="password"
+                name="confirm-password"
+                placeholder="Vahvista salasana"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
+                required
+              />
+              {confirmPasswordError && (
+                <p className="text-orange text-sm">{confirmPasswordError}</p>
+              )}
 
-          <FilledButton title="Rekisteröidy" color="orange" />
-        </form>
-      </div>
+              <FilledButton title="Rekisteröidy" color="orange" />
+            </form>
+          </div>
+        </>
+      )}
     </>
   );
 };

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
-//import { getSession } from "./actions";
+import { isAdmin } from "@/app/actions";
+import Navbar from "./components/Navbar";
+import NavbarAdmin from "./components/NavbarAdmin";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,20 @@ const RootLayout = async ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const admin = await isAdmin();
+
+  if (admin) {
+    return (
+      <html lang="fi">
+        <body className="lg:flex max-w-full box-border">
+          <NavbarAdmin />
+          <div className="grow lg:ml-72 max-lg:mt-16">{children}</div>
+          <Toaster position="top-center" />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="fi">
       <body className="lg:flex max-w-full box-border">

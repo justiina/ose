@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       from: `OSEn jasensivusto <${process.env.FROM_EMAIL}>`,
       to: `${email}`,
       reply_to: `${process.env.REPLY_TO_EMAIL}`,
-      subject: "Hello world",
+      subject: "Rekisteröityminen OSEn jäsensivustolle",
       react: EmailTemplate({ firstName, registrationLink }) as React.ReactElement,
     });
 

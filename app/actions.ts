@@ -42,19 +42,43 @@ export const signup = async (
   const data = {
     email,
     password,
-    options: {
-      data: {
-        isAdmin,
-      },
-    },
   };
   console.log(data);
   const { error } = await supabase.auth.signUp(data);
   if (error) {
-    console.log(error.message);
+    if (error.message === "User already registered") {
+      return {
+        error:
+          "Annettu sähköposti on jo rekisteröity\nPaina Unohtuiko salasana? -linkkiä nollataksesi salasanan.",
+      };
+    }
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  } else {
+    // Remove invitation from invitedUsers table
+    const { error } = await supabase
+      .from("invitedUsers")
+      .delete()
+      .eq("email", email);
+    if (error) {
+      return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+    }
+    // update userRoles table
+    if (isAdmin) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user !== undefined) {
+        const uid = user?.id;
+        const { error } = await supabase
+          .from("adminUsers")
+          .insert([{ user_id: uid, email }]);
+        if (error) {
+          return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+        }
+      }
+    }
+    return {};
   }
-  return {};
 };
 
 export const logout = async () => {
@@ -141,7 +165,7 @@ export const getInvitedUserByToken = async (
     } else {
       return {
         userData: null,
-        error: "Käyttäjätietoja ei löytynyt.\nYritä myöhemmin uudestaan.",
+        error: "Käyttäjätietoja ei löytynyt.\nOle yhteydessä sihteeriin.",
       };
     }
   } catch (error: any) {
@@ -150,6 +174,35 @@ export const getInvitedUserByToken = async (
       error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
     };
   }
+};
+
+export const isAdmin = async (): Promise<boolean | string> => {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user !== undefined) {
+    const uid = user?.id;
+    try {
+      const { data: userData, error } = await supabase
+        .from("adminUsers")
+        .select()
+        .eq("user_id", uid);
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (userData && userData.length > 0) {
+        return true;
+      } else if (userData.length == 0) {
+        return false;
+      } else {
+        return false;
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  }
+  return false;
 };
 
 /*
