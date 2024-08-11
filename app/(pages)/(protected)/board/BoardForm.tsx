@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
 import FilledButton from "@/app/components/Buttons";
+import { isAdmin } from "@/app/actions";
 
 type FileType = {
   title: string;
@@ -25,8 +26,13 @@ type DeleteFileType = {
   path: string;
 };
 
-const AdminBoardForm = () => {
+type PropsType = {
+  admin: boolean;
+};
+
+const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
+
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
   const [fetchLettersLoading, setFetchLettersLoading] = useState<boolean>(true);
 
@@ -250,7 +256,7 @@ const AdminBoardForm = () => {
               <th scope="col">#</th>
               <th scope="col">Päivämäärä</th>
               <th scope="col">Pöytäkirja</th>
-              <th scope="col"></th>
+              {admin && <th scope="col"></th>}
             </tr>
             {boardFiles.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
@@ -274,20 +280,22 @@ const AdminBoardForm = () => {
                         pdf
                       </button>
                     </td>
-                    <td>
-                      <IoTrash
-                        onClick={() =>
-                          handleDelete("hallitus", `poytakirjat/${file.name}`)
-                        }
-                        className="cursor-pointer hover:text-orange text-grey text-2xl"
-                      />
-                    </td>
+                    {admin && (
+                      <td>
+                        <IoTrash
+                          onClick={() =>
+                            handleDelete("hallitus", `poytakirjat/${file.name}`)
+                          }
+                          className="cursor-pointer hover:text-orange text-grey text-2xl"
+                        />
+                      </td>
+                    )}
                   </tr>
                 </>
               );
             })}
           </table>
-          {!showAddBoardForm && (
+          {!showAddBoardForm && admin && (
             <div className="flex justify-end">
               <FilledButton
                 onClick={() => setShowAddBoardForm(!showAddBoardForm)}
@@ -297,7 +305,7 @@ const AdminBoardForm = () => {
             </div>
           )}
 
-          {showAddBoardForm && (
+          {showAddBoardForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               {boardUploading ? (
                 "Ladataan ..."
@@ -367,7 +375,7 @@ const AdminBoardForm = () => {
               <th scope="col">#</th>
               <th scope="col">Päivämäärä</th>
               <th scope="col">Sihteerikirje</th>
-              <th scope="col"></th>
+              {admin && <th scope="col"></th>}
             </tr>
             {letters.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
@@ -394,23 +402,25 @@ const AdminBoardForm = () => {
                         pdf
                       </button>
                     </td>
-                    <td>
-                      <IoTrash
-                        onClick={() =>
-                          handleDelete(
-                            "hallitus",
-                            `sihteerikirjeet/${file.name}`
-                          )
-                        }
-                        className="cursor-pointer hover:text-orange text-grey text-2xl"
-                      />
-                    </td>
+                    {admin && (
+                      <td>
+                        <IoTrash
+                          onClick={() =>
+                            handleDelete(
+                              "hallitus",
+                              `sihteerikirjeet/${file.name}`
+                            )
+                          }
+                          className="cursor-pointer hover:text-orange text-grey text-2xl"
+                        />
+                      </td>
+                    )}
                   </tr>
                 </>
               );
             })}
           </table>
-          {showConfirmation && (
+          {showConfirmation && admin && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-xl mb-4">
@@ -431,14 +441,16 @@ const AdminBoardForm = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-end">
-            <FilledButton
-              onClick={() => setShowAddLetterForm(!showAddLetterForm)}
-              title="Lisää tiedosto"
-              color="blue"
-            />
-          </div>
-          {showAddLetterForm && (
+          {admin && (
+            <div className="flex justify-end">
+              <FilledButton
+                onClick={() => setShowAddLetterForm(!showAddLetterForm)}
+                title="Lisää tiedosto"
+                color="blue"
+              />
+            </div>
+          )}
+          {showAddLetterForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               {letterUploading ? (
                 "Ladataan ..."
@@ -506,4 +518,4 @@ const AdminBoardForm = () => {
   );
 };
 
-export default AdminBoardForm;
+export default BoardForm;

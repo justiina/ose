@@ -176,7 +176,7 @@ export const getInvitedUserByToken = async (
   }
 };
 
-export const isAdmin = async (): Promise<boolean | string> => {
+export const isAdmin = async (): Promise<boolean> => {
   const supabase = createClient();
   const {
     data: { user },
@@ -476,36 +476,3 @@ export const updateEvent = async (
   // Return notification if none of the conditions are met
   return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
 };
-
-// STORAGE FUNCTIONS
-/*
-export const saveFile = async (
-  bucket: string,
-  folder: string,
-  filename: string,
-  file: File
-): Promise<boolean | string> => {
-  const supabase = createClient();
-  try {
-    if (!file) {
-      return "Valitse tiedosto, jotta voit ladata sen sivustolle.";
-    }
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(`${folder}/${filename}`, file);
-    if (error) {
-      console.log(error);
-      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-    }
-    if (data) {
-      console.log("onnistui?")
-      return true;
-    }
-  } catch (error) {
-    console.error("Error file upload:", error);
-    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-  }
-  // Return notification if none of the conditions are met
-  return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-};
-*/

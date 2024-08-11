@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import AdminBoardForm from "./AdminBoardForm";
+import BoardForm from "./BoardForm";
+import { isAdmin } from "@/app/actions";
 
 const Board = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -12,7 +13,9 @@ const Board = async () => {
     return redirect("/");
   }
 
-  return <AdminBoardForm />;
+  const admin = await isAdmin()
+
+  return <BoardForm admin={admin}/>;
 };
 
 export default Board;

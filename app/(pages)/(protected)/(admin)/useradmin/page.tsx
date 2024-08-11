@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import EditUsers from "./EditUsers";
+import { isAdmin } from "@/app/actions";
 
 const UserAdmin = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -10,6 +11,12 @@ const UserAdmin = async () => {
   } = await supabase.auth.getUser();
   if (!user) {
     return redirect("/");
+  }
+
+  // Allow only admin users to get to this route
+  const admin = await isAdmin();
+  if (!admin) {
+    return redirect("/main");
   }
 
   return (
