@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Member Site for Search and Rescue Organisation Oulun Seudun Etsintäkoirat OSE ry
 
-## Getting Started
+## Introduction
 
-First, run the development server:
+This is a member site for search and rescue organisation, Oulun Seudun Etsintäkoirat OSE ry. OSE members train dogs to help police find missing person when needed. The member site gathers important events, instructions, files, and member information in one place. The site is implemented using web technologies to ensure easy access for everyone. The user interface is responsive so that the site works well on computers and mobile devices.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Used technologies
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Used framework is React-based Next.js and the language is TypeScript. User interface is implemented using Tailwind CSS. User authentication, database and file storage, are implemented using the Supabase platform.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+![login page](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/01_login.png "Login page")
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Implementation
 
-## Learn More
+### User registration
 
-To learn more about Next.js, take a look at the following resources:
+The site is available only for accepted members of the organisation. Users can thus register only via invitation send by the admin. Form containing new user's first and last name, email and info whether the new user gets admin rights or not is filled by the admin.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+![invite new user form](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/02_invite_user.png "Invite new user form")
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Submission of the invitation form sends the invitation email to the address of new user and saves the user data to Supabase table of invited users. Invitation email contains the URL to register where the token links user to the invited users table.
 
-## Deploy on Vercel
+The registration is completed if the token is found (and not expired) from the table and the user provides password with sufficient security qualifications. Registration creates new user, removes user info from the invited users table and adds their uid to admin table, if the new user was assigned with admin rights.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![register user form](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/03_register_user.png "User registration form")
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Navigation and calendar
+
+The navigation bar is positioned on the left side for larger screens and at the top of the screen for mobile devices and smaller window size.
+A calendar component is in the main page for announcing and sharing events. Different types of events are displayed with distinct colours.
+
+Larger screen | Smaller screen
+:-----------: | :-----------:
+![main page](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/04_main.png "Main page with calendar") | ![main page small screen](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/05_main_small.png "Smaller screen main page with calendar")
+
+Events of the day are shown in the dialog opening when the day is clicked from the calendar.
+![dialog with days events](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/06_days_events.png "Dialog showing days evens")
+
+A new event can be added using a form that opens either from the '+' button in the top-right corner of the calendar or from a dialog that appears by clicking on any day. The form requests information related to the event, and the application provides a warning if the user attempted to save the event without required information.
+
+![add event form](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/07_add_event.png "Add event form")
+
+### User information
+
+In the User Information page, users can edit their details and choose which information are displayed to other OSE members on the Contact Information page.
+
+![own info](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/08_own_info.png "Own information")
+
+### Contact information
+This page shows the contact information of all OSE members who have agreed to share their information to other members.
+
+![contact info](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/09_contacts.png "Contact information")
+
+### Storage
+
+The application includes currently storage for PDF files, allowing documents such as board meeting minutes, secretary letters, and various instructions and common practices to be collected in one place. Storage uses Supabase's Storage service, with the file name starting with the date of the meeting or secretary letter, by which the files were organized on the site. Only users with admin rights can add or remove files from the app.
+
+![add pdf form](https://ldlguzrtadadbymtessv.supabase.co/storage/v1/object/public/images/readme/10_add_pdf.png "Add pdf form")
