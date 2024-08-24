@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import UnderConstruction from "@/app/components/UnderConstruction";
+import CalloutGroupForm from "./CalloutGroupForm";
+import { isAdmin } from "@/app/actions";
 
-const CallOutGroup = async () => {
+const CalloutGroup = async () => {
   // Check that the user is signed in, redirect to login page if not
   const supabase = createClient();
   const {
@@ -12,7 +13,9 @@ const CallOutGroup = async () => {
     return redirect("/");
   }
 
-  return <div><UnderConstruction /></div>;
+  const admin = await isAdmin()
+
+  return <CalloutGroupForm admin={admin}/>;
 };
 
-export default CallOutGroup;
+export default CalloutGroup;

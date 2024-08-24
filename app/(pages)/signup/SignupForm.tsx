@@ -19,6 +19,9 @@ const SignupForm = () => {
   const [passwordError, setPasswordError] = useState<string>("");
   const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
 
+  // Set the token lifespan in minutes (e.g. 7 days)
+  const tokenLifespanMinutes = 7 * 24 * 60;
+
   // Fetch the invited user data by token
   useEffect(() => {
     const fetchData = async () => {
@@ -27,8 +30,19 @@ const SignupForm = () => {
           const userData = await getInvitedUserByToken(token);
           if (userData.error) {
             setInvitedError(userData.error);
-          } else {
-            setUser(userData.userData);
+          } else if (userData.userData !== null) {
+            // Check if the token is expired
+            const createdAtDate = new Date(userData.userData?.created_at);
+            const currentDateTime = new Date();
+            const expirationTime =
+              createdAtDate.getTime() + tokenLifespanMinutes * 60 * 1000;            
+              if (currentDateTime.getTime() > expirationTime) {
+              setInvitedError(
+                "Tämä kutsu on vanhentunut! Ole hyvä ja pyydä sihteeriltä uusi kutsu."
+              );
+            } else {
+              setUser(userData.userData);
+            }
           }
         } catch (error) {
           console.error("Error fetching user data:", error);

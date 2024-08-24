@@ -12,6 +12,8 @@ import {
   EventType,
   InvitedUserType,
   GetInvitedUserType,
+  CalloutTrainingType,
+  AddToInvitedUsersType,
 } from "./components/Types";
 
 // USER FUNCTIONS
@@ -108,7 +110,7 @@ export const resetPassword = async (
 
 // USER ADMIN
 export const addToInvitedUsers = async (
-  data: InvitedUserType
+  data: AddToInvitedUsersType
 ): Promise<boolean | any> => {
   const supabase = createClient();
   try {
@@ -155,6 +157,7 @@ export const getInvitedUserByToken = async (
     if (userData && userData.length > 0) {
       const userObject = userData[0];
       const mappedUserData: InvitedUserType = {
+        created_at: userObject.created_at,
         token: userObject.token,
         email: userObject.email,
         firstName: userObject.firstName,
@@ -475,4 +478,38 @@ export const updateEvent = async (
   }
   // Return notification if none of the conditions are met
   return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+};
+
+// CALLOUT GROUP FUNCTIONS
+
+export const getCalloutTrainings = async () => {
+  const supabase = createClient();
+  try {
+    const { data } = await supabase
+      .from("calloutTrainings")
+      .select("*")
+      .order("date", { ascending: true });
+    if (data) {
+      return data;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const saveCalloutTraining = async (
+  data: CalloutTrainingType
+): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { error } = await supabase.from("calloutTrainings").insert(data);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
 };

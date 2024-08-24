@@ -9,7 +9,14 @@ import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
 import FilledButton from "@/app/components/Buttons";
-import { isAdmin } from "@/app/actions";
+import {
+  getCalloutTrainings,
+  isAdmin,
+  saveCalloutTraining,
+} from "@/app/actions";
+import { CalloutTrainingType } from "@/app/components/Types";
+import { MultiDropdown } from "@/app/components/Dropdown";
+import { groupOptions } from "@/app/components/StyleMappingAndOptions";
 
 type FileType = {
   title: string;
@@ -30,26 +37,26 @@ type PropsType = {
   admin: boolean;
 };
 
-const BoardForm: React.FC<PropsType> = ({ admin }) => {
+const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
 
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
-  const [fetchLettersLoading, setFetchLettersLoading] = useState<boolean>(true);
+  const [fetchTrainingsLoading, setFetchTrainingsLoading] =
+    useState<boolean>(true);
 
   const [showAddBoardForm, setShowAddBoardForm] = useState<boolean>(false);
-  const [showAddLetterForm, setShowAddLetterForm] = useState<boolean>(false);
+  const [showAddTrainingsForm, setShowAddTrainingsForm] =
+    useState<boolean>(false);
 
   const [fileNameBoard, setFileNameBoard] = useState<string>("");
-  const [fileNameLetter, setFileNameLetter] = useState<string>("");
-
   const [uploadBoardFile, setUploadBoardFile] = useState<File | null>(null);
-  const [uploadLetterFile, setUploadLetterFile] = useState<File | null>(null);
-
   const [boardUploading, setBoardUploading] = useState<boolean>(false);
-  const [letterUploading, setLetterUploading] = useState<boolean>(false);
-
   const [boardFiles, setBoardFiles] = useState<FileObject[]>([]);
-  const [letters, setLetters] = useState<FileObject[]>([]);
+
+  const [trainings, setTrainings] = useState<CalloutTrainingType[]>([]);
+  const [newTraining, setNewTraining] = useState<CalloutTrainingType | null>(
+    null
+  );
 
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteFile, setDeleteFile] = useState<DeleteFileType | null>(null);
@@ -59,7 +66,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   useEffect(() => {
     const getBoardFiles = async () => {
       const { data, error } = await supabase.storage
-        .from("hallitus")
+        .from("halyryhma")
         .list("poytakirjat", { sortBy: { column: "name", order: "asc" } });
 
       if (data !== null) {
@@ -72,46 +79,38 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         });
       }
     };
-    const getLetterFiles = async () => {
-      const { data, error } = await supabase.storage
-        .from("hallitus")
-        .list("sihteerikirjeet", { sortBy: { column: "name", order: "asc" } });
-      if (data !== null) {
-        setLetters(data);
-        setFetchLettersLoading(false);
-      } else {
-        console.log(error);
+    const fetchTrainingsData = async () => {
+      try {
+        const trainingsData = await getCalloutTrainings();
+        if (trainingsData !== undefined) {
+          if ("error" in trainingsData) {
+            toast.error(trainingsData.error, { id: "fetchError" });
+          } else {
+            const trainingsArray: CalloutTrainingType[] = trainingsData.map(
+              (doc) => doc as CalloutTrainingType
+            );
+            setTrainings(trainingsArray);
+            setFetchTrainingsLoading(false);
+          }
+        }
+      } catch (error: any) {
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "uploadError",
+          id: "fetchError2",
         });
       }
     };
-
     getBoardFiles();
-    getLetterFiles();
+    fetchTrainingsData();
   }, []);
-
-  const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.id === "datetimeBoard") {
-      const date = e.target.value;
-      setFileNameBoard(`${date}-kokous.pdf`);
-    } else if (e.target.id === "datetimeLetter") {
-      const date = e.target.value;
-      setFileNameLetter(`${date}-sihteerikirje.pdf`);
-    }
-  };
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!e.target.files || e.target.files.length === 0) {
       toast.error("Valitse tiedosto, jotta voit ladata sen sivustolle.", {
         id: "loadError",
       });
-    } else if (e.target.id === "board") {
+    } else {
       const file = e.target.files[0];
       setUploadBoardFile(file);
-    } else if (e.target.id === "letter") {
-      const file = e.target.files[0];
-      setUploadLetterFile(file);
     }
   };
 
@@ -156,113 +155,102 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
     setDeleteFile(null);
   };
 
-  const cancel = (folder: string) => {
-    if (folder === "poytakirjat") {
+  const cancel = (from: string) => {
+    if (from === "board") {
       setShowAddBoardForm(!showAddBoardForm);
       setFileNameBoard("");
-    } else if (folder === "sihteerikirjeet") {
-      setShowAddLetterForm(!showAddLetterForm);
-      setFileNameLetter("");
+    } else if (from === "training") {
+      setNewTraining(null);
+      setShowAddTrainingsForm(false);
     }
   };
 
   const save = async (bucket: string, folder: string) => {
-    if (folder === "poytakirjat") {
-      try {
-        // Check that all the required info is provided
-        if (fileNameBoard === "" || uploadBoardFile === null) {
-          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
-            id: "infoError",
-          });
-        } else {
-          const { error: uploadError } = await supabase.storage
-            .from(bucket)
-            .upload(`${folder}/${fileNameBoard}`, uploadBoardFile);
-          if (uploadError) {
-            if (uploadError.message === "The resource already exists") {
-              toast.error(
-                "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" }
-              );
-            } else {
-              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-                id: "uploadError",
-              });
-            }
-          } else {
-            toast.success("Tiedoston tallentaminen onnistui!");
-            setShowAddBoardForm(false);
-            window.location.reload();
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "uploadError2",
+    try {
+      // Check that all the required info is provided
+      if (fileNameBoard === "" || uploadBoardFile === null) {
+        toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
+          id: "infoError",
         });
-      } finally {
-        setBoardUploading(false);
+      } else {
+        const { error: uploadError } = await supabase.storage
+          .from(bucket)
+          .upload(`${folder}/${fileNameBoard}`, uploadBoardFile);
+        if (uploadError) {
+          if (uploadError.message === "The resource already exists") {
+            toast.error(
+              "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
+              { id: "uploadError" }
+            );
+          } else {
+            toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+              id: "uploadError",
+            });
+          }
+        } else {
+          toast.success("Tiedoston tallentaminen onnistui!");
+          setShowAddBoardForm(false);
+          window.location.reload();
+        }
       }
-    } else if (folder === "sihteerikirjeet") {
-      try {
-        // Check that all the required info is provided
-        if (fileNameLetter === "" || uploadLetterFile === null) {
-          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
-            id: "infoError",
-          });
-        } else {
-          const { error: uploadError } = await supabase.storage
-            .from(bucket)
-            .upload(`${folder}/${fileNameLetter}`, uploadLetterFile);
-          if (uploadError) {
-            if (uploadError.message === "The resource already exists") {
-              toast.error(
-                "Samalle päivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" }
-              );
-            } else {
-              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-                id: "uploadError",
-              });
-            }
-          } else {
-            toast.success("Tiedoston tallentaminen onnistui!");
-            setShowAddLetterForm(false);
-            window.location.reload();
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "uploadError2",
-        });
-      } finally {
-        setLetterUploading(false);
+    } catch (error) {
+      console.log(error);
+      toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+        id: "uploadError2",
+      });
+    } finally {
+      setBoardUploading(false);
+    }
+  };
+
+  // Save training data to Supabase
+  const saveTraining = async () => {
+    if (!newTraining?.date || !newTraining.organiser) {
+      toast.error("Täytä ainakin pakolliset kentät!");
+      return;
+    } else {
+      const saveOk = await saveCalloutTraining(newTraining);
+      if (saveOk) {
+        window.location.reload();
+        toast.success("Tapahtuman tallentaminen onnistui!");
+      } else {
+        toast.error(saveOk, { id: "saveError" });
+        return;
       }
     }
   };
 
-  if (fetchLoading || fetchLettersLoading) {
+  const handleInputChange =
+    (fieldName: keyof CalloutTrainingType) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setNewTraining((prevTraining) => ({
+        ...(prevTraining as CalloutTrainingType),
+        [fieldName]: e.target.value,
+      }));
+    };
+
+  const handleDropdownSelect = (selected: string[]) => {
+    setNewTraining((prevTraining) => ({
+      ...(prevTraining as CalloutTrainingType),
+      organiser: selected,
+    }));
+  };
+
+  if (fetchLoading || fetchTrainingsLoading) {
     return <LoadingIndicator />;
   }
 
   return (
-    <div className="container max-w-screen-md p-8 lg:p-16">
+    <div className="container p-8 lg:p-16">
       <div className="mb-8">
-        <h1 className="mb-4">Hallituksen kokouspöytäkirjat</h1>
+        <h1 className="mb-4">Häytysryhmän koukouspöytäkirjat</h1>
         <div className="md:mx-8">
           <table className="mb-8">
             <tr>
-              <th className="bg-green text-white" scope="col">
-                #
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Päivämäärä
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Pöytäkirja
-              </th>
-              {admin && <th className="bg-green text-white" scope="col"></th>}
+              <th scope="col">#</th>
+              <th scope="col">Päivämäärä</th>
+              <th scope="col">Pöytäkirja</th>
+              {admin && <th scope="col"></th>}
             </tr>
             {boardFiles.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
@@ -280,7 +268,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                       <button
                         className="text-blue"
                         onClick={() =>
-                          goToFileUrl("hallitus", `poytakirjat/${file.name}`)
+                          goToFileUrl("halyryhma", `poytakirjat/${file.name}`)
                         }
                         key={index}
                       >
@@ -291,7 +279,10 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                       <td>
                         <IoTrash
                           onClick={() =>
-                            handleDelete("hallitus", `poytakirjat/${file.name}`)
+                            handleDelete(
+                              "halyryhma",
+                              `poytakirjat/${file.name}`
+                            )
                           }
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
@@ -352,19 +343,21 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                         name="datetimeBoard"
                         aria-label="Date and time"
                         type="date"
-                        onChange={handleDateChange}
+                        onChange={(e) =>
+                          setFileNameBoard(`${e.target.value}-kokous.pdf`)
+                        }
                       />
                     </div>
                   </div>
                   {/*---Save or cancel---*/}
                   <div className="flex justify-end lg:w-2/3 mt-4 gap-2">
                     <FilledButton
-                      onClick={() => cancel("poytakirjat")}
+                      onClick={() => cancel("board")}
                       title="Peruuta"
                       color="grey"
                     />
                     <FilledButton
-                      onClick={() => save("hallitus", "poytakirjat")}
+                      onClick={() => save("halyryhma", "poytakirjat")}
                       title="Tallenna"
                       color="orange"
                     />
@@ -376,26 +369,19 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         </div>
       </div>
       <div className="mb-8">
-        <h1 className="mb-4">Sihteerikirjeet</h1>
+        <h1 className="mb-4">Hälytreenit</h1>
         <div className="md:mx-8">
           <table className="mb-8">
             <tr>
-              <th className="bg-green text-white" scope="col">
-                #
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Päivämäärä
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Sihteerikirje
-              </th>
-              {admin && <th className="bg-green text-white" scope="col"></th>}
+              <th scope="col">#</th>
+              <th scope="col">Päivämäärä</th>
+              <th scope="col">Järjestäjä</th>
+              <th scope="col">Koirajohto 1</th>
+              <th scope="col">Koirajohto 2</th>
+              {admin && <th scope="col"></th>}
             </tr>
-            {letters.map((file, index) => {
-              if (file.name === ".emptyFolderPlaceholder") return false;
-              const [year, month, day] = file.name
-                .replace("-sihteerikirje.pdf", "")
-                .split("-");
+            {trainings.map((training, index) => {
+              const [year, month, day] = training.date.split("-");
               const date = `${day}.${month}.${year}`;
               const fileNum = index + 1;
               return (
@@ -404,28 +390,16 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                     <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
-                      <button
-                        className="text-blue"
-                        onClick={() =>
-                          goToFileUrl(
-                            "hallitus",
-                            `sihteerikirjeet/${file.name}`
-                          )
-                        }
-                        key={index}
-                      >
-                        pdf
-                      </button>
+                      {training.organiser?.map((group, index) => (
+                        <p key={index}>{group}</p>
+                      ))}
                     </td>
+                    <td>{training.dogHead1}</td>
+                    <td>{training.dogHead2}</td>
                     {admin && (
                       <td>
                         <IoTrash
-                          onClick={() =>
-                            handleDelete(
-                              "hallitus",
-                              `sihteerikirjeet/${file.name}`
-                            )
-                          }
+                          onClick={() => {}}
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
                       </td>
@@ -459,73 +433,90 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
           {admin && (
             <div className="flex justify-end">
               <FilledButton
-                onClick={() => setShowAddLetterForm(!showAddLetterForm)}
+                onClick={() => setShowAddTrainingsForm(!showAddTrainingsForm)}
                 icon={<FaPlus />}
-                title="Lisää tiedosto"
+                title="Lisää treeni"
                 color="blue"
               />
             </div>
           )}
-          {showAddLetterForm && admin && (
+          {showAddTrainingsForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
-              {letterUploading ? (
-                "Ladataan ..."
-              ) : (
-                <>
-                  <h2 className="mb-2 text-blue">
-                    Uuden sihteerikirjeen lisäys
-                  </h2>
-                  <p className="mb-4">
-                    HUOM! Tällä hetkellä onnistuu vain pdf-tiedostojen
-                    lisääminen.
-                  </p>
-                  {/*---Choose the file---*/}
-                  <div className="flex flex-col mb-4">
-                    <div className="flex gap-1">
-                      <label className="font-bold">
-                        Valitse tiedosto (pdf)
-                      </label>
-                      <p className="text-orange">*</p>
-                    </div>
+              <>
+                <h2 className="mb-2 text-blue">Häytreenin lisäys</h2>
+                {/*---Date---*/}
+                <div className="flex flex-col lg:w-2/3">
+                  <div className="flex gap-1">
+                    <label className="font-bold">Hälytreenin päivä</label>
+                    <p className="text-orange">*</p>
+                  </div>
+                  <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
                     <input
-                      type="file"
-                      id="letter"
-                      name="letter"
-                      accept="application/pdf"
-                      onChange={handleFileChange}
+                      id="dateTraining"
+                      name="dateTraining"
+                      aria-label="Date of the training"
+                      type="date"
+                      onChange={handleInputChange("date")}
                     />
                   </div>
-                  {/*---Date---*/}
-                  <div className="flex flex-col lg:w-2/3">
-                    <div className="flex gap-1">
-                      <label className="font-bold">Päiväys</label>
-                      <p className="text-orange">*</p>
-                    </div>
-                    <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
-                      <input
-                        id="datetimeLetter"
-                        name="datetimeLetter"
-                        aria-label="Date and time"
-                        type="date"
-                        onChange={handleDateChange}
-                      />
-                    </div>
+                </div>
+
+                {/*---Organiser---*/}
+                <div className="flex flex-col lg:w-2/3">
+                  <div className="flex gap-1">
+                    <label className="font-bold">Järjestävä ryhmä</label>
+                    <p className="text-orange">*</p>
                   </div>
-                  {/*---Save or cancel---*/}
-                  <div className="flex justify-end lg:w-2/3 mt-4 gap-2">
-                    <FilledButton
-                      onClick={() => cancel("sihteerikirjeet")}
-                      title="Peruuta"
-                      color="grey"
-                    />
-                    <FilledButton
-                      onClick={() => save("hallitus", "sihteerikirjeet")}
-                      title="Tallenna"
-                      color="orange"
+                  <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                    <MultiDropdown
+                      options={groupOptions}
+                      onSelect={handleDropdownSelect}
                     />
                   </div>
-                </>
-              )}
+                </div>
+
+                {/*---Head of the dog search 1---*/}
+                <div className="flex flex-col lg:w-2/3">
+                  <label className="font-bold">Koirajohto 1</label>
+                  <input
+                    id="dogHead1"
+                    className="border border-grey bg-white rounded-lg py-1 px-4 mb-2"
+                    type="text"
+                    name="dogHead1"
+                    placeholder="Etunimi Sukunimi"
+                    onChange={handleInputChange("dogHead1")}
+                    required
+                  />
+                </div>
+
+                {/*---Head of the dog search 2---*/}
+                <div className="flex flex-col lg:w-2/3">
+                  <label className="font-bold">Koirajohto 2</label>
+                  <input
+                    id="dogHead1"
+                    className="border border-grey bg-white rounded-lg py-1 px-4 mb-2"
+                    type="text"
+                    name="dogHead1"
+                    placeholder="Etunimi Sukunimi"
+                    onChange={handleInputChange("dogHead2")}
+                    required
+                  />
+                </div>
+
+                {/*---Save or cancel---*/}
+                <div className="flex justify-end lg:w-2/3 mt-4 gap-2">
+                  <FilledButton
+                    onClick={() => cancel("training")}
+                    title="Peruuta"
+                    color="grey"
+                  />
+                  <FilledButton
+                    onClick={saveTraining}
+                    title="Tallenna"
+                    color="orange"
+                  />
+                </div>
+              </>
             </div>
           )}
         </div>
@@ -534,4 +525,4 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   );
 };
 
-export default BoardForm;
+export default CalloutGroupForm;

@@ -28,6 +28,9 @@ export const EventColorAndIconMap: {
   },
 };
 
+// List groups
+export const groupOptions = ["MaA", "MaB", "TiA", "TiB"];
+
 // List event types for dropdown list in AddEvent and EditEvent
 export const eventTypeOptions = [
   "MaA-treeni",
