@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
 import FilledButton from "@/app/components/Buttons";
-import { isAdmin } from "@/app/actions";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 
@@ -36,7 +35,9 @@ type PropsType = {
 const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentLetterDate, setCurrentLetterDate] = useState<Date>(new Date());
   const currentYear = currentDate.getFullYear();
+  const currentLetterYear = currentLetterDate.getFullYear();
   const thisYear = new Date().getFullYear();
 
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
@@ -100,6 +101,11 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const filteredBoardFiles = boardFiles.filter((file) => {
     const year = parseInt(file.name.split("-")[0]);
     return year === currentYear;
+  });
+
+  const filteredLetters = letters.filter((file) => {
+    const year = parseInt(file.name.split("-")[0]);
+    return year === currentLetterYear;
   });
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -253,28 +259,41 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
     }
   };
 
+
+  const goToPreviousYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(subYears(currentDate, 1));
+    } else if (from === "letters") {
+      setCurrentLetterDate(subYears(currentLetterDate, 1));
+    }
+  };
+
+  const goToNextYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(addYears(currentDate, 1));
+    } else if (from === "letters") {
+      setCurrentLetterDate(addYears(currentLetterDate, 1));
+    }
+  };
+  
+  const goToToday = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(new Date());
+    } else if (from === "letters") {
+      setCurrentLetterDate(new Date());
+    }
+  };
+  
   if (fetchLoading || fetchLettersLoading) {
     return <LoadingIndicator />;
   }
-
-  const goToPreviousYear = () => {
-    setCurrentDate(subYears(currentDate, 1));
-  };
-
-  const goToNextYear = () => {
-    setCurrentDate(addYears(currentDate, 1));
-  };
-
-  const goToToday = () => {
-    setCurrentDate(new Date());
-  };
 
   return (
     <div className="container max-w-screen-md p-8 lg:p-16">
       <div className="mb-8">
         <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
           <button
-            onClick={goToPreviousYear}
+            onClick={() => goToPreviousYear("board")}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
           >
             <IoIosArrowBack className="text-2xl" />
@@ -284,7 +303,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               Hallituksen kokouspöytäkirjat {currentYear}
             </h1>
             <button
-              onClick={goToToday}
+              onClick={() => goToToday("board")}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <MdOutlineToday className="text-2xl" />
@@ -292,7 +311,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
           </div>
           {Number(thisYear) > Number(currentYear) ? (
             <button
-              onClick={goToNextYear}
+              onClick={() => goToNextYear("board")}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
               <IoIosArrowForward className="text-2xl" />
@@ -429,7 +448,35 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         </div>
       </div>
       <div className="mb-8">
-        <h1 className="mb-4">Sihteerikirjeet</h1>
+        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          <button
+            onClick={() => goToPreviousYear("letters")}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">Sihteerikirjeet {currentLetterYear}</h1>
+            <button
+              onClick={() => goToToday("letters")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2xl" />
+            </button>
+          </div>
+          {Number(thisYear) > Number(currentLetterYear) ? (
+            <button
+              onClick={() => goToNextYear("letters")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <IoIosArrowForward className="text-2xl" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center h-8 w-8 rounded-full text-greylight">
+              <IoIosArrowForward className="text-2xl" />
+            </div>
+          )}
+        </div>
         <div className="md:mx-8">
           <table className="mb-8">
             <tr>
@@ -444,7 +491,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               </th>
               {admin && <th className="bg-green text-white" scope="col"></th>}
             </tr>
-            {letters.map((file, index) => {
+            {filteredLetters.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
               const [year, month, day] = file.name
                 .replace("-sihteerikirje.pdf", "")

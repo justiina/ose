@@ -14,10 +14,11 @@ type OwnLinkProps = {
   title: string;
   color: string;
   href: LinkProps["href"];
+  icon?: React.ReactNode;
 };
 
 // Define reusable classNames for each component that has same styling
-const filledClassName = (color: string, isLink?: boolean): string => {
+const filledClassName = (color: string): string => {
   let textColor: string = "";
   if (color === "greylight") {
     textColor = "grey";
@@ -25,11 +26,7 @@ const filledClassName = (color: string, isLink?: boolean): string => {
     textColor = "white";
   }
 
-  const flexJustification = isLink
-    ? ""
-    : "flex justify-center items-center gap-2 ";
-
-  return `${flexJustification} px-4 py-2 bg-${color} text-${textColor} rounded-lg hover:bg-${color}hover active:bg-${color}hover`;
+  return `flex justify-center items-center gap-2 px-4 py-2 bg-${color} text-${textColor} rounded-lg hover:bg-${color}hover active:bg-${color}hover`;
 };
 
 const FilledButton: React.FC<ButtonProps> = ({
@@ -47,9 +44,15 @@ const FilledButton: React.FC<ButtonProps> = ({
   );
 };
 
-export const FilledLink: React.FC<OwnLinkProps> = ({ title, color, href }) => {
+export const FilledLink: React.FC<OwnLinkProps> = ({
+  title,
+  color,
+  href,
+  icon,
+}) => {
   return (
-    <Link href={href} className={filledClassName(color, true)}>
+    <Link href={href} className={filledClassName(color)}>
+      {icon && <span>{icon}</span>}
       {title}
     </Link>
   );

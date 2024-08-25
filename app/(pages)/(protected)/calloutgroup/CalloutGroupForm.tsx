@@ -8,25 +8,18 @@ import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
-import FilledButton from "@/app/components/Buttons";
+import FilledButton, { FilledLink } from "@/app/components/Buttons";
 import {
   getCalloutTrainings,
-  isAdmin,
   saveCalloutTraining,
 } from "@/app/actions";
 import { CalloutTrainingType } from "@/app/components/Types";
 import { MultiDropdown } from "@/app/components/Dropdown";
 import { groupOptions } from "@/app/components/StyleMappingAndOptions";
-
-type FileType = {
-  title: string;
-  url: string;
-};
-
-type UploadInfoType = {
-  filename: string;
-  title: string;
-};
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { MdOutlineToday } from "react-icons/md";
+import { addYears, subYears } from "date-fns";
+import { GoBellFill } from "react-icons/go";
 
 type DeleteFileType = {
   bucket: string;
@@ -39,6 +32,14 @@ type PropsType = {
 
 const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentTrainingsDate, setCurrentTrainingsDate] = useState<Date>(
+    new Date()
+  );
+
+  const currentYear = currentDate.getFullYear();
+  const currentTrainingsYear = currentTrainingsDate.getFullYear();
+  const thisYear = new Date().getFullYear();
 
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
   const [fetchTrainingsLoading, setFetchTrainingsLoading] =
@@ -102,6 +103,16 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
     getBoardFiles();
     fetchTrainingsData();
   }, []);
+
+  const filteredBoardFiles = boardFiles.filter((file) => {
+    const year = parseInt(file.name.split("-")[0]);
+    return year === currentYear;
+  });
+
+  const filteredTrainings = trainings.filter((file) => {
+    const year = parseInt(file.date.split("-")[0]);
+    return year === currentTrainingsYear;
+  });
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -236,6 +247,30 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
     }));
   };
 
+  const goToPreviousYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(subYears(currentDate, 1));
+    } else if (from === "trainings") {
+      setCurrentTrainingsDate(subYears(currentTrainingsDate, 1));
+    }
+  };
+
+  const goToNextYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(addYears(currentDate, 1));
+    } else if (from === "trainings") {
+      setCurrentTrainingsDate(addYears(currentTrainingsDate, 1));
+    }
+  };
+
+  const goToToday = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(new Date());
+    } else if (from === "trainings") {
+      setCurrentTrainingsDate(new Date());
+    }
+  };
+
   if (fetchLoading || fetchTrainingsLoading) {
     return <LoadingIndicator />;
   }
@@ -243,7 +278,38 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
   return (
     <div className="container p-8 lg:p-16">
       <div className="mb-8">
-        <h1 className="mb-4">Häytysryhmän koukouspöytäkirjat</h1>
+        {/*---Callout Board Files---*/}
+        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          <button
+            onClick={() => goToPreviousYear("board")}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">
+              Häytysryhmän kokouspöytäkirjat {currentYear}
+            </h1>
+            <button
+              onClick={() => goToToday("board")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2xl" />
+            </button>
+          </div>
+          {Number(thisYear) > Number(currentYear) ? (
+            <button
+              onClick={() => goToNextYear("board")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <IoIosArrowForward className="text-2xl" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center h-8 w-8 rounded-full text-greylight">
+              <IoIosArrowForward className="text-2xl" />
+            </div>
+          )}
+        </div>
         <div className="md:mx-8">
           <table className="mb-8">
             <tr>
@@ -252,7 +318,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
               <th scope="col">Pöytäkirja</th>
               {admin && <th scope="col"></th>}
             </tr>
-            {boardFiles.map((file, index) => {
+            {filteredBoardFiles.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
               const [year, month, day] = file.name
                 .replace("-kokous.pdf", "")
@@ -368,8 +434,38 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
           )}
         </div>
       </div>
+
+      {/*---Callout Trainings---*/}
       <div className="mb-8">
-        <h1 className="mb-4">Hälytreenit</h1>
+        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          <button
+            onClick={() => goToPreviousYear("trainings")}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">Hälytreenit {currentTrainingsYear}</h1>
+            <button
+              onClick={() => goToToday("trainings")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2xl" />
+            </button>
+          </div>
+          {Number(thisYear) > Number(currentTrainingsYear) ? (
+            <button
+              onClick={() => goToNextYear("trainings")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <IoIosArrowForward className="text-2xl" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center h-8 w-8 rounded-full text-greylight">
+              <IoIosArrowForward className="text-2xl" />
+            </div>
+          )}
+        </div>
         <div className="md:mx-8">
           <table className="mb-8">
             <tr>
@@ -380,7 +476,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
               <th scope="col">Koirajohto 2</th>
               {admin && <th scope="col"></th>}
             </tr>
-            {trainings.map((training, index) => {
+            {filteredTrainings.map((training, index) => {
               const [year, month, day] = training.date.split("-");
               const date = `${day}.${month}.${year}`;
               const fileNum = index + 1;
@@ -519,6 +615,23 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
               </>
             </div>
           )}
+        </div>
+      </div>
+      {/*---Participation to Callout Duties---*/}
+      <div>
+        <h1 className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          Hälytyksiin osallistuminen
+        </h1>
+        <p className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          Merkitse hälytyksiin osallistumisesi alla olevan linkin kautta.
+        </p>
+        <div className="flex justify-center mt-4 gap-2">
+          <FilledLink
+            title="Hälytykset"
+            color="blue"
+            href="https://docs.google.com/spreadsheets/d/1Xu0bCuFLzEHxC_DhF7PwWaNu5OJORyAo_LP0pGuW0_I/edit?pli=1&gid=679733562#gid=679733562"
+            icon={<GoBellFill className="text-xl" />}
+          />
         </div>
       </div>
     </div>
