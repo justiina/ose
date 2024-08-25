@@ -16,7 +16,7 @@ import FilledButton from "@/app/components/Buttons";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const searchParams = useSearchParams()!;
@@ -54,7 +54,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
       };
       fetchData();
     }
-    setLoading(false);
+    setIsLoading(false);
   }, [dateParams]);
 
   const handleDelete = (eventId: string | null) => {
@@ -83,7 +83,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
 
   return (
     <div>
-      {loading ? (
+      {isLoading ? (
         <p>Loading...</p>
       ) : events != undefined ? (
         events.length > 0 ? (

@@ -13,7 +13,7 @@ const SignupForm = () => {
   const token: string | null = searchParams.get("token");
   const [user, setUser] = useState<InvitedUserType | null>(null);
   const [invitedError, setInvitedError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
@@ -47,7 +47,7 @@ const SignupForm = () => {
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -101,7 +101,7 @@ const SignupForm = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />;
   }
 

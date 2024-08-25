@@ -513,3 +513,25 @@ export const saveCalloutTraining = async (
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
+
+// CALLOUT GROUP ACTIONS
+
+export const getCalloutParticipationTableUrl = async (): Promise<
+  string | any
+> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("calloutParticipationUrl")
+      .select("url")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+    if (error) {
+      throw new Error("Jotain meni vikaan! Yritä myöhemmin uudestaan.");
+    }
+    return data?.url || "";
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
