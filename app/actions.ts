@@ -514,8 +514,6 @@ export const saveCalloutTraining = async (
   }
 };
 
-// CALLOUT GROUP ACTIONS
-
 export const getCalloutParticipationTableUrl = async (): Promise<
   string | any
 > => {
@@ -533,5 +531,50 @@ export const getCalloutParticipationTableUrl = async (): Promise<
     return data?.url || "";
   } catch (error: any) {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const deleteCalloutTraining = async (
+  trainingId: string
+): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { error } = await supabase
+      .from("calloutTrainings")
+      .delete()
+      .eq("id", trainingId);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const updateCalloutTraining = async (
+  data: Partial<CalloutTrainingType>
+): Promise<boolean | string> => {
+  const supabase = createClient();
+  try {
+    const { data: trainingData, error } = await supabase
+      .from("calloutTrainings")
+      .update(data)
+      .eq("id", data.id)
+      .select();
+    if (error) {
+      console.log("Supabase error:", error);
+      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+    }
+    if (trainingData && trainingData.length > 0) {
+      return true;
+    } else {
+      return "Päivitys epäonnistui!\nTarkista, että tiedot ovat oikein.";
+    }
+  } catch (error) {
+    console.error("Error updating callout training:", error);
+    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
   }
 };

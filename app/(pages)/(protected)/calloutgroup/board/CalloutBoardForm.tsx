@@ -17,6 +17,7 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { addYears, subYears } from "date-fns";
 import { GoBellFill } from "react-icons/go";
+import { RiArrowGoBackLine } from "react-icons/ri";
 
 type DeleteFileType = {
   bucket: string;
@@ -266,17 +267,23 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
               );
             })}
           </table>
+          <div className="flex justify-between">
+            <FilledButton
+              onClick={() => router.push("/calloutgroup")}
+              icon={<RiArrowGoBackLine className="text-2xl" />}
+              title="Takaisin"
+              color="grey"
+            />
 
-          {!showAddBoardForm && admin && (
-            <div className="flex justify-end">
+            {!showAddBoardForm && admin && (
               <FilledButton
                 onClick={() => setShowAddBoardForm(!showAddBoardForm)}
                 icon={<FaPlus />}
                 title="Lisää tiedosto"
                 color="blue"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {showAddBoardForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
@@ -342,26 +349,26 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
           )}
         </div>
         {showConfirmation && admin && (
-            <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-xl mb-4">
-                  Haluatko varmasti poistaa tiedoston?
-                </h2>
-                <div className="flex justify-end gap-2">
-                  <FilledButton
-                    onClick={cancelDelete}
-                    title="Peruuta"
-                    color="greylight"
-                  />
-                  <FilledButton
-                    onClick={confirmDelete}
-                    title="OK"
-                    color="orange"
-                  />
-                </div>
+          <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <h2 className="text-xl mb-4">
+                Haluatko varmasti poistaa tiedoston?
+              </h2>
+              <div className="flex justify-end gap-2">
+                <FilledButton
+                  onClick={cancelDelete}
+                  title="Peruuta"
+                  color="greylight"
+                />
+                <FilledButton
+                  onClick={confirmDelete}
+                  title="OK"
+                  color="orange"
+                />
               </div>
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   );

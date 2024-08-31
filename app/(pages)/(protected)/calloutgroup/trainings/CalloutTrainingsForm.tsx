@@ -9,18 +9,26 @@ import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
 import FilledButton, { FilledLink } from "@/app/components/Buttons";
-import { getCalloutTrainings, saveCalloutTraining } from "@/app/actions";
+import {
+  deleteCalloutTraining,
+  getCalloutTrainings,
+  saveCalloutTraining,
+  updateCalloutTraining,
+} from "@/app/actions";
 import { CalloutTrainingType } from "@/app/components/Types";
 import { MultiDropdown } from "@/app/components/Dropdown";
 import { groupOptions } from "@/app/components/StyleMappingAndOptions";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { MdOutlineToday } from "react-icons/md";
+import { MdOutlineEdit, MdOutlineToday } from "react-icons/md";
 import { addYears, subYears } from "date-fns";
 import { GoBellFill } from "react-icons/go";
+import { RiArrowGoBackLine } from "react-icons/ri";
 
-type DeleteFileType = {
-  bucket: string;
-  path: string;
+type EditType = {
+  editDate: boolean;
+  editOrganiser: boolean;
+  editDogHead1: boolean;
+  editDogHead2: boolean;
 };
 
 type PropsType = {
@@ -28,7 +36,6 @@ type PropsType = {
 };
 
 const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
-  const supabase = createClient();
   const [currentTrainingsDate, setCurrentTrainingsDate] = useState<Date>(
     new Date()
   );
@@ -48,7 +55,12 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
   );
 
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const [deleteFile, setDeleteFile] = useState<DeleteFileType | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const [showEdit, setShowEdit] = useState<boolean>(false);
+  const [editRowIndex, setEditRowIndex] = useState<number | null>(null); // Track the row being edited
+  const [editedTraining, setEditedTraining] =
+    useState<CalloutTrainingType | null>(null);
 
   const router = useRouter();
 
@@ -81,26 +93,73 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
     return year === currentTrainingsYear;
   });
 
-  const confirmDelete = async () => {
-    if (deleteFile) {
-      const { error } = await supabase.storage
-        .from(deleteFile.bucket)
-        .remove([deleteFile.path]);
-
-      if (error) {
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "delError",
-        });
-      } else {
-        toast.success("Tiedoston poistaminen onnistui!", { id: "delSuccess" });
-        window.location.reload();
-      }
+  const handleDelete = (trainingId: string | null) => {
+    if (trainingId !== null) {
+      setShowConfirmation(true);
+      setDeleteId(trainingId);
     }
   };
 
   const cancelDelete = () => {
     setShowConfirmation(false);
-    setDeleteFile(null);
+    setDeleteId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      const deleteOk = await deleteCalloutTraining(deleteId);
+      if (deleteOk) {
+        // Remove the deleted training from the state
+        setTrainings((prevTrainings) =>
+          prevTrainings.filter((training) => training.id !== deleteId)
+        );
+        // Hide the confirmation dialog
+        setShowConfirmation(false);
+      } else {
+        toast.error(deleteOk, { id: "delError" });
+        return;
+      }
+    }
+  };
+
+  const handleEdit = (index: number, training: CalloutTrainingType) => {
+    setShowEdit(!showEdit);
+    setEditRowIndex(index);
+    setEditedTraining({ ...training });
+  };
+
+  const cancelEdit = () => {
+    setShowEdit(false);
+    setEditRowIndex(null);
+    setEditedTraining(null);
+  };
+
+  const saveEditedTraining = async () => {
+    if (editedTraining && editRowIndex !== null) {
+      const saveOk = await updateCalloutTraining(editedTraining);
+      if (saveOk) {
+        // Update existing training with the updated one
+        setTrainings((prevTrainings) => {
+          const sortedTrainings = [...prevTrainings]
+            .map((training) =>
+              training.id === editedTraining.id ? editedTraining : training
+            )
+            // Sort the trainings by date
+            .sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return dateA.getTime() - dateB.getTime();
+            });
+          return sortedTrainings;
+        });
+        setShowEdit(false);
+        setEditRowIndex(null);
+        setEditedTraining(null);
+        toast.success("Muutokset tallennettu!");
+      } else {
+        toast.error("Muutosten tallentaminen epäonnistui", { id: "saveError" });
+      }
+    }
   };
 
   const cancel = () => {
@@ -113,32 +172,64 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
     if (!newTraining?.date || !newTraining.organiser) {
       toast.error("Täytä ainakin pakolliset kentät!");
       return;
+    }
+
+    const saveOk = await saveCalloutTraining(newTraining);
+    if (saveOk) {
+      // Update the trainings state with the new training
+      setTrainings((prevTrainings) => {
+        // Create new training object with saved data
+        const updatedTrainings = [...prevTrainings, newTraining];
+
+        // Sort the updated array by date
+        const sortedTrainings = updatedTrainings.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA.getTime() - dateB.getTime();
+        });
+
+        // Update the state with the sorted array
+        return sortedTrainings;
+      });
+
+      // Clear the form and reset the state
+      setNewTraining(null);
+      setShowAddTrainingsForm(false);
+      toast.success("Tietojen tallentaminen onnistui!");
     } else {
-      const saveOk = await saveCalloutTraining(newTraining);
-      if (saveOk) {
-        window.location.reload();
-        toast.success("Tapahtuman tallentaminen onnistui!");
-      } else {
-        toast.error(saveOk, { id: "saveError" });
-        return;
-      }
+      toast.error(saveOk, { id: "saveError" });
+      return;
     }
   };
 
   const handleInputChange =
     (fieldName: keyof CalloutTrainingType) =>
     (e: ChangeEvent<HTMLInputElement>) => {
-      setNewTraining((prevTraining) => ({
-        ...(prevTraining as CalloutTrainingType),
-        [fieldName]: e.target.value,
-      }));
+      if (showEdit && editRowIndex !== null) {
+        setEditedTraining((prevTraining) => ({
+          ...(prevTraining as CalloutTrainingType),
+          [fieldName]: e.target.value,
+        }));
+      } else {
+        setNewTraining((prevTraining) => ({
+          ...(prevTraining as CalloutTrainingType),
+          [fieldName]: e.target.value,
+        }));
+      }
     };
 
   const handleDropdownSelect = (selected: string[]) => {
-    setNewTraining((prevTraining) => ({
-      ...(prevTraining as CalloutTrainingType),
-      organiser: selected,
-    }));
+    if (showEdit && editRowIndex !== null) {
+      setEditedTraining((prevTraining) => ({
+        ...(prevTraining as CalloutTrainingType),
+        organiser: selected,
+      }));
+    } else {
+      setNewTraining((prevTraining) => ({
+        ...(prevTraining as CalloutTrainingType),
+        organiser: selected,
+      }));
+    }
   };
 
   const goToPreviousYear = () => {
@@ -192,54 +283,121 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
         </div>
         <div className="md:mx-8">
           <table className="mb-8">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Päivämäärä</th>
-              <th scope="col">Järjestäjä</th>
-              <th scope="col">Koirajohto 1</th>
-              <th scope="col">Koirajohto 2</th>
-              {admin && <th scope="col"></th>}
-            </tr>
-            {filteredTrainings.map((training, index) => {
-              const [year, month, day] = training.date.split("-");
-              const date = `${day}.${month}.${year}`;
-              const fileNum = index + 1;
-              return (
-                <>
-                  <tr>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Päivämäärä</th>
+                <th scope="col">Järjestäjä</th>
+                <th scope="col">Koirajohto 1</th>
+                <th scope="col">Koirajohto 2</th>
+                {admin && <th scope="col">Muokkaa</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTrainings.map((training, index) => {
+                const [year, month, day] = training.date.split("-");
+                const date = `${day}.${month}.${year}`;
+                const fileNum = index + 1;
+                return (
+                  <tr key={index}>
                     <td>{fileNum}</td>
-                    <td>{date}</td>
                     <td>
-                      {training.organiser?.map((group, index) => (
-                        <p key={index}>{group}</p>
-                      ))}
+                      {showEdit && editRowIndex === index ? (
+                        <div className="border border-grey bg-white rounded-lg py-1 px-4">
+                          <input
+                            type="date"
+                            value={editedTraining?.date || ""}
+                            onChange={handleInputChange("date")}
+                          />
+                        </div>
+                      ) : (
+                        date
+                      )}
                     </td>
-                    <td>{training.dogHead1}</td>
-                    <td>{training.dogHead2}</td>
+                    <td>
+                      {showEdit && editRowIndex === index ? (
+                        <div className="border border-grey bg-white rounded-lg py-1 px-4">
+                          <MultiDropdown
+                            options={groupOptions}
+                            onSelect={handleDropdownSelect}
+                            value={editedTraining?.organiser || []}
+                          />
+                        </div>
+                      ) : (
+                        training.organiser.join(", ")
+                      )}
+                    </td>
+                    <td>
+                      {showEdit && editRowIndex === index ? (
+                        <input
+                          className="border border-grey bg-white rounded-lg py-1 px-4"
+                          type="text"
+                          value={editedTraining?.dogHead1 || ""}
+                          onChange={handleInputChange("dogHead1")}
+                        />
+                      ) : (
+                        training.dogHead1
+                      )}
+                    </td>
+                    <td>
+                      {showEdit && editRowIndex === index ? (
+                        <input
+                          className="border border-grey bg-white rounded-lg py-1 px-4"
+                          type="text"
+                          value={editedTraining?.dogHead2 || ""}
+                          onChange={handleInputChange("dogHead2")}
+                        />
+                      ) : (
+                        training.dogHead2
+                      )}
+                    </td>
                     {admin && (
                       <td>
-                        <IoTrash
-                          onClick={() => {}}
-                          className="cursor-pointer hover:text-orange text-grey text-2xl"
-                        />
+                        {showEdit && editRowIndex === index ? (
+                          <>
+                            <button
+                              className="mr-2 p-1 py-1 px-3 rounded-lg text-grey border-2 border-grey hover:text-white hover:bg-grey active:text-white active:bg-grey"
+                              onClick={cancelEdit}
+                            >
+                              Peru
+                            </button>
+                            <button
+                              className="py-1 px-3 rounded-lg text-green border-2 border-green hover:text-white hover:bg-green active:text-white active:bg-green"
+                              onClick={saveEditedTraining}
+                            >
+                              Tallenna
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex gap-2">
+                            <IoTrash
+                              onClick={() => handleDelete(training.id)}
+                              className="cursor-pointer hover:text-orange text-grey text-2xl"
+                            />
+                            <MdOutlineEdit
+                              onClick={() => handleEdit(index, training)}
+                              className="cursor-pointer hover:text-orange text-grey text-2xl"
+                            />
+                          </div>
+                        )}
                       </td>
                     )}
                   </tr>
-                </>
-              );
-            })}
+                );
+              })}
+            </tbody>
           </table>
           {showConfirmation && admin && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-xl mb-4">
-                  Haluatko varmasti poistaa tiedoston?
+                  Haluatko varmasti poistaa tämän harjoituksen?
                 </h2>
                 <div className="flex justify-end gap-2">
                   <FilledButton
                     onClick={cancelDelete}
                     title="Peruuta"
-                    color="greylight"
+                    color="grey"
                   />
                   <FilledButton
                     onClick={confirmDelete}
@@ -250,16 +408,22 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
               </div>
             </div>
           )}
-          {admin && (
-            <div className="flex justify-end">
+          <div className="flex justify-between">
+            <FilledButton
+              onClick={() => router.push("/calloutgroup")}
+              icon={<RiArrowGoBackLine className="text-2xl" />}
+              title="Takaisin"
+              color="grey"
+            />
+            {admin && (
               <FilledButton
                 onClick={() => setShowAddTrainingsForm(!showAddTrainingsForm)}
                 icon={<FaPlus />}
                 title="Lisää treeni"
                 color="blue"
               />
-            </div>
-          )}
+            )}
+          </div>
           {showAddTrainingsForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               <>

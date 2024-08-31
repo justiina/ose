@@ -8,6 +8,8 @@ import { LiaExchangeAltSolid } from "react-icons/lia";
 import { useEffect, useState } from "react";
 import { getCalloutParticipationTableUrl } from "@/app/actions";
 import toast from "react-hot-toast";
+import { RiArrowGoBackLine } from "react-icons/ri";
+import { useRouter } from "next/navigation";
 
 type PropsType = {
   admin: boolean;
@@ -16,6 +18,7 @@ type PropsType = {
 const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tableUrl, setTableUrl] = useState<string>("");
+  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +51,13 @@ const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
         <p className="mb-4">
           Merkitse hälytyksiin osallistumisesi alla olevan linkin kautta.
         </p>
-        <div className="flex mb-8">
+        <div className="flex justify-start gap-2 mb-8">
+            <FilledButton
+              onClick={() => router.push("/calloutgroup")}
+              icon={<RiArrowGoBackLine className="text-2xl" />}
+              title="Takaisin"
+              color="grey"
+            />
           <FilledLink
             title="Hälytykset"
             color="orange"

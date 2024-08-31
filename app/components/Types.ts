@@ -76,6 +76,7 @@ export type EventsByDateType = {
 };
 
 export type CalloutTrainingType = {
+  id: string;
   date: string;
   organiser: string[];
   dogHead1: string | null;

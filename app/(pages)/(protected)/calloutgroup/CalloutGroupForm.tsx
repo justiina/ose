@@ -223,7 +223,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
       const saveOk = await saveCalloutTraining(newTraining);
       if (saveOk) {
         window.location.reload();
-        toast.success("Tapahtuman tallentaminen onnistui!");
+        toast.success("Tietojen tallentaminen onnistui!");
       } else {
         toast.error(saveOk, { id: "saveError" });
         return;
