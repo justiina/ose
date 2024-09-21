@@ -1,14 +1,12 @@
 "use client";
 
 import LoadingIndicator from "@/app/components/LoadingIndicator";
-import { createClient } from "@/utils/supabase/client";
-import { FileObject } from "@supabase/storage-js";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
-import FilledButton, { FilledLink } from "@/app/components/Buttons";
+import FilledButton from "@/app/components/Buttons";
 import {
   deleteCalloutTraining,
   getCalloutTrainings,
@@ -21,15 +19,7 @@ import { groupOptions } from "@/app/components/StyleMappingAndOptions";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineEdit, MdOutlineToday } from "react-icons/md";
 import { addYears, subYears } from "date-fns";
-import { GoBellFill } from "react-icons/go";
 import { RiArrowGoBackLine } from "react-icons/ri";
-
-type EditType = {
-  editDate: boolean;
-  editOrganiser: boolean;
-  editDogHead1: boolean;
-  editDogHead2: boolean;
-};
 
 type PropsType = {
   admin: boolean;

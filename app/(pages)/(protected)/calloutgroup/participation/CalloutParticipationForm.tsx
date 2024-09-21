@@ -6,7 +6,10 @@ import FilledButton, { FilledLink } from "@/app/components/Buttons";
 import { GoBellFill } from "react-icons/go";
 import { LiaExchangeAltSolid } from "react-icons/lia";
 import { useEffect, useState } from "react";
-import { getCalloutParticipationTableUrl } from "@/app/actions";
+import {
+  getCalloutParticipationTableUrl,
+  updateCalloutParticipationTableUrl,
+} from "@/app/actions";
 import toast from "react-hot-toast";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { useRouter } from "next/navigation";
@@ -18,7 +21,8 @@ type PropsType = {
 const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tableUrl, setTableUrl] = useState<string>("");
-  const router = useRouter()
+  const [newTableUrl, setNewTableUrl] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +41,21 @@ const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
     fetchData();
   }, []);
 
-  const handleClick = () => {};
+  const handleClick = async () => {
+    if (!newTableUrl) {
+      toast.error("Tarkista uusi osoite!");
+      return;
+    } else {
+      const saveOk = await updateCalloutParticipationTableUrl(newTableUrl);
+      if (saveOk) {
+        window.location.reload();
+        toast.success("Uusi osoite lisätty sivulle!");
+      } else {
+        toast.error(saveOk, { id: "saveError" });
+        return;
+      }
+    }
+  };
 
   if (isLoading) {
     return <LoadingIndicator />;
@@ -52,28 +70,33 @@ const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
           Merkitse hälytyksiin osallistumisesi alla olevan linkin kautta.
         </p>
         <div className="flex justify-start gap-2 mb-8">
-            <FilledButton
-              onClick={() => router.push("/calloutgroup")}
-              icon={<RiArrowGoBackLine className="text-2xl" />}
-              title="Takaisin"
-              color="grey"
-            />
+          <FilledButton
+            onClick={() => router.push("/calloutgroup")}
+            icon={<RiArrowGoBackLine className="text-2xl" />}
+            title="Takaisin"
+            color="grey"
+          />
           <FilledLink
             title="Hälytykset"
             color="orange"
             href={tableUrl}
             icon={<GoBellFill className="text-xl" />}
+            openInNewTab={true}
           />
         </div>
         {admin && (
           <div>
             <h2 className="mb-4">Muokkaa linkin osoitetta</h2>
+            <p className="mb-4">
+              Lisää uusi osoite alla olevaan kenttään, jos haluat muuttaa sen.
+            </p>
             <p className="mb-4">Nykyinen taulukko on osoitteessa {tableUrl}</p>
             <input
               className="border border-grey rounded-lg py-1 px-4 text-sm mb-2"
               type="text"
               name="newurl"
               placeholder="Uusi osoite"
+              onChange={(e) => setNewTableUrl(e.target.value)}
             />
             <FilledButton
               title="Vaihda osoite"

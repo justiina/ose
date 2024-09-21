@@ -1,14 +1,46 @@
 "use client";
-import { resetPassword } from "@/app/actions";
+import { addToPasswordResets, resetPassword } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
-import React from "react";
-import { useFormState } from "react-dom";
+import { redirect } from "next/navigation";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 const ForgotPasswordForm = () => {
-  const [state, formAction] = useFormState<any, FormData>(
-    resetPassword,
-    undefined
-  );
+  const [email, setEmail] = useState<string | null>(null);
+  const token = crypto.randomUUID();
+
+  const sendResetEmail = async () => {
+    if (!email) {
+      toast.error("Anna sähköpostiosoitteesi!");
+      return;
+    } else {
+      await fetch("api/resetpassword", {
+        method: "POST",
+        body: JSON.stringify({ token, email }),
+      }).then(() => {
+        resetPassword;
+        saveToPasswordResets();
+      });
+    }
+  };
+
+  const saveToPasswordResets = async () => {
+    if (!email) {
+      toast.error("Anna sähköpostiosoitteesi!");
+      return;
+    } else {
+      const saveOk = await addToPasswordResets({ token, email });
+      if (saveOk) {
+        toast.success(
+          "Salasanan vaihto-ohjeet on lähetetty antamaasi sähköpostiosoitteeseen."
+        );
+        redirect("/");
+      } else {
+        toast.error(saveOk, { id: "saveError" });
+        return;
+      }
+    }
+  };
 
   return (
     <div className="flex-col justify-center mx-4 mt-4 mb-8">
@@ -25,16 +57,18 @@ const ForgotPasswordForm = () => {
           </p>
         </p>
       </div>
-      <form action={formAction} className="grid gap-2 mr-8 md:flex">
+      <form className="grid gap-2 mr-8 md:flex">
         <input
           id="email"
           className="border border-grey rounded-lg py-1 px-4 text-sm"
           type="email"
           name="email"
           placeholder="Sähköposti"
+          value={email || ""}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <FilledButton title="Lähetä" color="blue" />
+        <FilledButton onClick={sendResetEmail} title="Lähetä" color="blue" />
       </form>
     </div>
   );

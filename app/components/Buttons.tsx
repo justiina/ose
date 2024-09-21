@@ -15,18 +15,23 @@ type OwnLinkProps = {
   color: string;
   href: LinkProps["href"];
   icon?: React.ReactNode;
+  openInNewTab?: boolean;
 };
 
 // Define reusable classNames for each component that has same styling
 const filledClassName = (color: string): string => {
   let textColor: string = "";
   if (color === "greylight") {
-    textColor = "grey";
+    textColor = "text-grey";
   } else {
-    textColor = "white";
+    textColor = "text-white";
   }
 
-  return `flex justify-center items-center gap-2 px-4 py-2 bg-${color} text-${textColor} rounded-lg hover:bg-${color}hover active:bg-${color}hover`;
+  const bgColor = `bg-${color}`;
+  const hoverColor = `hover:bg-${color}hover`;
+  const activeColor = `active:bg-${color}hover`;
+
+  return `flex justify-center items-center gap-2 px-4 py-2 ${bgColor} ${textColor} rounded-lg ${hoverColor} ${activeColor}`;
 };
 
 const FilledButton: React.FC<ButtonProps> = ({
@@ -49,13 +54,28 @@ export const FilledLink: React.FC<OwnLinkProps> = ({
   color,
   href,
   icon,
+  openInNewTab = false,
 }) => {
-  return (
-    <Link href={href} className={filledClassName(color)}>
-      {icon && <span>{icon}</span>}
-      {title}
-    </Link>
-  );
+  if (openInNewTab) {
+    return (
+      <Link
+        href={href}
+        className={filledClassName(color)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {icon && <span>{icon}</span>}
+        {title}
+      </Link>
+    );
+  } else {
+    return (
+      <Link href={href} className={filledClassName(color)}>
+        {icon && <span>{icon}</span>}
+        {title}
+      </Link>
+    );
+  }
 };
 
 export default FilledButton;

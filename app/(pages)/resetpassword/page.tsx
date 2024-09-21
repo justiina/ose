@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import ResetPasswordForm from "./ResetPasswordForm"
 
 const ResetPassword = async () => {
     // Check that the user is signed in, redirect to login page if not
@@ -10,7 +11,7 @@ const ResetPassword = async () => {
     if (!user) {
       return redirect("/");
     }
-  return <div>ResetPassword</div>;
+  return <div><ResetPasswordForm /></div>;
 };
 
 export default ResetPassword;

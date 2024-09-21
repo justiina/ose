@@ -45,6 +45,17 @@ export type GetInvitedUserType = {
   error: string | null;
 };
 
+export type ResetPasswordType = {
+  created_at: Date;
+  token: string;
+  email: string;
+};
+
+export type GetResetPasswordType = {
+  userData: ResetPasswordType | null;
+  error: string | null;
+};
+
 export type EventType = {
   id: string | null;
   created: string | null;

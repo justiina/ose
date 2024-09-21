@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import CalloutGroupForm from "./CalloutGroupForm";
 import { isAdmin } from "@/app/actions";
 import Link from "next/link";
 import { FilledLink } from "@/app/components/Buttons";
@@ -18,7 +17,12 @@ const CalloutGroup = async () => {
   }
 
   return (
-    <div className="container p-8 lg:p-16">
+    <div className="container mx-auto p-8 lg:p-16">
+      <h1 className="mb-4">Hälytysryhmä</h1>
+      <p className="mb-4">
+        Alta löydät hälytysryhmän kokouspöytäkirjat, hälytreenien ajankohdat ja
+        järjestäjät sekä linkin, johon voit merkitä hälytyksiin osallistumisesi.
+      </p>
       <div className="grid justify-start mt-4 gap-2">
         <FilledLink
           title="Hälytysryhmän kokouspöytäkirjat"

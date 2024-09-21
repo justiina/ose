@@ -1,35 +1,41 @@
 "use client";
-import { getInvitedUserByToken, signup } from "@/app/actions";
+import {
+  getResetPasswordInfo,
+  getUidByEmail,
+  resetPassword,
+} from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
-import { InvitedUserType } from "@/app/components/Types";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-const SignupForm = () => {
+const ResetPasswordForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams()!;
   const token: string | null = searchParams.get("token");
-  const [user, setUser] = useState<InvitedUserType | null>(null);
-  const [invitedError, setInvitedError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
+
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
 
-  // Set the token lifespan to 7 days (in minutes)
-  const tokenLifespanMinutes = 7 * 24 * 60;
+  // Set the token lifespan to 30 minutes
+  const tokenLifespanMinutes = 30;
 
-  // Fetch the invited user data by token
+  // Fetch the user info by token
   useEffect(() => {
     const fetchData = async () => {
       if (token !== null) {
         try {
-          const userData = await getInvitedUserByToken(token);
+          const userData = await getResetPasswordInfo(token);
           if (userData.error) {
-            setInvitedError(userData.error);
+            setFetchError(userData.error);
           } else if (userData.userData !== null) {
             // Check if the token is expired
             const createdAtDate = new Date(userData.userData?.created_at);
@@ -37,11 +43,18 @@ const SignupForm = () => {
             const expirationTime =
               createdAtDate.getTime() + tokenLifespanMinutes * 60 * 1000;
             if (currentDateTime.getTime() > expirationTime) {
-              setInvitedError(
-                "Tämä kutsu on vanhentunut! Ole hyvä ja pyydä sihteeriltä uusi kutsu."
+              setFetchError(
+                "Linkki on vanhentunut! Lähetä itsellesi tarvittaessa uusi linkki Unohtuiko salasana? -kohdasta."
               );
             } else {
-              setUser(userData.userData);
+              setEmail(userData.userData.email);
+              if (email !== null && email !== "") {
+                const fetchedUid = await getUidByEmail(email);
+                if (fetchedUid.error) {
+                  setFetchError(fetchedUid.error);
+                }
+                setUid(fetchedUid);
+              }
             }
           }
         } catch (error) {
@@ -53,21 +66,15 @@ const SignupForm = () => {
     fetchData();
   }, [token]);
 
-  const handleSignup = async (event: FormEvent) => {
+  const handleReset = async (event: FormEvent) => {
     event.preventDefault();
-    if (user !== null && !passwordError && !confirmPasswordError) {
-      const result = await signup(
-        user.email,
-        password,
-        user.firstName,
-        user.lastName,
-        user.isAdmin
-      );
+    if (uid !== null && !passwordError && !confirmPasswordError) {
+      const result = await resetPassword(uid, password);
       if (result.error) {
         toast.error(result.error);
         router.push("/");
       } else {
-        toast.success("Rekisteröityminen onnistui, tervetuloa sivustolle!");
+        toast.success("Salasanan nollaus onnistui, tervetuloa sivustolle!");
         router.push("/");
       }
     }
@@ -113,20 +120,19 @@ const SignupForm = () => {
 
   return (
     <>
-      <h1 className="mb-2">Rekisteröidy OSEn jäsensivustolle</h1>
-      {invitedError !== null ? (
-        <p className="text-orange">{invitedError}</p>
+      <h1 className="mb-2">Salasanan nollaus</h1>
+      {fetchError !== null ? (
+        <p className="text-orange">{fetchError}</p>
       ) : (
         <>
           {" "}
-          <p className="mb-4">Anna salasana sähköpostiosoitteelle:</p>
+          <p className="mb-4">Anna uusi salasana:</p>
           <div>
-            <p className="mb-4 font-bold">{user?.email}</p>
-            <form onSubmit={handleSignup} className="grid gap-1 mr-8 md:w-4/5">
+            <form onSubmit={handleReset} className="grid gap-1 mr-8 md:w-4/5">
               <input
                 id="password"
                 className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Salasana"
                 value={password}
@@ -140,7 +146,7 @@ const SignupForm = () => {
               <input
                 id="confirm-password"
                 className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="confirm-password"
                 placeholder="Vahvista salasana"
                 value={confirmPassword}
@@ -151,7 +157,7 @@ const SignupForm = () => {
                 <p className="text-orange text-sm">{confirmPasswordError}</p>
               )}
 
-              <FilledButton title="Rekisteröidy" color="orange" />
+              <FilledButton title="Vaihda salasana" color="orange" />
             </form>
           </div>
         </>
@@ -160,4 +166,4 @@ const SignupForm = () => {
   );
 };
 
-export default SignupForm;
+export default ResetPasswordForm;

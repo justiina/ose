@@ -163,7 +163,29 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         });
       } else {
         toast.success("Tiedoston poistaminen onnistui!", { id: "delSuccess" });
-        window.location.reload();
+        if (
+          deleteFile.bucket === "hallitus" &&
+          deleteFile.path.startsWith("poytakirjat")
+        ) {
+          setBoardFiles((prevFiles) =>
+            prevFiles.filter(
+              (file) =>
+                file.name !== deleteFile.path.replace("poytakirjat/", "")
+            )
+          );
+        } else if (
+          deleteFile.bucket === "hallitus" &&
+          deleteFile.path.startsWith("sihteerikirjeet")
+        ) {
+          setLetters((prevFiles) =>
+            prevFiles.filter(
+              (file) =>
+                file.name !== deleteFile.path.replace("sihteerikirjeet/", "")
+            )
+          );
+        }
+        setShowConfirmation(false);
+        setDeleteFile(null);
       }
     }
   };
@@ -259,7 +281,6 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
     }
   };
 
-
   const goToPreviousYear = (from: string) => {
     if (from === "board") {
       setCurrentDate(subYears(currentDate, 1));
@@ -275,7 +296,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
       setCurrentLetterDate(addYears(currentLetterDate, 1));
     }
   };
-  
+
   const goToToday = (from: string) => {
     if (from === "board") {
       setCurrentDate(new Date());
@@ -283,7 +304,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
       setCurrentLetterDate(new Date());
     }
   };
-  
+
   if (fetchLoading || fetchLettersLoading) {
     return <LoadingIndicator />;
   }
@@ -323,29 +344,31 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
           )}
         </div>
         <div className="md:mx-8">
-          <table className="mb-8">
-            <tr>
-              <th className="bg-green text-white" scope="col">
-                #
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Päivämäärä
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Pöytäkirja
-              </th>
-              {admin && <th className="bg-green text-white" scope="col"></th>}
-            </tr>
-            {filteredBoardFiles.map((file, index) => {
-              if (file.name === ".emptyFolderPlaceholder") return false;
-              const [year, month, day] = file.name
-                .replace("-kokous.pdf", "")
-                .split("-");
-              const date = `${day}.${month}.${year}`;
-              const fileNum = index + 1;
-              return (
-                <>
-                  <tr>
+          <table className="mb-8 ">
+            <thead>
+              <tr>
+                <th className="bg-green text-white" scope="col">
+                  #
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Päivämäärä
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Pöytäkirja
+                </th>
+                {admin && <th className="bg-green text-white" scope="col"></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBoardFiles.map((file, index) => {
+                if (file.name === ".emptyFolderPlaceholder") return false;
+                const [year, month, day] = file.name
+                  .replace("-kokous.pdf", "")
+                  .split("-");
+                const date = `${day}.${month}.${year}`;
+                const fileNum = index + 1;
+                return (
+                  <tr key={index}>
                     <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
@@ -370,9 +393,9 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                       </td>
                     )}
                   </tr>
-                </>
-              );
-            })}
+                );
+              })}
+            </tbody>
           </table>
           {!showAddBoardForm && admin && (
             <div className="flex justify-end">
@@ -479,6 +502,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         </div>
         <div className="md:mx-8">
           <table className="mb-8">
+            <thead>
             <tr>
               <th className="bg-green text-white" scope="col">
                 #
@@ -491,16 +515,18 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               </th>
               {admin && <th className="bg-green text-white" scope="col"></th>}
             </tr>
+            </thead>
+            <tbody>
+
             {filteredLetters.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
               const [year, month, day] = file.name
-                .replace("-sihteerikirje.pdf", "")
-                .split("-");
+              .replace("-sihteerikirje.pdf", "")
+              .split("-");
               const date = `${day}.${month}.${year}`;
               const fileNum = index + 1;
               return (
-                <>
-                  <tr>
+                <tr key={index}>
                     <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
@@ -527,13 +553,13 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                             )
                           }
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
-                        />
+                          />
                       </td>
                     )}
                   </tr>
-                </>
               );
             })}
+            </tbody>
           </table>
           {showConfirmation && admin && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
@@ -545,7 +571,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                   <FilledButton
                     onClick={cancelDelete}
                     title="Peruuta"
-                    color="greylight"
+                    color="grey"
                   />
                   <FilledButton
                     onClick={confirmDelete}

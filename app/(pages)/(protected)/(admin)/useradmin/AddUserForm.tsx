@@ -10,9 +10,9 @@ type AddUserProps = {
 };
 
 export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const [selectedRadio, setSelectedRadio] = useState<string>("notAdmin");
@@ -45,19 +45,24 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
   };
 
   const saveAsInvited = async () => {
-    const saveOk = await addToInvitedUsers({
-      token,
-      email,
-      firstName,
-      lastName,
-      isAdmin,
-    });
-    if (saveOk) {
-      window.location.reload();
-      toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
-    } else {
-      toast.error(saveOk, { id: "saveError" });
+    if (!email || !firstName || !lastName) {
+      toast.error("Täytä kaikki kentät!");
       return;
+    } else {
+      const saveOk = await addToInvitedUsers({
+        token,
+        email,
+        firstName,
+        lastName,
+        isAdmin,
+      });
+      if (saveOk) {
+        window.location.reload();
+        toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
+      } else {
+        toast.error(saveOk, { id: "saveError" });
+        return;
+      }
     }
   };
 
@@ -81,7 +86,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="text"
             name="firstName"
             placeholder="Etunimi"
-            value={firstName}
+            value={firstName || ""}
             onChange={(e) => setFirstName(e.target.value)}
             required
           />
@@ -97,7 +102,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="text"
             name="lastName"
             placeholder="Sukunimi"
-            value={lastName}
+            value={lastName || ""}
             onChange={(e) => setLastName(e.target.value)}
             required
           />
@@ -112,7 +117,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             type="email"
             name="email"
             placeholder="Sähköposti"
-            value={email}
+            value={email || ""}
             onChange={(e) => setEmail(e.target.value)}
             required
           />

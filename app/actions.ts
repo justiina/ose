@@ -14,6 +14,8 @@ import {
   GetInvitedUserType,
   CalloutTrainingType,
   AddToInvitedUsersType,
+  ResetPasswordType,
+  GetResetPasswordType,
 } from "./components/Types";
 
 // USER FUNCTIONS
@@ -38,6 +40,8 @@ export const login = async (
 export const signup = async (
   email: string,
   password: string,
+  firstName: string,
+  lastName: string,
   isAdmin?: boolean
 ): Promise<{ error?: string }> => {
   const supabase = createClient();
@@ -45,7 +49,6 @@ export const signup = async (
     email,
     password,
   };
-  console.log(data);
   const { error } = await supabase.auth.signUp(data);
   if (error) {
     if (error.message === "User already registered") {
@@ -64,18 +67,29 @@ export const signup = async (
     if (error) {
       return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
     }
-    // update userRoles table
-    if (isAdmin) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user !== undefined) {
-        const uid = user?.id;
+    // update users userRoles tables
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user !== undefined) {
+      const uid = user?.id;
+      const { error } = await supabase
+        .from("users")
+        .insert([{ id: uid, email, firstName, lastName }]);
+      if (error) {
+        return {
+          error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+        };
+      }
+      if (isAdmin) {
         const { error } = await supabase
           .from("adminUsers")
           .insert([{ user_id: uid, email }]);
         if (error) {
-          return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+          return {
+            error:
+              "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+          };
         }
       }
     }
@@ -92,6 +106,146 @@ export const logout = async () => {
 };
 
 export const resetPassword = async (
+  uid: string,
+  password: string
+): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { error } = await supabase.auth.admin.updateUserById(uid, {
+      password: password,
+    });
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const addToPasswordResets = async (data: {
+  token: string;
+  email: string;
+}): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { error } = await supabase.from("passwordResets").insert(data);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const getResetPasswordInfo = async (
+  token: string
+): Promise<GetResetPasswordType> => {
+  const supabase = createClient();
+  try {
+    const { data: userData, error } = await supabase
+      .from("passwordResets")
+      .select()
+      .eq("token", token);
+    if (error) {
+      console.log(error);
+      return {
+        userData: null,
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
+    }
+    if (userData && userData.length > 0) {
+      const userObject = userData[0];
+      const mappedUserData: ResetPasswordType = {
+        created_at: userObject.created_at,
+        token: userObject.token,
+        email: userObject.email,
+      };
+      return { userData: mappedUserData, error: null };
+    } else {
+      return {
+        userData: null,
+        error: "Käyttäjätietoja ei löytynyt.\nOle yhteydessä sihteeriin.",
+      };
+    }
+  } catch (error: any) {
+    return {
+      userData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
+export const getUidByEmail = async (email: string): Promise<string | any> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select()
+      .eq("email", email);
+    if (error) {
+      return {
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
+    }
+    if (data && data.length > 0) {
+      const uid = data[0].id;
+      return { uid };
+    }
+  } catch (error) {
+    return {
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
+/*
+export const getResetPasswordInfo = async (
+  token: string
+): Promise<GetResetPasswordType> => {
+  const supabase = createClient();
+  try {
+    const { data: userData, error } = await supabase
+      .from("passwordResets")
+      .select()
+      .eq("token", token);
+    if (error) {
+      console.log(error);
+      return {
+        userData: null,
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
+    }
+    const {data: userId, error } = await supabase.
+    if (userData && userData.length > 0) {
+      const userObject = userData[0];
+      const mappedUserData: ResetPasswordType = {
+        created_at: userObject.created_at,
+        token: userObject.token,
+        email: userObject.email,
+      };
+      return { userData: mappedUserData, error: null };
+    } else {
+      return {
+        userData: null,
+        error: "Käyttäjätietoja ei löytynyt.\nYritä nollata salasana uudelleen",
+      };
+    }
+  } catch (error: any) {
+    return {
+      userData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+*/
+/*
+export const resetPassword = async (
   prevState: { error: undefined | string },
   formData: FormData
 ) => {
@@ -106,7 +260,7 @@ export const resetPassword = async (
   }
   revalidatePath("/");
   redirect("/");
-};
+};*/
 
 // USER ADMIN
 export const addToInvitedUsers = async (
@@ -208,15 +362,18 @@ export const isAdmin = async (): Promise<boolean> => {
   return false;
 };
 
-/*
-export const getAllUsers = async (): Promise<UserAuthType> => {
+export const getUserIdByEmail = async () => {
   const supabase = createClient();
   const {
     data: { users },
     error,
   } = await supabase.auth.admin.listUsers();
+  console.log(users);
+  console.log(error);
+  if (users !== undefined && users.length > 0) {
+    //console.log(users)
+  }
 };
-*/
 
 // USER INFO FROM SUPABASE DATABASE
 export const getUserInfo = async (): Promise<GetUserType> => {
@@ -428,7 +585,6 @@ export const saveEvent = async (data: AddEventType): Promise<boolean | any> => {
   try {
     const { error } = await supabase.from("events").insert(cleanData);
     if (error) {
-      console.log(error.message);
       throw new Error(error.message);
     } else {
       return true;
@@ -529,6 +685,25 @@ export const getCalloutParticipationTableUrl = async (): Promise<
       throw new Error("Jotain meni vikaan! Yritä myöhemmin uudestaan.");
     }
     return data?.url || "";
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const updateCalloutParticipationTableUrl = async (
+  url: string
+): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("calloutParticipationUrl")
+      .insert({ url })
+      .select();
+    if (error) {
+      throw new Error("Jotain meni vikaan! Yritä myöhemmin uudestaan.");
+    } else {
+      return true;
+    }
   } catch (error: any) {
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
