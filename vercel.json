@@ -1,7 +1,8 @@
 {
   "git": {
     "deploymentEnabled": {
-      "development": false
+      "development": false,
+      "resetpasswordtesting": false
     }
   }
 }
