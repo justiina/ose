@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState<string | null>(null);
   const token = crypto.randomUUID();
-
+/*
   const sendResetEmail = async () => {
     if (!email) {
       toast.error("Anna sähköpostiosoitteesi!");
@@ -41,6 +41,18 @@ const ForgotPasswordForm = () => {
       }
     }
   };
+*/
+const handleReset = async () => {
+  if (!email) {
+    toast.error("Anna sähköpostiosoitteesi!");
+    return;
+  } else {
+    resetPassword(email)
+  }
+}
+
+
+
 
   return (
     <div className="flex-col justify-center mx-4 mt-4 mb-8">
@@ -68,7 +80,7 @@ const ForgotPasswordForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <FilledButton onClick={sendResetEmail} title="Lähetä" color="blue" />
+        <FilledButton onClick={handleReset} title="Lähetä" color="blue" />
       </form>
     </div>
   );

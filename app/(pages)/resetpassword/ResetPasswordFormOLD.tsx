@@ -1,6 +1,5 @@
 "use client";
 import {
-  confirmPasswordReset,
   getResetPasswordInfo,
   getUidByEmail,
   resetPassword,
@@ -13,17 +12,60 @@ import toast from "react-hot-toast";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams()!;
+  const token: string | null = searchParams.get("token");
   const [email, setEmail] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
 
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
 
-  /*
+  // Set the token lifespan to 30 minutes
+  const tokenLifespanMinutes = 30;
+
+  // Fetch the user info by token
+  useEffect(() => {
+    const fetchData = async () => {
+      if (token !== null) {
+        try {
+          const userData = await getResetPasswordInfo(token);
+          if (userData.error) {
+            setFetchError(userData.error);
+          } else if (userData.userData !== null) {
+            // Check if the token is expired
+            const createdAtDate = new Date(userData.userData?.created_at);
+            const currentDateTime = new Date();
+            const expirationTime =
+              createdAtDate.getTime() + tokenLifespanMinutes * 60 * 1000;
+            if (currentDateTime.getTime() > expirationTime) {
+              setFetchError(
+                "Linkki on vanhentunut! Lähetä itsellesi tarvittaessa uusi linkki Unohtuiko salasana? -kohdasta."
+              );
+            } else {
+              setEmail(userData.userData.email);
+              if (email !== null && email !== "") {
+                const fetchedUid = await getUidByEmail(email);
+                if (fetchedUid.error) {
+                  setFetchError(fetchedUid.error);
+                }
+                setUid(fetchedUid);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [token]);
+/*
   const handleReset = async (event: FormEvent) => {
     event.preventDefault();
     if (uid !== null && !passwordError && !confirmPasswordError) {
@@ -72,18 +114,9 @@ const ResetPasswordForm = () => {
     }
   };
 
-  const changePassword = async () => {
-    if (!passwordError && !confirmPasswordError) {
-      const result = await confirmPasswordReset(password);
-      if (result.error) {
-        toast.error(result.error);
-        router.push("/");
-      } else {
-        toast.success("Salasanan nollaus onnistui, tervetuloa sivustolle!");
-        router.push("/");
-      }
-    }
-  };
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <>
@@ -95,10 +128,7 @@ const ResetPasswordForm = () => {
           {" "}
           <p className="mb-4">Anna uusi salasana:</p>
           <div>
-            <form
-              onSubmit={changePassword}
-              className="grid gap-1 mr-8 md:w-4/5"
-            >
+            <form onSubmit={()=>{}} className="grid gap-1 mr-8 md:w-4/5">
               <input
                 id="password"
                 className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
@@ -115,7 +145,7 @@ const ResetPasswordForm = () => {
 
               <input
                 id="confirm-password"
-                className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
+                className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
                 type={showPassword ? "text" : "password"}
                 name="confirm-password"
                 placeholder="Vahvista salasana"
@@ -126,13 +156,6 @@ const ResetPasswordForm = () => {
               {confirmPasswordError && (
                 <p className="text-orange text-sm">{confirmPasswordError}</p>
               )}
-
-              <div
-                className="flex justify-end mb-4 cursor-pointer hover:underline"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <p>Piilota salasana</p> : <p>Näytä salasana</p>}
-              </div>
 
               <FilledButton title="Vaihda salasana" color="orange" />
             </form>
