@@ -18,7 +18,7 @@ const ForgotPasswordForm = () => {
         method: "POST",
         body: JSON.stringify({ token, email }),
       }).then(() => {
-        resetPassword;
+        //resetPassword;
         saveToPasswordResets();
       });
     }
