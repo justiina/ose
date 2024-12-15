@@ -31,6 +31,8 @@ const NavbarAdmin = () => {
     "/main",
     "/userinfo",
     "/useradmin",
+    "/useradmin/adduser",
+    "/useradmin/deleteuser",
   ];
   const menuRef = useRef<HTMLDivElement | null>(null);
 

@@ -1,22 +1,29 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { isAdmin } from "@/app/actions";
-import CalloutParticipationForm from "./CalloutParticipationForm";
+import { AddUserForm } from "./AddUserForm";
 
-const CalloutBoard = async () => {
+const UserAdmin = async () => {
   // Check that the user is signed in, redirect to login page if not
   const supabase = await createClient();
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
-  if (error || !user) {
+  if (!user) {
     return redirect("/");
   }
 
-  const admin = await isAdmin()
+  // Allow only admin users to get to this route
+  const admin = await isAdmin();
+  if (!admin) {
+    return redirect("/main");
+  }
 
-  return <CalloutParticipationForm admin={admin}/>;
+  return (
+    <div className="container mx-auto p-8 lg:p-16">
+      <AddUserForm />
+    </div>
+  );
 };
 
-export default CalloutBoard;
+export default UserAdmin;

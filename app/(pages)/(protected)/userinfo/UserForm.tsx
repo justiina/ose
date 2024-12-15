@@ -5,7 +5,7 @@ import FilledButton from "@/app/components/Buttons";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
-import UserInfoField from "@/app/(pages)/(protected)/userinfo/UserInfoField";
+import UserInfoField from "@/app/components/UserInfoField";
 import { MdOutlineEdit } from "react-icons/md";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { TbEye } from "react-icons/tb";

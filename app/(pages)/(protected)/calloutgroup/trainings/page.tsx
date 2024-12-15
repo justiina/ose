@@ -5,11 +5,12 @@ import CalloutTrainingsForm from "./CalloutTrainingsForm";
 
 const CalloutTrainings = async () => {
   // Check that the user is signed in, redirect to login page if not
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
-  if (!user) {
+  if (error || !user) {
     return redirect("/");
   }
 
