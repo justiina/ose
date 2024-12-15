@@ -8,11 +8,12 @@ import { RiThumbUpFill } from "react-icons/ri";
 
 const CalloutGroup = async () => {
   // Check that the user is signed in, redirect to login page if not
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
-  if (!user) {
+  if (error || !user) {
     return redirect("/");
   }
 

@@ -3,8 +3,8 @@ import { createClient } from "@/utils/supabase/server";
 import SignupForm from "./SignupForm";
 
 const Signup = async () => {
-  // Redirect to main if the email is not
-  const supabase = createClient();
+  // Check that the user is signed in, redirect to login page if not
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -3,13 +3,9 @@ import FilledButton from "@/app/components/Buttons";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { addToInvitedUsers } from "@/app/actions";
+import { useRouter } from "next/navigation";
 
-type AddUserProps = {
-  cancel: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  send: (event: React.MouseEvent<HTMLButtonElement>) => void;
-};
-
-export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
+export const AddUserForm = () => {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [lastName, setLastName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -17,6 +13,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
 
   const [selectedRadio, setSelectedRadio] = useState<string>("notAdmin");
   const token = crypto.randomUUID();
+  const router = useRouter()
 
   const handleRadioChange = (value: string) => {
     setSelectedRadio(value);
@@ -35,7 +32,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
       toast.error("Täytä kaikki kentät!");
       return;
     } else {
-      await fetch("api/send", {
+      await fetch("../api/send", {
         method: "POST",
         body: JSON.stringify({ token, email, firstName, lastName }),
       }).then(() => {
@@ -57,24 +54,36 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
         isAdmin,
       });
       if (saveOk) {
-        window.location.reload();
         toast.success("Sähköposti lähetetty uudelle käyttäjälle!");
+        return router.push("/useradmin")
       } else {
         toast.error(saveOk, { id: "saveError" });
         return;
       }
     }
   };
+  // Cancel add add user and go back to main page
+  const cancel = () => {
+    // Initiate the states
+    setFirstName(null);
+    setLastName(null);
+    setEmail(null);
+    setIsAdmin(false);
+    setSelectedRadio("notAdmin");
+
+    // Redirect to previous page
+    router.push("/useradmin");
+  };
 
   return (
     <div>
-      <div className="my-4 bg-white rounded-lg p-4 border border-grey">
-        <h2 className="mb-2 text-blue">Uuden käyttäjän lisäys</h2>
+      <h1 className="mb-2 text-blue">Uuden käyttäjän lisäys</h1>
+      <div className="my-4 bg-white rounded-lg p-4 border border-grey lg:w-2/3">
         <p className="mb-4">
           Täytä alla olevat tiedot, niin rekisteröitymisohjeet lähetetään
           annettuun sähköpostiosoitteeseen.
         </p>
-        <div className="flex flex-col gap-2 lg:w-2/3">
+        <div className="flex flex-col gap-2">
           {/*---First name---*/}
           <div className="flex gap-1">
             <label className="font-bold">Etunimi</label>
@@ -108,7 +117,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
           />
 
           <div className="flex gap-1">
-            <label className="font-bold">Sähköposti</label>
+            <label className="font-bold">Sähköpostiosoite</label>
             <p className="text-orange">*</p>
           </div>
           <input
@@ -126,6 +135,7 @@ export const AddUserForm: React.FC<AddUserProps> = ({ cancel }) => {
             <label className="font-bold">Annetaanko admin-oikeudet?</label>
             <p className="text-orange">*</p>
           </div>
+          <p>HUOM! Älä anna admin-oikeuksia perusjäsenille.</p>
           <div className="flex gap-4">
             <label className=" flex gap-1">
               <input

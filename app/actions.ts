@@ -1,8 +1,6 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import {
   UserType,
   EventsByDateType,
@@ -20,21 +18,27 @@ import {
 
 // USER FUNCTIONS
 export const login = async (
-  prevState: { error: undefined | string },
-  formData: FormData
-) => {
-  const supabase = createClient();
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  email: string,
+  password: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const supabase = await createClient();
+    const data = { email, password };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
-  if (error) {
-    return { error: "Jotain meni vikaan!\nYritä uudestaan." };
+    const { error } = await supabase.auth.signInWithPassword(data);
+    if (error) {
+      console.error("Supabase Login Error:", error.message); // Log for debugging
+      return { success: false, error: "Jotain meni vikaan!\nYritä uudestaan." };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unexpected Error:", err); // Log unexpected errors
+    return {
+      success: false,
+      error: "Unexpected error occurred. Please try again.",
+    };
   }
-  revalidatePath("/main");
-  redirect("/main");
 };
 
 export const signup = async (
@@ -44,7 +48,7 @@ export const signup = async (
   lastName: string,
   isAdmin?: boolean
 ): Promise<{ error?: string }> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const data = {
     email,
     password,
@@ -87,8 +91,7 @@ export const signup = async (
           .insert([{ user_id: uid, email }]);
         if (error) {
           return {
-            error:
-              "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+            error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
           };
         }
       }
@@ -98,7 +101,7 @@ export const signup = async (
 };
 
 export const logout = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signOut();
   if (error) {
     throw new Error(error.message);
@@ -109,11 +112,9 @@ export const resetPassword = async (
   uid: string,
   password: string
 ): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
-    const { error } = await supabase.auth.admin.updateUserById(uid, {
-      password: password,
-    });
+    const { error } = await supabase.auth.admin.updateUserById(uid, {password});
     if (error) {
       console.log(error.message);
       throw new Error(error.message);
@@ -125,13 +126,12 @@ export const resetPassword = async (
   }
 };
 
-export const addToPasswordResets = async (data: {
-  token: string;
-  email: string;
-}): Promise<boolean | any> => {
-  const supabase = createClient();
+export const addToPasswordResets = async (
+  data: {token: string; email:string}
+): Promise<boolean | any> => {
+  const supabase = await createClient();
   try {
-    const { error } = await supabase.from("passwordResets").insert(data);
+    const { error } = await supabase.from("passwordResets").insert([data]);
     if (error) {
       console.log(error.message);
       throw new Error(error.message);
@@ -146,7 +146,7 @@ export const addToPasswordResets = async (data: {
 export const getResetPasswordInfo = async (
   token: string
 ): Promise<GetResetPasswordType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: userData, error } = await supabase
       .from("passwordResets")
@@ -182,11 +182,11 @@ export const getResetPasswordInfo = async (
 };
 
 export const getUidByEmail = async (email: string): Promise<string | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data, error } = await supabase
       .from("users")
-      .select()
+      .select("*")
       .eq("email", email);
     if (error) {
       return {
@@ -208,7 +208,7 @@ export const getUidByEmail = async (email: string): Promise<string | any> => {
 export const getResetPasswordInfo = async (
   token: string
 ): Promise<GetResetPasswordType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: userData, error } = await supabase
       .from("passwordResets")
@@ -250,7 +250,7 @@ export const resetPassword = async (
   formData: FormData
 ) => {
   console.log("reset salasana");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.resetPasswordForEmail(
     formData.get("email") as string,
     { redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/resetpassword` }
@@ -266,7 +266,7 @@ export const resetPassword = async (
 export const addToInvitedUsers = async (
   data: AddToInvitedUsersType
 ): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { error } = await supabase.from("invitedUsers").insert(data);
     if (error) {
@@ -281,7 +281,7 @@ export const addToInvitedUsers = async (
 };
 
 export const getInvitedUsers = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: userData } = await supabase.from("invitedUsers").select("*");
     if (userData) {
@@ -295,7 +295,7 @@ export const getInvitedUsers = async () => {
 export const getInvitedUserByToken = async (
   token: string
 ): Promise<GetInvitedUserType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: userData, error } = await supabase
       .from("invitedUsers")
@@ -334,7 +334,7 @@ export const getInvitedUserByToken = async (
 };
 
 export const isAdmin = async (): Promise<boolean> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -363,7 +363,7 @@ export const isAdmin = async (): Promise<boolean> => {
 };
 
 export const getUserIdByEmail = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { users },
     error,
@@ -377,7 +377,7 @@ export const getUserIdByEmail = async () => {
 
 // USER INFO FROM SUPABASE DATABASE
 export const getUserInfo = async (): Promise<GetUserType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -421,10 +421,47 @@ export const getUserInfo = async (): Promise<GetUserType> => {
   }
 };
 
+export const getUserById = async (uid: string): Promise<GetUserType> => {
+  const supabase = await createClient();
+  try {
+    const { data: userData, error } = await supabase
+      .from("users")
+      .select()
+      .eq("id", uid);
+    if (error) {
+      throw new Error(error.message);
+    }
+    if (userData && userData.length > 0) {
+      const userObject = userData[0];
+      const mappedUserData: UserType = {
+        id: userObject.id,
+        created: userObject.created,
+        firstName: userObject.firstName,
+        lastName: userObject.lastName,
+        email: userObject.email,
+        phoneNumber: userObject.phoneNumber,
+        group: userObject.group,
+        role: userObject.role,
+        showName: userObject.showName || false, // default to false if not provided
+        showEmail: userObject.showEmail || false, // default to false if not provided
+        showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
+      };
+      return { userData: mappedUserData, error: null };
+    } else {
+      return { userData: null, error: null };
+    }
+  } catch (error: any) {
+    return {
+      userData: null,
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
 export const updateUserInfo = async (
   data: Partial<UserType>
 ): Promise<boolean | string> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const {
       data: { user },
@@ -453,7 +490,7 @@ export const updateUserInfo = async (
 };
 
 export const getFirstName = async (uid: string | null): Promise<string> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     if (uid === null || uid === undefined) {
       return "";
@@ -476,8 +513,23 @@ export const getFirstName = async (uid: string | null): Promise<string> => {
   }
 };
 
+export const getAllUsers = async () => {
+  const supabase = await createClient();
+  try {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("*")
+      .order("lastName", { ascending: true });
+    if (userData) {
+      return userData;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
 export const getAllUsersWithConsent = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: userData } = await supabase
       .from("users")
@@ -495,7 +547,7 @@ export const getAllUsersWithConsent = async () => {
 // EVENT FUNCTIONS
 
 export const getEvents = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: eventData } = await supabase.from("events").select("*");
     if (eventData) {
@@ -509,7 +561,7 @@ export const getEvents = async () => {
 export const getEventsByDate = async (
   date: string
 ): Promise<EventsByDateType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: eventData, error } = await supabase
       .from("events")
@@ -533,7 +585,7 @@ export const getEventsByDate = async (
 };
 
 export const getEventById = async (id: string): Promise<EditEventType> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: eventData, error } = await supabase
       .from("events")
@@ -560,7 +612,7 @@ export const getEventById = async (id: string): Promise<EditEventType> => {
 };
 
 export const getGroupEvents = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: eventData } = await supabase
       .from("events")
@@ -581,7 +633,7 @@ export const saveEvent = async (data: AddEventType): Promise<boolean | any> => {
     Object.entries(data).filter(([_, value]) => value !== "" && value !== 0)
   );
 
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { error } = await supabase.from("events").insert(cleanData);
     if (error) {
@@ -595,7 +647,7 @@ export const saveEvent = async (data: AddEventType): Promise<boolean | any> => {
 };
 
 export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { error } = await supabase.from("events").delete().eq("id", eventId);
     if (error) {
@@ -612,7 +664,7 @@ export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
 export const updateEvent = async (
   updatedData: Partial<EventType>
 ): Promise<boolean | string> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const id = updatedData.id;
     if (id) {
@@ -639,7 +691,7 @@ export const updateEvent = async (
 // CALLOUT GROUP FUNCTIONS
 
 export const getCalloutTrainings = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data } = await supabase
       .from("calloutTrainings")
@@ -656,7 +708,7 @@ export const getCalloutTrainings = async () => {
 export const saveCalloutTraining = async (
   data: CalloutTrainingType
 ): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { error } = await supabase.from("calloutTrainings").insert(data);
     if (error) {
@@ -673,7 +725,7 @@ export const saveCalloutTraining = async (
 export const getCalloutParticipationTableUrl = async (): Promise<
   string | any
 > => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data, error } = await supabase
       .from("calloutParticipationUrl")
@@ -693,7 +745,7 @@ export const getCalloutParticipationTableUrl = async (): Promise<
 export const updateCalloutParticipationTableUrl = async (
   url: string
 ): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data, error } = await supabase
       .from("calloutParticipationUrl")
@@ -712,7 +764,7 @@ export const updateCalloutParticipationTableUrl = async (
 export const deleteCalloutTraining = async (
   trainingId: string
 ): Promise<boolean | any> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { error } = await supabase
       .from("calloutTrainings")
@@ -732,7 +784,7 @@ export const deleteCalloutTraining = async (
 export const updateCalloutTraining = async (
   data: Partial<CalloutTrainingType>
 ): Promise<boolean | string> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     const { data: trainingData, error } = await supabase
       .from("calloutTrainings")

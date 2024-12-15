@@ -50,6 +50,7 @@ const ResetPasswordForm = () => {
               setEmail(userData.userData.email);
               if (email !== null && email !== "") {
                 const fetchedUid = await getUidByEmail(email);
+                console.log(uid)
                 if (fetchedUid.error) {
                   setFetchError(fetchedUid.error);
                 }
@@ -58,23 +59,26 @@ const ResetPasswordForm = () => {
             }
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.log("Error fetching user data:", error);
         }
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [token]);
+  }, [token, email]);
 
-  const handleReset = async (event: FormEvent) => {
-    event.preventDefault();
+  const handleReset = async () => {
     if (uid !== null && !passwordError && !confirmPasswordError) {
-      const result = await resetPassword(uid, password);
-      if (result.error) {
-        toast.error(result.error);
-        router.push("/");
-      } else {
-        toast.success("Salasanan nollaus onnistui, tervetuloa sivustolle!");
+      try {
+        const result = await resetPassword(uid, password);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success("Salasanan nollaus onnistui, tervetuloa sivustolle!");
+        }
+      } catch (error) {
+        console.log("Error resetting password:", error);
+      } finally {
         router.push("/");
       }
     }

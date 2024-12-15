@@ -6,11 +6,12 @@ import { UserType } from "@/app/components/Types";
 
 const Contacts = async () => {
   // Check that the user is signed in, redirect to login page if not
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
-  if (!user) {
+  if (error || !user) {
     return redirect("/");
   }
 
@@ -21,7 +22,7 @@ const Contacts = async () => {
     if ("error" in allUsers) {
       toast.error(allUsers.error, { id: "fetchError" });
     } else {
-      contacts = allUsers.map((doc) => doc as UserType);
+      contacts = allUsers.map((doc: UserType) => doc as UserType);
     }
   }
 
@@ -31,38 +32,42 @@ const Contacts = async () => {
         <h1 className="mb-4">Yhteystiedot</h1>
 
         <table className="mb-8">
-          <tr>
-            <th className="bg-blue" scope="col">
-              Nimi
-            </th>
-            <th className="bg-blue" scope="col">
-              Treeniryhmä
-            </th>
-            <th className="bg-blue" scope="col">
-              Sähköposti
-            </th>
-            <th className="bg-blue" scope="col">
-              Puhelinnumero
-            </th>
-            <th className="bg-blue" scope="col">
-              Rooli(t) OSEssa
-            </th>
-          </tr>
-          {contacts.map((user) => (
-            <tr key={user.id}>
-              <td>
-                {user.lastName} {user.firstName}
-              </td>
-              <td>{user.group ? user.group : "-"}</td>
-              <td>{user.showEmail ? user.email : "-"}</td>
-              <td>{user.showPhoneNumber ? user.phoneNumber : "-"}</td>
-              <td>
-                {user.role?.map((role, index) => (
-                  <p key={index}>{role}</p>
-                ))}
-              </td>
+          <thead>
+            <tr>
+              <th className="bg-blue" scope="col">
+                Nimi
+              </th>
+              <th className="bg-blue" scope="col">
+                Treeniryhmä
+              </th>
+              <th className="bg-blue" scope="col">
+                Sähköposti
+              </th>
+              <th className="bg-blue" scope="col">
+                Puhelinnumero
+              </th>
+              <th className="bg-blue" scope="col">
+                Rooli(t) OSEssa
+              </th>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {contacts.map((user) => (
+              <tr key={user.id}>
+                <td>
+                  {user.lastName} {user.firstName}
+                </td>
+                <td>{user.group ? user.group : "-"}</td>
+                <td>{user.showEmail ? user.email : "-"}</td>
+                <td>{user.showPhoneNumber ? user.phoneNumber : "-"}</td>
+                <td>
+                  {user.role?.map((role, index) => (
+                    <p key={index}>{role}</p>
+                  ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </div>

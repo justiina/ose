@@ -1,13 +1,14 @@
 "use client";
 import { addToPasswordResets, resetPassword } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState<string | null>(null);
   const token = crypto.randomUUID();
+  const router = useRouter();
 
   const sendResetEmail = async () => {
     if (!email) {
@@ -18,7 +19,6 @@ const ForgotPasswordForm = () => {
         method: "POST",
         body: JSON.stringify({ token, email }),
       }).then(() => {
-        resetPassword;
         saveToPasswordResets();
       });
     }
@@ -29,12 +29,12 @@ const ForgotPasswordForm = () => {
       toast.error("Anna sähköpostiosoitteesi!");
       return;
     } else {
-      const saveOk = await addToPasswordResets({ token, email });
+      const saveOk = await addToPasswordResets({token, email});
       if (saveOk) {
         toast.success(
           "Salasanan vaihto-ohjeet on lähetetty antamaasi sähköpostiosoitteeseen."
         );
-        redirect("/");
+        return router.push("/")
       } else {
         toast.error(saveOk, { id: "saveError" });
         return;
@@ -49,13 +49,13 @@ const ForgotPasswordForm = () => {
           Anna sähköpostiosoitteesi salasanan nollausta varten ja paina Lähetä.
           Ohjeet lähetetään antamaasi sähköpostiosoitteeseen.
         </p>
-        <p>
+        <div>
           <b> Vain rekisteröity sähköpostiosoite voidaan nollata!</b>
           <p>
             Ota yhteyttä OSEn sihteeriin, jos et ole varma millä
             sähköpostiosoitteella olet rekisteröitynyt.
           </p>
-        </p>
+        </div>
       </div>
       <form className="grid gap-2 mr-8 md:flex">
         <input
