@@ -108,6 +108,31 @@ export const logout = async () => {
   }
 };
 
+export const resetPassword = async (email: string) => {
+  const supabase = createClient();
+  try {
+    const { data: resetData, error } =
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/resetpassword`,
+      });
+  } catch (error) {}
+};
+
+export const confirmPasswordReset = async (
+  password: string
+): Promise<boolean | any> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+    } else {
+      return true;
+    }
+  } catch (error) {}
+};
+
+/*
 export const resetPassword = async (
   uid: string,
   password: string
@@ -125,6 +150,7 @@ export const resetPassword = async (
     return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
   }
 };
+*/
 
 export const addToPasswordResets = async (
   data: {token: string; email:string}
