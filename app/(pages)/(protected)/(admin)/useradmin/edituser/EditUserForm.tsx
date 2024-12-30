@@ -1,14 +1,14 @@
 "use client";
 import { getAllUsers } from "@/app/actions";
 import Dialog from "@/app/components/Dialog";
-import DeleteUserCard from "./DeleteUserCard";
+import EditUserCard from "./EditUserCard";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { UserType } from "@/app/components/Types";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const DeleteUserFrom = () => {
+const EditUserForm = () => {
   const [users, setUsers] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -57,7 +57,7 @@ const DeleteUserFrom = () => {
               {users.map((user) => (
                 <Link
                   key={user.id}
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/deleteuser?showDialog=y&user=${user.id}`}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/edituser?showDialog=y&user=${user.id}`}
                   className="bg-white shadow rounded-lg p-4 hover:bg-orange transition duration-300"
                 >
                   {user.lastName} {user.firstName}
@@ -68,10 +68,10 @@ const DeleteUserFrom = () => {
         </div>
       </div>
       <Dialog title="Käyttäjän tiedot" onClose={closeModal}>
-        <DeleteUserCard />
+        <EditUserCard />
       </Dialog>
     </>
   );
 };
 
-export default DeleteUserFrom;
+export default EditUserForm;

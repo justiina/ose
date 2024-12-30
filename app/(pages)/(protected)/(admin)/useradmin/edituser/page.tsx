@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { isAdmin } from "@/app/actions";
-import DeleteUserFrom from "./DeleteUserFrom";
+import EditUserForm from "./EditUserForm";
 
 const UserAdmin = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -21,7 +21,7 @@ const UserAdmin = async () => {
 
   return (
     <div className="container mx-auto p-8 lg:p-16">
-      <DeleteUserFrom />
+      <EditUserForm />
     </div>
   );
 };

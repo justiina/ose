@@ -107,7 +107,7 @@ export const logout = async () => {
     throw new Error(error.message);
   }
 };
-
+/*
 export const resetPassword = async (email: string) => {
   const supabase = createClient();
   try {
@@ -131,7 +131,7 @@ export const confirmPasswordReset = async (
     }
   } catch (error) {}
 };
-
+*/
 /*
 export const resetPassword = async (
   uid: string,

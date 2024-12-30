@@ -11,7 +11,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { TbEye } from "react-icons/tb";
 import { TbEyeClosed } from "react-icons/tb";
 import Dropdown, { MultiDropdown } from "@/app/components/Dropdown";
-import { roleOptions } from "@/app/components/StyleMappingAndOptions";
+import { groupOptions, roleOptions } from "@/app/components/StyleMappingAndOptions";
 
 type EditType = {
   editName: boolean;
@@ -33,9 +33,6 @@ const UserForm = () => {
   });
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [selectedRadio, setSelectedRadio] = useState<string>("");
-
-  // List of training groups for dropdown list
-  const groupOptions = ["MaA", "MaB", "TiA", "TiB", "Raahe", "Ei ryhmää"];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,6 +119,7 @@ const UserForm = () => {
     }));
     setIsEdited(true); // Set isEdited to true when a field is edited
   };
+
   const handleDropdownSelect = (selected: string | string[]) => {
     if (typeof selected === "string") {
       setUser((prevUser) => ({
@@ -164,7 +162,7 @@ const UserForm = () => {
       <h1 className="mb-4">Omat tiedot</h1>
       <div>
         <p className="mb-4">
-          Avonainen silmän kuva tietokentän vieressä tarkoittaa, että tiedon saa
+          Avonaisen silmän kuva tietokentän vieressä tarkoittaa, että tiedon saa
           näyttää Yhteystiedot-sivulla muille OSElaisille. Voit muokata tätä ja
           itse tietokenttää kynäikonin kautta.
         </p>

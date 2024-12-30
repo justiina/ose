@@ -2,7 +2,7 @@
 import {
   getResetPasswordInfo,
   getUidByEmail,
-  resetPassword,
+  //resetPassword,
 } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
@@ -68,6 +68,7 @@ const ResetPasswordForm = () => {
   }, [token, email]);
 
   const handleReset = async () => {
+    /*
     if (uid !== null && !passwordError && !confirmPasswordError) {
       try {
         const result = await resetPassword(uid, password);
@@ -82,6 +83,7 @@ const ResetPasswordForm = () => {
         router.push("/");
       }
     }
+      */
   };
 
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import EditUsers from "./EditUsers";
 import { isAdmin } from "@/app/actions";
 import { FilledLink } from "@/app/components/Buttons";
-import { RiUserAddLine, RiUserForbidLine } from "react-icons/ri";
+import { RiUserAddLine, RiUserForbidLine, RiUserSettingsLine } from "react-icons/ri";
 
 const UserAdmin = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -36,10 +35,10 @@ const UserAdmin = async () => {
 
         {/*---Delete user---*/}
         <FilledLink
-          title="Poista käyttäjä"
+          title="Muokkaa käyttäjiä"
           color="blue"
-          href="/useradmin/deleteuser"
-          icon={<RiUserForbidLine className="text-xl" />}
+          href="/useradmin/edituser"
+          icon={<RiUserSettingsLine className="text-xl" />}
         />
       </div>
     </div>

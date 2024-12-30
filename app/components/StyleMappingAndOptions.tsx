@@ -29,7 +29,7 @@ export const EventColorAndIconMap: {
 };
 
 // List groups
-export const groupOptions = ["MaA", "MaB", "TiA", "TiB"];
+export const groupOptions = ["MaA", "MaB", "TiA", "TiB", "Raahe", "Ei ryhmää"];
 
 // List event types for dropdown list in AddEvent and EditEvent
 export const eventTypeOptions = [
