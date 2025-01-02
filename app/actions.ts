@@ -107,6 +107,80 @@ export const logout = async () => {
     throw new Error(error.message);
   }
 };
+
+export const deleteUser = async (
+  uid: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const supabase = await createClient();
+
+    // Delete user from authentication
+    const { data, error: authError } = await supabase.auth.admin.deleteUser(
+      uid
+    );
+    if (authError) {
+      console.error(
+        "Delete user error:",
+        authError.message,
+        "Code:",
+        authError.code
+      );
+      return { success: false, error: "Jotain meni vikaan!\nYritä uudestaan." };
+    }
+
+    // Delete user info from the users table
+    const { error: tableError } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", uid);
+    if (tableError) {
+      console.error("Delete user error:", tableError.message);
+      return {
+        success: false,
+        error: "Jotain meni vikaan (users table)!\nYritä uudestaan.",
+      };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unexpected Error:", err); // Log unexpected errors
+    return {
+      success: false,
+      error: "Unexpected error occurred. Please try again.",
+    };
+  }
+};
+
+// Update user role in the metadata
+export const updateUserRole = async (
+  uid: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const supabase = await createClient();
+
+    // Update user metadata
+    const { error } = await supabase.auth.admin.updateUserById(uid, {
+      app_metadata: { role: "service_role" },
+    });
+
+    if (error) {
+      console.error("Error updating user role:", error.message);
+      return {
+        success: false,
+        error: "Failed to update user role. Please try again.",
+      };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unexpected Error:", err);
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    };
+  }
+};
+
 /*
 export const resetPassword = async (email: string) => {
   const supabase = createClient();
@@ -152,9 +226,10 @@ export const resetPassword = async (
 };
 */
 
-export const addToPasswordResets = async (
-  data: {token: string; email:string}
-): Promise<boolean | any> => {
+export const addToPasswordResets = async (data: {
+  token: string;
+  email: string;
+}): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
     const { error } = await supabase.from("passwordResets").insert([data]);

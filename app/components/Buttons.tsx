@@ -18,6 +18,12 @@ type OwnLinkProps = {
   openInNewTab?: boolean;
 };
 
+type ToggleProps = {
+  title: string;
+  isOn: boolean;
+  onToggle: (newState: boolean) => void;
+};
+
 // Define reusable classNames for each component that has same styling
 const filledClassName = (color: string): string => {
   let textColor: string = "";
@@ -76,6 +82,28 @@ export const FilledLink: React.FC<OwnLinkProps> = ({
       </Link>
     );
   }
+};
+
+export const ToggleSwitch: React.FC<ToggleProps> = ({ title, isOn, onToggle }) => {
+  return (
+    <div className="flex items-center space-x-3">
+      {/* Label */}
+      <span>{title}</span>
+      {/* Toggle Button */}
+      <div
+        className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+          isOn ? "bg-blue" : "bg-grey"}`}
+        onClick={() => onToggle(!isOn)} // Call the parent toggle function
+      >
+        {/* Circle */}
+        <div
+          className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+            isOn ? "translate-x-6" : "translate-x-0"
+          }`}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default FilledButton;
