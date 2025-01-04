@@ -220,22 +220,24 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
         </div>
         <div className="md:mx-8">
           <table className="mb-8">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Päivämäärä</th>
-              <th scope="col">Pöytäkirja</th>
-              {admin && <th scope="col">Muokkaa</th>}
-            </tr>
-            {filteredBoardFiles.map((file, index) => {
-              if (file.name === ".emptyFolderPlaceholder") return false;
-              const [year, month, day] = file.name
-                .replace("-kokous.pdf", "")
-                .split("-");
-              const date = `${day}.${month}.${year}`;
-              const fileNum = index + 1;
-              return (
-                <>
-                  <tr>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Päivämäärä</th>
+                <th scope="col">Pöytäkirja</th>
+                {admin && <th scope="col">Muokkaa</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBoardFiles.map((file, index) => {
+                if (file.name === ".emptyFolderPlaceholder") return false;
+                const [year, month, day] = file.name
+                  .replace("-kokous.pdf", "")
+                  .split("-");
+                const date = `${day}.${month}.${year}`;
+                const fileNum = index + 1;
+                return (
+                  <tr key={file.name || index}>
                     <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
@@ -244,7 +246,6 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
                         onClick={() =>
                           goToFileUrl("halyryhma", `poytakirjat/${file.name}`)
                         }
-                        key={index}
                       >
                         pdf
                       </button>
@@ -263,9 +264,9 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
                       </td>
                     )}
                   </tr>
-                </>
-              );
-            })}
+                );
+              })}
+            </tbody>
           </table>
           <div className="flex justify-between">
             <FilledButton

@@ -49,8 +49,7 @@ const EditUserForm = () => {
   };
 
   const handleToggle = (newState: boolean) => {
-    setShowDelete(newState); // Update the state
-    console.log("Toggle state:", newState ? "On" : "Off");
+    setShowDelete(newState);
   };
 
   const handleDelete = (uid: string | null) => {
@@ -76,8 +75,10 @@ const EditUserForm = () => {
         return;
       }
       toast.success("Käyttäjän poistaminen onnistui!", { id: "deleteOk" });
-    }
-    toast.error("Jotain meni vikaan\nTarkista käyttäjätiedot.");
+      setShowConfirmation(false);
+      setDeleteUid(null);
+      window.location.reload();
+    } else toast.error("Jotain meni vikaan\nTarkista käyttäjätiedot.");
   };
 
   if (isLoading) {
@@ -91,7 +92,7 @@ const EditUserForm = () => {
           <h1 className="mb-4">Kaikki rekisteröityneet käyttäjät</h1>
           <div className="flex justify-end">
             <ToggleSwitch
-              title="Muokkaus"
+              title="Käyttäjän poistaminen"
               isOn={showDelete}
               onToggle={handleToggle}
             />
@@ -99,22 +100,19 @@ const EditUserForm = () => {
           <div>
             <div className="grid space-y-4 p-4">
               {users.map((user) => (
-                <div
+                <Link
                   className="flex justify-between bg-white shadow rounded-lg p-4 hover:bg-orange transition duration-300"
                   key={user.id}
+                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/edituser?showDialog=y&user=${user.id}`}
                 >
-                  <Link
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/edituser?showDialog=y&user=${user.id}`}
-                  >
-                    {user.lastName} {user.firstName}
-                  </Link>
+                  {user.lastName} {user.firstName}
                   {showDelete && (
                     <IoTrash
                       className="text-orange hover:text-background text-2xl cursor-pointer"
                       onClick={() => handleDelete(user.id)}
                     />
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -126,9 +124,7 @@ const EditUserForm = () => {
       {showConfirmation && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl">
-              Haluatko varmasti poistaa käyttäjän?
-            </h2>
+            <h2 className="text-xl">Haluatko varmasti poistaa käyttäjän?</h2>
             <h2 className="text-xl mb-4 text-red-700">
               HUOM! Tätä toimintoa ei voi peruuttaa!!
             </h2>

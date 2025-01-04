@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import {
   UserType,
   EventsByDateType,
@@ -71,7 +72,7 @@ export const signup = async (
     if (error) {
       return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
     }
-    // update users userRoles tables
+    // update users and adminUsers tables
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -112,12 +113,22 @@ export const deleteUser = async (
   uid: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SERVICE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Delete user from authentication
     const { data, error: authError } = await supabase.auth.admin.deleteUser(
       uid
     );
+
     if (authError) {
       console.error(
         "Delete user error:",
@@ -125,6 +136,7 @@ export const deleteUser = async (
         "Code:",
         authError.code
       );
+
       return { success: false, error: "Jotain meni vikaan!\nYritä uudestaan." };
     }
 
@@ -134,7 +146,6 @@ export const deleteUser = async (
       .delete()
       .eq("id", uid);
     if (tableError) {
-      console.error("Delete user error:", tableError.message);
       return {
         success: false,
         error: "Jotain meni vikaan (users table)!\nYritä uudestaan.",
@@ -142,8 +153,8 @@ export const deleteUser = async (
     }
 
     return { success: true };
+  
   } catch (err) {
-    console.error("Unexpected Error:", err); // Log unexpected errors
     return {
       success: false,
       error: "Unexpected error occurred. Please try again.",
@@ -160,7 +171,7 @@ export const updateUserRole = async (
 
     // Update user metadata
     const { error } = await supabase.auth.admin.updateUserById(uid, {
-      app_metadata: { role: "service_role" },
+      user_metadata: { role: "service_role" },
     });
 
     if (error) {

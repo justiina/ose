@@ -1,5 +1,5 @@
 "use client";
-import { addToPasswordResets, resetPassword } from "@/app/actions";
+import { addToPasswordResets } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
