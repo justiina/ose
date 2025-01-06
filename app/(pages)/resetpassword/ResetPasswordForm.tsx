@@ -1,5 +1,6 @@
 "use client";
 import {
+  deleteFromPasswordResets,
   getResetPasswordInfo,
   getUidByEmail,
   resetPassword,
@@ -75,7 +76,12 @@ const ResetPasswordForm = () => {
         if (result.error) {
           toast.error(result.error);
         } else {
-          toast.success("Salasanan nollaus onnistui\n Voit nyt kirjautua sivustolle uudella salasanallasi.");
+          toast.success(
+            "Salasanan nollaus onnistui\n Voit nyt kirjautua sivustolle uudella salasanallasi."
+          );
+          if (token) {
+            const removed = await deleteFromPasswordResets(token);
+          }
         }
       } catch (error) {
         console.log("Error resetting password:", error);

@@ -191,32 +191,6 @@ export const updateUserRole = async (
   }
 };
 
-/*
-export const resetPassword = async (email: string) => {
-  const supabase = createClient();
-  try {
-    const { data: resetData, error } =
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/resetpassword`,
-      });
-  } catch (error) {}
-};
-
-export const confirmPasswordReset = async (
-  password: string
-): Promise<boolean | any> => {
-  const supabase = createClient();
-  try {
-    const { data, error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
-    } else {
-      return true;
-    }
-  } catch (error) {}
-};
-*/
-
 export const resetPassword = async (
   id: string,
   password: string
@@ -255,6 +229,26 @@ export const addToPasswordResets = async (
     const { error } = await supabase
       .from("passwordResets")
       .insert([{ token, email }]);
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    } else {
+      return true;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const deleteFromPasswordResets = async (
+  token: string,
+): Promise<boolean | any> => {
+  const supabase = await createClient();
+  try {
+    const { error } = await supabase
+      .from("passwordResets")
+      .delete()
+      .eq("token", token);
     if (error) {
       console.log(error.message);
       throw new Error(error.message);
