@@ -29,12 +29,12 @@ const ForgotPasswordForm = () => {
       toast.error("Anna sähköpostiosoitteesi!");
       return;
     } else {
-      const saveOk = await addToPasswordResets({token, email});
+      const saveOk = await addToPasswordResets(token, email);
       if (saveOk) {
         toast.success(
-          "Salasanan vaihto-ohjeet on lähetetty antamaasi sähköpostiosoitteeseen."
+          "Salasanan vaihto-ohjeet lähetettiin antamaasi sähköpostiosoitteeseen."
         );
-        return router.push("/")
+        return router.push("/");
       } else {
         toast.error(saveOk, { id: "saveError" });
         return;
@@ -57,7 +57,7 @@ const ForgotPasswordForm = () => {
           </p>
         </div>
       </div>
-      <form className="grid gap-2 mr-8 md:flex">
+      <div className="grid gap-2 mr-8 md:flex">
         <input
           id="email"
           className="border border-grey rounded-lg py-1 px-4 text-sm"
@@ -69,7 +69,7 @@ const ForgotPasswordForm = () => {
           required
         />
         <FilledButton onClick={sendResetEmail} title="Lähetä" color="blue" />
-      </form>
+      </div>
     </div>
   );
 };

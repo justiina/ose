@@ -55,6 +55,7 @@ const SignupForm = () => {
 
   const handleSignup = async (event: FormEvent) => {
     event.preventDefault();
+    if (passwordError) {toast.error("Tarkista salasanasi!")}
     if (user !== null && !passwordError && !confirmPasswordError) {
       const result = await signup(
         user.email,
@@ -87,10 +88,10 @@ const SignupForm = () => {
     validateConfirmPassword(value);
   };
 
-  const validatePassword = (password: string) => {
+  const validatePassword = (passw: string) => {
     // Define your password rules here
     const rules = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!?@#=$%^&*-]).{8,}$/;
-    if (!rules.test(password)) {
+    if (!rules.test(passw)) {
       setPasswordError(
         "Salasanan tulee olla vähintään 8 merkkiä pitkä ja sisältää isoja ja pieniä kirjaimia, numeroita sekä erikoismerkkejä"
       );
@@ -104,7 +105,7 @@ const SignupForm = () => {
       setConfirmPasswordError("Salasanat eivät täsmää.");
     } else {
       setConfirmPasswordError("");
-    }
+  }
   };
 
   if (isLoading) {

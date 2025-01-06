@@ -2,19 +2,18 @@
 import {
   getResetPasswordInfo,
   getUidByEmail,
-  //resetPassword,
+  resetPassword,
 } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams()!;
   const token: string | null = searchParams.get("token");
-  const [email, setEmail] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
 
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -47,14 +46,16 @@ const ResetPasswordForm = () => {
                 "Linkki on vanhentunut! Lähetä itsellesi tarvittaessa uusi linkki Unohtuiko salasana? -kohdasta."
               );
             } else {
-              setEmail(userData.userData.email);
-              if (email !== null && email !== "") {
+              const email = userData.userData.email;
+
+              if (email) {
                 const fetchedUid = await getUidByEmail(email);
-                console.log(uid)
+
                 if (fetchedUid.error) {
                   setFetchError(fetchedUid.error);
+                } else {
+                  setUid(fetchedUid.uid);
                 }
-                setUid(fetchedUid);
               }
             }
           }
@@ -65,17 +66,16 @@ const ResetPasswordForm = () => {
       }
     };
     fetchData();
-  }, [token, email]);
+  }, [token]);
 
   const handleReset = async () => {
-    /*
     if (uid !== null && !passwordError && !confirmPasswordError) {
       try {
         const result = await resetPassword(uid, password);
         if (result.error) {
           toast.error(result.error);
         } else {
-          toast.success("Salasanan nollaus onnistui, tervetuloa sivustolle!");
+          toast.success("Salasanan nollaus onnistui\n Voit nyt kirjautua sivustolle uudella salasanallasi.");
         }
       } catch (error) {
         console.log("Error resetting password:", error);
@@ -83,7 +83,6 @@ const ResetPasswordForm = () => {
         router.push("/");
       }
     }
-      */
   };
 
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -133,38 +132,40 @@ const ResetPasswordForm = () => {
         <>
           {" "}
           <p className="mb-4">Anna uusi salasana:</p>
-          <div>
-            <form onSubmit={handleReset} className="grid gap-1 mr-8 md:w-4/5">
-              <input
-                id="password"
-                className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Salasana"
-                value={password}
-                onChange={handlePasswordChange}
-                required
-              />
-              {passwordError && (
-                <p className="text-orange text-sm">{passwordError}</p>
-              )}
+          <div className="grid gap-1 mr-8 md:w-4/5">
+            <input
+              id="password"
+              className="border border-grey rounded-lg mb-1 py-1 px-4 text-sm"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Salasana"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+            />
+            {passwordError && (
+              <p className="text-orange text-sm">{passwordError}</p>
+            )}
 
-              <input
-                id="confirm-password"
-                className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
-                type={showPassword ? "text" : "password"}
-                name="confirm-password"
-                placeholder="Vahvista salasana"
-                value={confirmPassword}
-                onChange={handleConfirmPasswordChange}
-                required
-              />
-              {confirmPasswordError && (
-                <p className="text-orange text-sm">{confirmPasswordError}</p>
-              )}
+            <input
+              id="confirm-password"
+              className="border border-grey rounded-lg mb-4 py-1 px-4 text-sm"
+              type={showPassword ? "text" : "password"}
+              name="confirm-password"
+              placeholder="Vahvista salasana"
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              required
+            />
+            {confirmPasswordError && (
+              <p className="text-orange text-sm">{confirmPasswordError}</p>
+            )}
 
-              <FilledButton title="Vaihda salasana" color="orange" />
-            </form>
+            <FilledButton
+              title="Vaihda salasana"
+              color="orange"
+              onClick={handleReset}
+            />
           </div>
         </>
       )}
