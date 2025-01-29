@@ -2,6 +2,7 @@
 
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { createClient } from "@/utils/supabase/client";
+import { addYears, subYears } from "date-fns";
 import { FileObject } from "@supabase/storage-js";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
@@ -9,6 +10,8 @@ import toast from "react-hot-toast";
 import { FaPlus } from "react-icons/fa";
 import { IoTrash } from "react-icons/io5";
 import FilledButton from "@/app/components/Buttons";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { MdOutlineToday } from "react-icons/md";
 
 type FileType = {
   title: string;
@@ -25,8 +28,18 @@ type DeleteFileType = {
   path: string;
 };
 
-const AdminBoardForm = () => {
+type PropsType = {
+  admin: boolean;
+};
+
+const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentLetterDate, setCurrentLetterDate] = useState<Date>(new Date());
+  const currentYear = currentDate.getFullYear();
+  const currentLetterYear = currentLetterDate.getFullYear();
+  const thisYear = new Date().getFullYear();
+
   const [fetchLoading, setFetchLoading] = useState<boolean>(true);
   const [fetchLettersLoading, setFetchLettersLoading] = useState<boolean>(true);
 
@@ -85,6 +98,16 @@ const AdminBoardForm = () => {
     getLetterFiles();
   }, []);
 
+  const filteredBoardFiles = boardFiles.filter((file) => {
+    const year = parseInt(file.name.split("-")[0]);
+    return year === currentYear;
+  });
+
+  const filteredLetters = letters.filter((file) => {
+    const year = parseInt(file.name.split("-")[0]);
+    return year === currentLetterYear;
+  });
+
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.id === "datetimeBoard") {
       const date = e.target.value;
@@ -140,7 +163,29 @@ const AdminBoardForm = () => {
         });
       } else {
         toast.success("Tiedoston poistaminen onnistui!", { id: "delSuccess" });
-        window.location.reload();
+        if (
+          deleteFile.bucket === "hallitus" &&
+          deleteFile.path.startsWith("poytakirjat")
+        ) {
+          setBoardFiles((prevFiles) =>
+            prevFiles.filter(
+              (file) =>
+                file.name !== deleteFile.path.replace("poytakirjat/", "")
+            )
+          );
+        } else if (
+          deleteFile.bucket === "hallitus" &&
+          deleteFile.path.startsWith("sihteerikirjeet")
+        ) {
+          setLetters((prevFiles) =>
+            prevFiles.filter(
+              (file) =>
+                file.name !== deleteFile.path.replace("sihteerikirjeet/", "")
+            )
+          );
+        }
+        setShowConfirmation(false);
+        setDeleteFile(null);
       }
     }
   };
@@ -236,6 +281,30 @@ const AdminBoardForm = () => {
     }
   };
 
+  const goToPreviousYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(subYears(currentDate, 1));
+    } else if (from === "letters") {
+      setCurrentLetterDate(subYears(currentLetterDate, 1));
+    }
+  };
+
+  const goToNextYear = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(addYears(currentDate, 1));
+    } else if (from === "letters") {
+      setCurrentLetterDate(addYears(currentLetterDate, 1));
+    }
+  };
+
+  const goToToday = (from: string) => {
+    if (from === "board") {
+      setCurrentDate(new Date());
+    } else if (from === "letters") {
+      setCurrentLetterDate(new Date());
+    }
+  };
+
   if (fetchLoading || fetchLettersLoading) {
     return <LoadingIndicator />;
   }
@@ -243,25 +312,64 @@ const AdminBoardForm = () => {
   return (
     <div className="container max-w-screen-md p-8 lg:p-16">
       <div className="mb-8">
-        <h1 className="mb-4">Hallituksen kokousten pöytäkirjat</h1>
+        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          <button
+            onClick={() => goToPreviousYear("board")}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">
+              Hallituksen kokouspöytäkirjat {currentYear}
+            </h1>
+            <button
+              onClick={() => goToToday("board")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2xl" />
+            </button>
+          </div>
+          {Number(thisYear) > Number(currentYear) ? (
+            <button
+              onClick={() => goToNextYear("board")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <IoIosArrowForward className="text-2xl" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center h-8 w-8 rounded-full text-greylight">
+              <IoIosArrowForward className="text-2xl" />
+            </div>
+          )}
+        </div>
         <div className="md:mx-8">
-          <table className="mb-8">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Päivämäärä</th>
-              <th scope="col">Pöytäkirja</th>
-              <th scope="col"></th>
-            </tr>
-            {boardFiles.map((file, index) => {
-              if (file.name === ".emptyFolderPlaceholder") return false;
-              const [year, month, day] = file.name
-                .replace("-kokous.pdf", "")
-                .split("-");
-              const date = `${day}.${month}.${year}`;
-              return (
-                <>
-                  <tr>
-                    <td>{index}</td>
+          <table className="mb-8 ">
+            <thead>
+              <tr>
+                <th className="bg-green text-white" scope="col">
+                  #
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Päivämäärä
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Pöytäkirja
+                </th>
+                {admin && <th className="bg-green text-white" scope="col"></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBoardFiles.map((file, index) => {
+                if (file.name === ".emptyFolderPlaceholder") return false;
+                const [year, month, day] = file.name
+                  .replace("-kokous.pdf", "")
+                  .split("-");
+                const date = `${day}.${month}.${year}`;
+                const fileNum = index + 1;
+                return (
+                  <tr key={index}>
+                    <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
                       <button
@@ -274,30 +382,33 @@ const AdminBoardForm = () => {
                         pdf
                       </button>
                     </td>
-                    <td>
-                      <IoTrash
-                        onClick={() =>
-                          handleDelete("hallitus", `poytakirjat/${file.name}`)
-                        }
-                        className="cursor-pointer hover:text-orange text-grey text-2xl"
-                      />
-                    </td>
+                    {admin && (
+                      <td>
+                        <IoTrash
+                          onClick={() =>
+                            handleDelete("hallitus", `poytakirjat/${file.name}`)
+                          }
+                          className="cursor-pointer hover:text-orange text-grey text-2xl"
+                        />
+                      </td>
+                    )}
                   </tr>
-                </>
-              );
-            })}
+                );
+              })}
+            </tbody>
           </table>
-          {!showAddBoardForm && (
+          {!showAddBoardForm && admin && (
             <div className="flex justify-end">
               <FilledButton
                 onClick={() => setShowAddBoardForm(!showAddBoardForm)}
+                icon={<FaPlus />}
                 title="Lisää tiedosto"
                 color="blue"
               />
             </div>
           )}
 
-          {showAddBoardForm && (
+          {showAddBoardForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               {boardUploading ? (
                 "Ladataan ..."
@@ -360,25 +471,63 @@ const AdminBoardForm = () => {
         </div>
       </div>
       <div className="mb-8">
-        <h1 className="mb-4">Sihteerikirjeet</h1>
+        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+          <button
+            onClick={() => goToPreviousYear("letters")}
+            className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+          >
+            <IoIosArrowBack className="text-2xl" />
+          </button>
+          <div className="flex gap-2">
+            <h1 className="text-center">Sihteerikirjeet {currentLetterYear}</h1>
+            <button
+              onClick={() => goToToday("letters")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <MdOutlineToday className="text-2xl" />
+            </button>
+          </div>
+          {Number(thisYear) > Number(currentLetterYear) ? (
+            <button
+              onClick={() => goToNextYear("letters")}
+              className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
+            >
+              <IoIosArrowForward className="text-2xl" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-center h-8 w-8 rounded-full text-greylight">
+              <IoIosArrowForward className="text-2xl" />
+            </div>
+          )}
+        </div>
         <div className="md:mx-8">
           <table className="mb-8">
+            <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Päivämäärä</th>
-              <th scope="col">Sihteerikirje</th>
-              <th scope="col"></th>
+              <th className="bg-green text-white" scope="col">
+                #
+              </th>
+              <th className="bg-green text-white" scope="col">
+                Päivämäärä
+              </th>
+              <th className="bg-green text-white" scope="col">
+                Sihteerikirje
+              </th>
+              {admin && <th className="bg-green text-white" scope="col"></th>}
             </tr>
-            {letters.map((file, index) => {
+            </thead>
+            <tbody>
+
+            {filteredLetters.map((file, index) => {
               if (file.name === ".emptyFolderPlaceholder") return false;
               const [year, month, day] = file.name
-                .replace("-sihteerikirje.pdf", "")
-                .split("-");
+              .replace("-sihteerikirje.pdf", "")
+              .split("-");
               const date = `${day}.${month}.${year}`;
+              const fileNum = index + 1;
               return (
-                <>
-                  <tr>
-                    <td>{index}</td>
+                <tr key={index}>
+                    <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
                       <button
@@ -394,23 +543,25 @@ const AdminBoardForm = () => {
                         pdf
                       </button>
                     </td>
-                    <td>
-                      <IoTrash
-                        onClick={() =>
-                          handleDelete(
-                            "hallitus",
-                            `sihteerikirjeet/${file.name}`
-                          )
-                        }
-                        className="cursor-pointer hover:text-orange text-grey text-2xl"
-                      />
-                    </td>
+                    {admin && (
+                      <td>
+                        <IoTrash
+                          onClick={() =>
+                            handleDelete(
+                              "hallitus",
+                              `sihteerikirjeet/${file.name}`
+                            )
+                          }
+                          className="cursor-pointer hover:text-orange text-grey text-2xl"
+                          />
+                      </td>
+                    )}
                   </tr>
-                </>
               );
             })}
+            </tbody>
           </table>
-          {showConfirmation && (
+          {showConfirmation && admin && (
             <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-xl mb-4">
@@ -420,7 +571,7 @@ const AdminBoardForm = () => {
                   <FilledButton
                     onClick={cancelDelete}
                     title="Peruuta"
-                    color="greylight"
+                    color="grey"
                   />
                   <FilledButton
                     onClick={confirmDelete}
@@ -431,14 +582,17 @@ const AdminBoardForm = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-end">
-            <FilledButton
-              onClick={() => setShowAddLetterForm(!showAddLetterForm)}
-              title="Lisää tiedosto"
-              color="blue"
-            />
-          </div>
-          {showAddLetterForm && (
+          {admin && (
+            <div className="flex justify-end">
+              <FilledButton
+                onClick={() => setShowAddLetterForm(!showAddLetterForm)}
+                icon={<FaPlus />}
+                title="Lisää tiedosto"
+                color="blue"
+              />
+            </div>
+          )}
+          {showAddLetterForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               {letterUploading ? (
                 "Ladataan ..."
@@ -506,4 +660,4 @@ const AdminBoardForm = () => {
   );
 };
 
-export default AdminBoardForm;
+export default BoardForm;

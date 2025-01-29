@@ -1,18 +1,22 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import AdminBoardForm from "./AdminBoardForm";
+import BoardForm from "./BoardForm";
+import { isAdmin } from "@/app/actions";
 
 const Board = async () => {
   // Check that the user is signed in, redirect to login page if not
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
-  if (!user) {
+  if (error || !user) {
     return redirect("/");
   }
 
-  return <AdminBoardForm />;
+  const admin = await isAdmin()
+
+  return <BoardForm admin={admin}/>;
 };
 
 export default Board;

@@ -17,6 +17,45 @@ export type GetUserType = {
   error: string | null;
 };
 
+export type UserAuthType = {
+  id: string;
+  email: string;
+  options: {
+    data: {
+      isAdmin: boolean | null;
+      firstName: string;
+      lastName: string;
+    };
+  };
+};
+
+export type InvitedUserType = {
+  created_at: Date;
+  token: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isAdmin: boolean;
+};
+
+export type AddToInvitedUsersType = Omit<InvitedUserType, "created_at">;
+
+export type GetInvitedUserType = {
+  userData: InvitedUserType | null;
+  error: string | null;
+};
+
+export type ResetPasswordType = {
+  created_at: Date;
+  token: string;
+  email: string;
+};
+
+export type GetResetPasswordType = {
+  userData: ResetPasswordType | null;
+  error: string | null;
+};
+
 export type EventType = {
   id: string | null;
   created: string | null;
@@ -39,9 +78,23 @@ export type EditEventType = {
   eventData: EventType | null;
   error: string | null;
 };
+
 export type AddEventType = Omit<EventType, "id" | "createdByName">;
 
 export type EventsByDateType = {
   eventData: EventType[] | null;
+  error: string | null;
+};
+
+export type CalloutTrainingType = {
+  id: string;
+  date: string;
+  organiser: string[];
+  dogHead1: string | null;
+  dogHead2: string | null;
+};
+
+export type GetCalloutTrainingsType = {
+  data: CalloutTrainingType[] | null;
   error: string | null;
 };

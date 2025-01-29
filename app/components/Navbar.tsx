@@ -10,6 +10,7 @@ import { FaSuitcase } from "react-icons/fa";
 import { GoBellFill } from "react-icons/go";
 import { FaBookOpen } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
+import { RiUserSettingsLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 
@@ -21,6 +22,9 @@ const Navbar = () => {
     "/editevent",
     "/board",
     "/calloutgroup",
+    "/calloutgroup/board",
+    "/calloutgroup/trainings",
+    "/calloutgroup/participation",
     "/contacts",
     "/groups",
     "/instructions",
@@ -137,6 +141,7 @@ const Navbar = () => {
             <FaUserCircle className="text-2xl" />
             Omat tiedot
           </Link>
+
         </div>
         <div className="row-span-3 flex flex-col justify-evenly">
           <LogoutForm

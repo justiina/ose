@@ -4,7 +4,7 @@ import LoginForm from "./LoginForm";
 
 const Login = async () => {
   // Redirect to main if user is logged in
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

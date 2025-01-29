@@ -9,7 +9,7 @@ import LoadingIndicator from "@/app/components/LoadingIndicator";
 
 const Groups = async () => {
   // Check that the user is signed in, redirect to login page if not
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

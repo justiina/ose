@@ -12,12 +12,11 @@ import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
 import { GrGroup } from "react-icons/gr";
-import { HOST } from "@/app/components/HostInfo";
 import FilledButton from "@/app/components/Buttons";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const searchParams = useSearchParams()!;
@@ -55,7 +54,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
       };
       fetchData();
     }
-    setLoading(false);
+    setIsLoading(false);
   }, [dateParams]);
 
   const handleDelete = (eventId: string | null) => {
@@ -84,7 +83,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
 
   return (
     <div>
-      {loading ? (
+      {isLoading ? (
         <p>Loading...</p>
       ) : events != undefined ? (
         events.length > 0 ? (
@@ -123,7 +122,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
                         />
                         <Link
-                          href={`${HOST}/editevent?event=${event.id}`}
+                          href={`${process.env.NEXT_PUBLIC_BASE_URL}/editevent?event=${event.id}`}
                           className="cursor-pointer hover:text-blue text-grey text-2xl"
                         >
                           <MdOutlineEdit />
@@ -165,25 +164,25 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                       <Link href={event.placeLink}>Karttalinkki</Link>
                     </p>
                   ) : (
-                    <p className="flex gap-2 text-greylight">
+                    <div className="flex gap-2 text-greylight">
                       <TbMap className="text-2xl" />
                       <p>-</p>
-                    </p>
+                    </div>
                   )}
                   <div className="flex gap-2">
-                    <p className="flex gap-2 text-greylight">
+                    <div className="flex gap-2 text-greylight">
                       <GrGroup className="text-2xl" />
                       {event.individuals ? (
                         <p>{event.individuals}</p>
                       ) : (
                         <p>-</p>
                       )}
-                    </p>
+                    </div>
 
-                    <p className="flex gap-2 text text-greylight">
+                    <div className="flex gap-2 text text-greylight">
                       <MdTimelapse className="text-2xl" />
                       {event.duration ? <p>{event.duration}</p> : <p>-</p>}
-                    </p>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
