@@ -427,16 +427,18 @@ export const getUserInfo = async (): Promise<GetUserType> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user !== undefined) {
-    const uid = user?.id;
+
+  if (user !== undefined && user !== null) {
+    const uid = user.id;
     try {
       const { data: userData, error } = await supabase
         .from("users")
         .select()
-        .eq("id", uid);
+        .eq("id", uid)
       if (error) {
         throw new Error(error.message);
       }
+
       if (userData && userData.length > 0) {
         const userObject = userData[0];
         const mappedUserData: UserType = {
@@ -452,9 +454,11 @@ export const getUserInfo = async (): Promise<GetUserType> => {
           showEmail: userObject.showEmail || false, // default to false if not provided
           showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
         };
+
         return { userData: mappedUserData, error: null };
+      
       } else {
-        return { userData: null, error: null };
+        return { userData: null, error: "Jotain meni vikaan" };
       }
     } catch (error: any) {
       return {
@@ -504,6 +508,7 @@ export const getUserById = async (uid: string): Promise<GetUserType> => {
   }
 };
 
+/*
 export const updateUserInfo = async (
   data: Partial<UserType>
 ): Promise<boolean | string> => {
@@ -512,13 +517,14 @@ export const updateUserInfo = async (
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
     if (user !== undefined) {
       const uid = user?.id;
-      const { data: userData, error } = await supabase
+      const { data:userData, error } = await supabase
         .from("users")
         .update(data)
         .eq("id", uid)
-        .select();
+
       if (error) {
         console.log(error);
         return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
@@ -534,6 +540,77 @@ export const updateUserInfo = async (
   // Return notification if none of the conditions are met
   return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
 };
+*/
+
+export const updateUserInfo = async (
+  data: Partial<UserType>
+): Promise<boolean | string> => {
+  const supabase = await createClient();
+
+  try {
+    // Fetch the current user
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData?.user) {
+      console.error("Error fetching user:", authError);
+      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+    }
+
+    const uid = authData.user.id;
+
+    // Update the user data
+    const { data: updatedData, error: updateError } = await supabase
+      .from("users")
+      .update(data)
+      .eq("id", uid);
+
+    if (updateError) {
+      console.error("Error updating user info:", updateError);
+      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+    }
+
+    if (updatedData) {
+      return true;
+    }
+
+    return "Tietoja ei päivitetty.\nYritä myöhemmin uudestaan.";
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+  }
+};
+
+export const updateUserById = async (
+  data: Partial<UserType>
+): Promise<boolean | string> => {
+  const supabase = await createClient();
+
+  try {
+    const uid = data.id;
+
+    // Update the user data
+    const { data: updatedData, error: updateError } = await supabase
+      .from("users")
+      .update(data)
+      .eq("id", uid);
+
+    if (updateError) {
+      console.error("Error updating user info:", updateError);
+      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+    }
+
+    if (updatedData) {
+      return true;
+    }
+
+    return "Tietoja ei päivitetty.\nYritä myöhemmin uudestaan.";
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+  }
+};
+
+
 
 export const getFirstName = async (uid: string | null): Promise<string> => {
   const supabase = await createClient();

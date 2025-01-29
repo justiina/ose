@@ -164,25 +164,25 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                       <Link href={event.placeLink}>Karttalinkki</Link>
                     </p>
                   ) : (
-                    <p className="flex gap-2 text-greylight">
+                    <div className="flex gap-2 text-greylight">
                       <TbMap className="text-2xl" />
                       <p>-</p>
-                    </p>
+                    </div>
                   )}
                   <div className="flex gap-2">
-                    <p className="flex gap-2 text-greylight">
+                    <div className="flex gap-2 text-greylight">
                       <GrGroup className="text-2xl" />
                       {event.individuals ? (
                         <p>{event.individuals}</p>
                       ) : (
                         <p>-</p>
                       )}
-                    </p>
+                    </div>
 
-                    <p className="flex gap-2 text text-greylight">
+                    <div className="flex gap-2 text text-greylight">
                       <MdTimelapse className="text-2xl" />
                       {event.duration ? <p>{event.duration}</p> : <p>-</p>}
-                    </p>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">

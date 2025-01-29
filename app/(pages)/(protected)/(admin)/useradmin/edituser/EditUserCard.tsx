@@ -1,5 +1,5 @@
 "use client";
-import { getUserById, updateUserInfo } from "@/app/actions";
+import { getUserById, updateUserById, updateUserInfo } from "@/app/actions";
 import { UserType } from "@/app/components/Types";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -164,9 +164,11 @@ const EditUserCard = () => {
 
   const handleSave = async () => {
     if (user !== null) {
-      const updateOk = await updateUserInfo(user);
+      const updateOk = await updateUserById(user);
       if (updateOk === true) {
         toast.success("Tietojen päivittäminen onnistui!");
+
+        // Update URL and React state to close the dialog
         const url = new URL(window.location.href);
         url.searchParams.delete("user");
         url.searchParams.delete("showDialog");
