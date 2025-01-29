@@ -241,7 +241,7 @@ export const addToPasswordResets = async (
 };
 
 export const deleteFromPasswordResets = async (
-  token: string,
+  token: string
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -434,7 +434,7 @@ export const getUserInfo = async (): Promise<GetUserType> => {
       const { data: userData, error } = await supabase
         .from("users")
         .select()
-        .eq("id", uid)
+        .eq("id", uid);
       if (error) {
         throw new Error(error.message);
       }
@@ -456,7 +456,6 @@ export const getUserInfo = async (): Promise<GetUserType> => {
         };
 
         return { userData: mappedUserData, error: null };
-      
       } else {
         return { userData: null, error: "Jotain meni vikaan" };
       }
@@ -557,6 +556,7 @@ export const updateUserInfo = async (
     }
 
     const uid = authData.user.id;
+    console.log(uid)
 
     // Update the user data
     const { data: updatedData, error: updateError } = await supabase
@@ -565,15 +565,11 @@ export const updateUserInfo = async (
       .eq("id", uid);
 
     if (updateError) {
-      console.error("Error updating user info:", updateError);
       return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
     }
 
-    if (updatedData) {
-      return true;
-    }
-
-    return "Tietoja ei päivitetty.\nYritä myöhemmin uudestaan.";
+    return true;
+    
   } catch (error) {
     console.error("Unexpected error:", error);
     return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
@@ -609,8 +605,6 @@ export const updateUserById = async (
     return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
   }
 };
-
-
 
 export const getFirstName = async (uid: string | null): Promise<string> => {
   const supabase = await createClient();

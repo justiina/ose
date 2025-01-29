@@ -18,7 +18,10 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 import { FaPlus, FaListUl, FaRegCalendarAlt } from "react-icons/fa";
 import { LuFilter, LuFilterX } from "react-icons/lu";
-import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
+import {
+  EventColorAndIconMap,
+  eventTypeOptions,
+} from "../../../components/StyleMappingAndOptions";
 import { EventType } from "@/app/components/Types";
 import Dialog from "@/app/components/Dialog";
 import Link from "next/link";
@@ -55,6 +58,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showList, setShowList] = useState<boolean>(false);
   const [filterActive, setFilterActive] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   useEffect(() => {
     if (dateParams !== null && eventDate !== dateParams) {
@@ -87,6 +91,13 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     };
     fetchData();
   }, [dateParams]);
+
+  // Remove all filters when filterActive is false
+  useEffect(() => {
+    if (!filterActive) {
+      setSelectedFilters([]);
+    }
+  }, [filterActive]);
 
   const daysInMonth = eachDayOfInterval({
     start: firstDayOfMonth,
@@ -133,6 +144,23 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     setCurrentDate(addYears(currentDate, 1));
   };
 
+  const handleSelectAll = () => {
+    if (selectedFilters.length === Object.keys(EventColorAndIconMap).length) {
+      setSelectedFilters([]); // Deselect all
+    } else {
+      setSelectedFilters(Object.keys(EventColorAndIconMap)); // Select all
+    }
+  };
+
+  const handleCheckboxChange = (type: string) => {
+    setSelectedFilters(
+      (prev) =>
+        prev.includes(type)
+          ? prev.filter((item) => item !== type) // uncheck
+          : [...prev, type] // check
+    );
+  };
+
   const filterEvents = () => {
     setFilterActive(!filterActive);
   };
@@ -145,7 +173,15 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
 
   const renderEventList = () => {
     const filteredEvents = events.filter((event) => {
-      return new Date(event.date).getFullYear() === currentDate.getFullYear();
+      // Filter by year
+      const isSameYear =
+        new Date(event.date).getFullYear() === currentDate.getFullYear();
+
+      // Filter by event type
+      const filteredByType =
+        selectedFilters.length === 0 || selectedFilters.includes(event.type);
+
+      return isSameYear && filteredByType;
     });
     const eventsByMonthAndYear = filteredEvents.reduce(
       (acc: { [key: string]: EventType[] }, event) => {
@@ -273,6 +309,39 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             </button>
           </div>
         </div>
+        {filterActive && (
+          <div className="flex flex-wrap gap-x-4">
+            {/* Select All Checkbox */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="select_all"
+                className="mr-1"
+                checked={
+                  selectedFilters.length ===
+                  Object.keys(EventColorAndIconMap).length
+                }
+                onChange={handleSelectAll}
+              />
+              <label htmlFor="select_all">Valitse kaikki</label>
+            </div>
+            {/* Event Type Checkboxes */}
+            {Object.keys(EventColorAndIconMap).map((type) => {
+              return (
+                <div key={type} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`checkbox_${type}`}
+                    className="mr-1"
+                    checked={selectedFilters.includes(type)}
+                    onChange={() => handleCheckboxChange(type)}
+                  />
+                  <label htmlFor={`checkbox_${type}`}>{type}</label>
+                </div>
+              );
+            })}
+          </div>
+        )}
         {showList ? (
           renderEventList()
         ) : (
@@ -294,6 +363,14 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             {daysInMonth.map((day, index) => {
               const dateKey = format(day, "yyyy-MM-dd");
               const todaysEvents = eventsByDate[dateKey] || [];
+
+              // Filter events based on the selected filters
+              const filteredEvents = selectedFilters.length
+                ? todaysEvents.filter((event) =>
+                    selectedFilters.includes(event.type)
+                  )
+                : todaysEvents;
+
               return (
                 <Link
                   href={`${process.env.NEXT_PUBLIC_BASE_URL}/main?showDialog=y&date=${dateKey}`}
@@ -306,7 +383,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                 >
                   {/*---Add events from Supabase---*/}
                   {format(day, "d")}
-                  {todaysEvents.map((event, index) => {
+                  {filteredEvents.map((event, index) => {
                     const backgroundColor =
                       EventColorAndIconMap[event.type].color || "bg-grey";
 

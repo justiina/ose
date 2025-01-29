@@ -17,7 +17,7 @@ const EditUserForm = () => {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteUid, setDeleteUid] = useState<string | null>(null);
 
-  // Fetch the events data
+  // Fetch the users data
   useEffect(() => {
     const fetchData = async () => {
       try {

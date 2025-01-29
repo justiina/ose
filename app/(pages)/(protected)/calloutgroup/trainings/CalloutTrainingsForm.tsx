@@ -344,9 +344,9 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
                     {admin && (
                       <td>
                         {showEdit && editRowIndex === index ? (
-                          <>
+                          <div>
                             <button
-                              className="mr-2 p-1 py-1 px-3 rounded-lg text-grey border-2 border-grey hover:text-white hover:bg-grey active:text-white active:bg-grey"
+                              className="mr-2 p-1 py-1 px-3 mb-1 rounded-lg text-grey border-2 border-grey hover:text-white hover:bg-grey active:text-white active:bg-grey"
                               onClick={cancelEdit}
                             >
                               Peru
@@ -357,7 +357,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
                             >
                               Tallenna
                             </button>
-                          </>
+                          </div>
                         ) : (
                           <div className="flex gap-2">
                             <IoTrash
