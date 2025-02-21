@@ -41,7 +41,7 @@ export const selectEventType = (selectedOption: string) => {
       selected = "Taso 2";
       break;
     case "Taso 3 treeni":
-      selected = "Taso 2";
+      selected = "Taso 3";
       break;
     case "Raahen treeni":
       selected = "Raahe";
