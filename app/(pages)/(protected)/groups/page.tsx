@@ -18,7 +18,6 @@ const Groups = async () => {
   }
 
   let events: EventType[] = [];
-  let isLoading: boolean = true;
 
   const allEvents = await getGroupEvents();
   if (allEvents !== undefined) {
@@ -28,7 +27,6 @@ const Groups = async () => {
       events = await Promise.all(
         allEvents.map(async (event: EventType) => {
           const firstName = await getFirstName(event.createdBy);
-          isLoading = false;
           return {
             id: event.id,
             created: showDateAndTime(event.created) || null,
@@ -46,11 +44,17 @@ const Groups = async () => {
           };
         })
       );
+      console.log(events);
     }
   }
 
-  if (isLoading) {
-    return <LoadingIndicator />;
+  if (events.length === 0) {
+    return (
+      <div className="container mx-auto p-8 lg:p-16">
+        <h1 className="mb-4">Viikkotreenit ryhmittäin</h1>
+        <p className="mb-4">Ei saatavilla olevia tapahtumia.</p>
+      </div>
+    );
   }
 
   return (

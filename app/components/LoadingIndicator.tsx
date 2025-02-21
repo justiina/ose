@@ -28,4 +28,4 @@ export const SmallLoadingIndicator = () => {
   );
 };
 
-export default LoadingIndicator;
+export default LoadingIndicator

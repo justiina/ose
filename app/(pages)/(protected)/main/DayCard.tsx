@@ -73,6 +73,12 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
       const deleteOk = await deleteEvent(deleteId);
       if (deleteOk) {
         setShowConfirmation(false);
+        const url = new URL(window.location.href);
+        url.searchParams.delete("showDialog");
+        url.searchParams.delete("date");
+        window.history.replaceState({}, "", url.toString());
+        window.location.reload();
+        return
       } else {
         toast.error(deleteOk, { id: "delError" });
         return;
