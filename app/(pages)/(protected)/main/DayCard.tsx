@@ -8,11 +8,11 @@ import { IoLocationOutline, IoTrash } from "react-icons/io5";
 import { EventColorAndIconMap } from "../../../components/StyleMappingAndOptions";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { FaPlus } from "react-icons/fa";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TbMap } from "react-icons/tb";
 import { GrGroup } from "react-icons/gr";
 import FilledButton from "@/app/components/Buttons";
+import { SmallLoadingIndicator } from "@/app/components/LoadingIndicator";
 
 const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -27,6 +27,8 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   useEffect(() => {
     if (dateParams !== null) {
       const fetchData = async () => {
+        setIsLoading(true);
+
         const { eventData, error } = await getEventsByDate(dateParams);
         if (eventData) {
           const eventsWithCreatorNames = await Promise.all(
@@ -50,11 +52,13 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
             })
           );
           setEvents(eventsWithCreatorNames);
+        } else {
+          setEvents([]);
         }
+        setIsLoading(false);
       };
       fetchData();
     }
-    setIsLoading(false);
   }, [dateParams]);
 
   const handleDelete = (eventId: string | null) => {
@@ -84,127 +88,119 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
   return (
     <div>
       {isLoading ? (
-        <p>Loading...</p>
-      ) : events != undefined ? (
-        events.length > 0 ? (
-          <>
-            {events.map((event, index) => (
-              <div key={index}>
-                <div className="flex justify-between border-y-2 border-greylight py-2">
+        <SmallLoadingIndicator />
+      ) : events.length === 0 ? (
+        <p>Ei tapahtumia</p>
+      ) : (
+        <>
+          {events.map((event, index) => (
+            <div key={index}>
+              <div className="flex justify-between border-y-2 border-greylight py-2">
+                <div className="flex items-center justify-start ml-2 gap-1">
+                  <MdAccessTime className="text-xl" />
+                  <p>{event.time}</p>
+                </div>
+                {event.place && (
                   <div className="flex items-center justify-start ml-2 gap-1">
-                    <MdAccessTime className="text-xl" />
-                    <p>{event.time}</p>
-                  </div>
-                  {event.place && (
-                    <div className="flex items-center justify-start ml-2 gap-1">
-                      <IoLocationOutline className="text-xl" />
-                      <p>{event.place}</p>
-                    </div>
-                  )}
-
-                  <p
-                    className={`${
-                      EventColorAndIconMap[event.type || ""].color || "bg-grey"
-                    } text-white cursor-pointer flex items-center justify-center text-sm rounded-full px-4 py-0.5 mr-6`}
-                  >
-                    {event.type}
-                  </p>
-                </div>
-                <div className="mx-6 my-4">
-                  <div className="flex justify-between">
-                    <h2>{event.title}</h2>
-
-                    {/*--- Show delete and edit buttons only if currentUser has created it --- */}
-                    {currentUser === event.createdBy && (
-                      <div className="flex gap-2">
-                        <IoTrash
-                          onClick={() => handleDelete(event.id)}
-                          className="cursor-pointer hover:text-orange text-grey text-2xl"
-                        />
-                        <Link
-                          href={`${process.env.NEXT_PUBLIC_BASE_URL}/editevent?event=${event.id}`}
-                          className="cursor-pointer hover:text-blue text-grey text-2xl"
-                        >
-                          <MdOutlineEdit />
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                  <p className="my-1">{event.details}</p>
-                </div>
-
-                {showConfirmation && (
-                  <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-8 rounded-lg shadow-lg">
-                      <h2 className="text-xl mb-4">
-                        Haluatko varmasti poistaa tapahtuman?
-                      </h2>
-                      <div className="flex justify-end">
-                        <button
-                          onClick={cancelDelete}
-                          className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                        >
-                          Peruuta
-                        </button>
-                        <button
-                          onClick={confirmDelete}
-                          className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
-                        >
-                          OK
-                        </button>
-                      </div>
-                    </div>
+                    <IoLocationOutline className="text-xl" />
+                    <p>{event.place}</p>
                   </div>
                 )}
 
-                <div className="flex mx-6 justify-between">
-                  {event.placeLink ? (
-                    <p className="flex gap-2">
-                      <TbMap className="text-2xl" />
-                      <Link href={event.placeLink}>Karttalinkki</Link>
-                    </p>
-                  ) : (
-                    <div className="flex gap-2 text-greylight">
-                      <TbMap className="text-2xl" />
-                      <p>-</p>
+                <p
+                  className={`${
+                    EventColorAndIconMap[event.type || ""].color || "bg-grey"
+                  } text-white cursor-pointer flex items-center justify-center text-sm rounded-full px-4 py-0.5 mr-6`}
+                >
+                  {event.type}
+                </p>
+              </div>
+              <div className="mx-6 my-4">
+                <div className="flex justify-between">
+                  <h2>{event.title}</h2>
+
+                  {/*--- Show delete and edit buttons only if currentUser has created it --- */}
+                  {currentUser === event.createdBy && (
+                    <div className="flex gap-2">
+                      <IoTrash
+                        onClick={() => handleDelete(event.id)}
+                        className="cursor-pointer hover:text-orange text-grey text-2xl"
+                      />
+                      <Link
+                        href={`${process.env.NEXT_PUBLIC_BASE_URL}/editevent?event=${event.id}`}
+                        className="cursor-pointer hover:text-blue text-grey text-2xl"
+                      >
+                        <MdOutlineEdit />
+                      </Link>
                     </div>
                   )}
-                  <div className="flex gap-2">
-                    <div className="flex gap-2 text-greylight">
-                      <GrGroup className="text-2xl" />
-                      {event.individuals ? (
-                        <p>{event.individuals}</p>
-                      ) : (
-                        <p>-</p>
-                      )}
-                    </div>
+                </div>
+                <p className="my-1">{event.details}</p>
+              </div>
 
-                    <div className="flex gap-2 text text-greylight">
-                      <MdTimelapse className="text-2xl" />
-                      {event.duration ? <p>{event.duration}</p> : <p>-</p>}
+              {showConfirmation && (
+                <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white p-8 rounded-lg shadow-lg">
+                    <h2 className="text-xl mb-4">
+                      Haluatko varmasti poistaa tapahtuman?
+                    </h2>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={cancelDelete}
+                        className="mr-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                      >
+                        Peruuta
+                      </button>
+                      <button
+                        onClick={confirmDelete}
+                        className="px-4 py-2 bg-orange text-white rounded-lg hover:bg-orangehover"
+                      >
+                        OK
+                      </button>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
-                  {event.createdByName ? (
-                    <>
-                      <p>Lisännyt: {event.createdByName}</p>
-                      <p>{event.created}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p>Lisätty: {event.created}</p>
-                    </>
-                  )}
+              )}
+
+              <div className="flex mx-6 justify-between">
+                {event.placeLink ? (
+                  <p className="flex gap-2">
+                    <TbMap className="text-2xl" />
+                    <Link href={event.placeLink}>Karttalinkki</Link>
+                  </p>
+                ) : (
+                  <div className="flex gap-2 text-greylight">
+                    <TbMap className="text-2xl" />
+                    <p>-</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <div className="flex gap-2 text-greylight">
+                    <GrGroup className="text-2xl" />
+                    {event.individuals ? <p>{event.individuals}</p> : <p>-</p>}
+                  </div>
+
+                  <div className="flex gap-2 text text-greylight">
+                    <MdTimelapse className="text-2xl" />
+                    {event.duration ? <p>{event.duration}</p> : <p>-</p>}
+                  </div>
                 </div>
               </div>
-            ))}
-          </>
-        ) : (
-          <p>Ei tapahtumia</p>
-        )
-      ) : (
-        <p>Ei tapahtumia</p>
+              <div className="flex justify-end mx-6 my-4 gap-1 text-greylight">
+                {event.createdByName ? (
+                  <>
+                    <p>Lisännyt: {event.createdByName}</p>
+                    <p>{event.created}</p>
+                  </>
+                ) : (
+                  <>
+                    <p>Lisätty: {event.created}</p>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </>
       )}
       <div className="flex justify-center my-6">
         <FilledButton

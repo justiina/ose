@@ -1,5 +1,5 @@
 "use client";
-import { deleteUser, getAllUsers, updateUserRole } from "@/app/actions";
+import { deleteUser, getAllUsers } from "@/app/actions";
 import Dialog from "@/app/components/Dialog";
 import EditUserCard from "./EditUserCard";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
@@ -16,6 +16,7 @@ const EditUserForm = () => {
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteUid, setDeleteUid] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState<string>("");
 
   // Fetch the users data
   useEffect(() => {
@@ -52,13 +53,18 @@ const EditUserForm = () => {
     setShowDelete(newState);
   };
 
-  const handleDelete = (uid: string | null) => {
+  const handleDelete = (
+    uid: string | null,
+    firstName: string,
+    lastName: string
+  ) => {
     if (uid === null) {
       toast.error(
         "Käyttäjätunnusta ei löytynyt!\nYritä myöhemmin uudestaan ja ota yhteys sivuston ylläpitäjään, jos ongelma toistuu."
       );
     }
     setShowConfirmation(true);
+    setDeleteName(`${firstName} ${lastName}`);
     setDeleteUid(uid);
   };
 
@@ -109,7 +115,15 @@ const EditUserForm = () => {
                   {showDelete && (
                     <IoTrash
                       className="text-orange hover:text-background text-2xl cursor-pointer"
-                      onClick={() => handleDelete(user.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleDelete(
+                          user.id,
+                          user.firstName || "",
+                          user.lastName || ""
+                        );
+                      }}
                     />
                   )}
                 </Link>
@@ -124,7 +138,8 @@ const EditUserForm = () => {
       {showConfirmation && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl">Haluatko varmasti poistaa käyttäjän?</h2>
+            <h2 className="text-xl">Haluatko varmasti poistaa käyttäjän</h2>
+            <h2 className="text-xl">{deleteName}?</h2>
             <h2 className="text-xl mb-4 text-red-700">
               HUOM! Tätä toimintoa ei voi peruuttaa!!
             </h2>

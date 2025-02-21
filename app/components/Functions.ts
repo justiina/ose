@@ -34,17 +34,14 @@ export const showDate = (date: Date) => {
 export const selectEventType = (selectedOption: string) => {
   let selected: string = "";
   switch (selectedOption) {
-    case "MaA-treeni":
-      selected = "MaA";
+    case "Taso 1 treeni":
+      selected = "Taso 1";
       break;
-    case "MaB-treeni":
-      selected = "MaB";
+    case "Taso 2 treeni":
+      selected = "Taso 2";
       break;
-    case "TiA-treeni":
-      selected = "TiA";
-      break;
-    case "TiB-treeni":
-      selected = "TiB";
+    case "Taso 3 treeni":
+      selected = "Taso 2";
       break;
     case "Raahen treeni":
       selected = "Raahe";

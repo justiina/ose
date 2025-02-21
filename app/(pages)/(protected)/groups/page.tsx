@@ -61,26 +61,20 @@ const Groups = async () => {
       </p>
       <EventCard
         events={events}
-        heading="Maanantai A"
-        group="MaA"
+        heading="Taso 1"
+        group="Taso 1"
         currentUser={user.id}
       />
       <EventCard
         events={events}
-        heading="Maanantai B"
-        group="MaB"
+        heading="Taso 2"
+        group="Taso 2"
         currentUser={user.id}
       />
       <EventCard
         events={events}
-        heading="Tiistai A"
-        group="TiA"
-        currentUser={user.id}
-      />
-      <EventCard
-        events={events}
-        heading="Tiistai B"
-        group="TiB"
+        heading="Taso 3"
+        group="Taso 3"
         currentUser={user.id}
       />
       <EventCard
