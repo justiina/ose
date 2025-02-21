@@ -1,5 +1,5 @@
 "use client";
-import { addToPasswordResets } from "@/app/actions";
+import { getUserByEmail, addToPasswordResets } from "@/app/actions";
 import FilledButton from "@/app/components/Buttons";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -15,12 +15,21 @@ const ForgotPasswordForm = () => {
       toast.error("Anna sähköpostiosoitteesi!");
       return;
     } else {
-      await fetch("api/resetpassword", {
-        method: "POST",
-        body: JSON.stringify({ token, email }),
-      }).then(() => {
-        saveToPasswordResets();
-      });
+      // Check if the email is from registered user
+      const userOk = await getUserByEmail(email);
+      if (userOk) {
+        await fetch("api/resetpassword", {
+          method: "POST",
+          body: JSON.stringify({ token, email }),
+        }).then(() => {
+          saveToPasswordResets();
+        });
+      } else {
+        toast.error(
+          "Antamaasi sähköpostia ei ole rekisteröity!\nOle yhteyksissä sihteeriin."
+        );
+        return router.push("/");
+      }
     }
   };
 

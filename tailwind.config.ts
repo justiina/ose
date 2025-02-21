@@ -32,6 +32,7 @@ const config: Config = {
         greenhover: "#1E9533",
         purple: "#D21BEF",
         yellow: "#F5B715",
+        cyan: "#17BEBB",
       },
     },
   },

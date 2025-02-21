@@ -191,6 +191,37 @@ export const updateUserRole = async (
   }
 };
 
+export const getUserByEmail = async (email: string): Promise<boolean | any> => {
+  const supabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SERVICE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email);
+    if (error) {
+      return {
+        error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+      };
+    }
+    if (data && data.length > 0) {
+      return true;
+    } else return false;
+  } catch (error) {
+    return {
+      error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
+    };
+  }
+};
+
 export const resetPassword = async (
   id: string,
   password: string
@@ -556,7 +587,7 @@ export const updateUserInfo = async (
     }
 
     const uid = authData.user.id;
-    console.log(uid)
+    console.log(uid);
 
     // Update the user data
     const { data: updatedData, error: updateError } = await supabase
@@ -569,7 +600,6 @@ export const updateUserInfo = async (
     }
 
     return true;
-    
   } catch (error) {
     console.error("Unexpected error:", error);
     return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
@@ -734,7 +764,7 @@ export const getGroupEvents = async () => {
     const { data: eventData } = await supabase
       .from("events")
       .select("*")
-      .in("type", ["MaA", "MaB", "TiA", "TiB", "Raahe"])
+      .in("type", ["Taso 1", "Taso 2", "Taso 3", "Raahe"])
       .order("date", { ascending: false });
     if (eventData) {
       return eventData;

@@ -33,6 +33,7 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
     individuals: 0,
     duration: "",
   });
+  const [isFullDay, setIsFullDay] = useState<boolean>(false);
 
   // Set up the auto height of textarea used in details section
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -47,7 +48,12 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
       if (fieldName === "date") {
         const [day, time] = e.target.value.split("T");
-        setFormData({ ...formData, date: day, time: time });
+        if (isFullDay) {
+          // If full-day event, only save the date, clear time
+          setFormData({ ...formData, date: day, time: "" });
+        } else {
+          setFormData({ ...formData, date: day, time: time });
+        }
       } else {
         setFormData({ ...formData, [fieldName]: e.target.value });
       }
@@ -123,14 +129,25 @@ const AddEventForm = ({ currentUser, date }: PropsType) => {
             <label className="font-bold">Aika</label>
             <p className="text-orange">*</p>
           </div>
-          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4">
+            {/* Show 'date' input if full-day is checked, otherwise 'datetime-local' */}
             <input
               id="datetimeInput"
               aria-label="Date and time"
-              type="datetime-local"
+              type={isFullDay ? "date" : "datetime-local"}
               defaultValue={`${formData.date}T${formData.time}` || ""}
               onChange={handleInputChange("date")}
             />
+          </div>
+          <div className="flex items-center mb-2">
+            <input
+              className="mr-1"
+              id="fullDayCheckbox"
+              type="checkbox"
+              checked={isFullDay}
+              onChange={() => setIsFullDay(!isFullDay)}
+            />
+            <label>Koko päivä</label>
           </div>
         </div>
 

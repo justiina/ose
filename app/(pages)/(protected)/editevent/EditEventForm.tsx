@@ -18,6 +18,7 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [event, setEvent] = useState<EditEventTypeForm | null>(null);
   const [defaultTime, setDefaultTime] = useState<string | null>(null);
+  const [isFullDay, setIsFullDay] = useState<boolean>(false);
 
   // Initialise router
   const router = useRouter();
@@ -58,7 +59,12 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
     (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
       if (fieldName === "date") {
         const [day, time] = e.target.value.split("T");
-        setEvent({ ...event!, date: day, time: time });
+        if (isFullDay) {
+          // If full-day event, only save the date, clear time
+          setEvent({ ...event!, date: day, time: "" });
+        } else {
+          setEvent({ ...event!, date: day, time: time });
+        }
       } else {
         setEvent({ ...event!, [fieldName]: e.target.value });
       }
@@ -125,14 +131,24 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
             <label className="font-bold">Aika</label>
             <p className="text-orange">*</p>
           </div>
-          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+          <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4">
+            {/* Show 'date' input if full-day is checked, otherwise 'datetime-local' */}
             <input
               id="datetimeInput"
               aria-label="Date and time"
-              type="datetime-local"
-              defaultValue={defaultTime || ""}
+              type={isFullDay ? "date" : "datetime-local"}
               onChange={handleInputChange("date")}
             />
+          </div>
+          <div className="flex items-center mb-2">
+            <input
+              className="mr-1"
+              id="fullDayCheckbox"
+              type="checkbox"
+              checked={isFullDay}
+              onChange={() => setIsFullDay(!isFullDay)}
+            />
+            <label>Koko päivä</label>
           </div>
         </div>
 
