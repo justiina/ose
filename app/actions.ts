@@ -161,36 +161,6 @@ export const deleteUser = async (
   }
 };
 
-// Update user role in the metadata
-export const updateUserRole = async (
-  uid: string
-): Promise<{ success: boolean; error?: string }> => {
-  try {
-    const supabase = await createClient();
-
-    // Update user metadata
-    const { error } = await supabase.auth.admin.updateUserById(uid, {
-      user_metadata: { role: "service_role" },
-    });
-
-    if (error) {
-      console.error("Error updating user role:", error.message);
-      return {
-        success: false,
-        error: "Failed to update user role. Please try again.",
-      };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error("Unexpected Error:", err);
-    return {
-      success: false,
-      error: "An unexpected error occurred. Please try again.",
-    };
-  }
-};
-
 export const getUserByEmail = async (email: string): Promise<boolean | any> => {
   const supabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -452,6 +422,18 @@ export const isAdmin = async (): Promise<boolean> => {
   return false;
 };
 
+export const getAdminUsers = async () => {
+  const supabase = await createClient();
+  try {
+    const { data: userData } = await supabase.from("adminUsers").select("*");
+    if (userData) {
+      return userData;
+    }
+  } catch (error: any) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
 // USER INFO FROM SUPABASE DATABASE
 export const getUserInfo = async (): Promise<GetUserType> => {
   const supabase = await createClient();
@@ -535,6 +517,50 @@ export const getUserById = async (uid: string): Promise<GetUserType> => {
       userData: null,
       error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan.",
     };
+  }
+};
+
+export const getAdminById = async (uid: string): Promise<boolean> => {
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase
+      .from("adminUsers")
+      .select("user_id")
+      .eq("user_id", uid)
+      .single();
+    return !!data && !error;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const addToAdmins = async (
+  uid: string,
+  email: string | null
+): Promise<boolean> => {
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase
+      .from("adminUsers")
+      .upsert([{ user_id: uid, email: email }], { onConflict: "user_id" })
+      .select();
+    return !!data && !error;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const removeFromAdmins = async (uid: string): Promise<boolean> => {
+  const supabase = await createClient();
+  try {
+    const { error } = await supabase
+      .from("adminUsers")
+      .delete()
+      .eq("user_id", uid);
+    console.log("uid:", uid)
+    return !error;
+  } catch (error) {
+    return false;
   }
 };
 
@@ -622,14 +648,9 @@ export const updateUserById = async (
 
     if (updateError) {
       console.error("Error updating user info:", updateError);
-      return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+      return "Tietoja ei päivitetty.\nYritä myöhemmin uudestaan.";
     }
-
-    if (updatedData) {
-      return true;
-    }
-
-    return "Tietoja ei päivitetty.\nYritä myöhemmin uudestaan.";
+    return true;
   } catch (error) {
     console.error("Unexpected error:", error);
     return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";

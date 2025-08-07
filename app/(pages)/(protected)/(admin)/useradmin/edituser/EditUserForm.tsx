@@ -1,17 +1,19 @@
 "use client";
-import { deleteUser, getAllUsers } from "@/app/actions";
+import { deleteUser, getAllUsers, getAdminUsers } from "@/app/actions";
 import Dialog from "@/app/components/Dialog";
 import EditUserCard from "./EditUserCard";
 import LoadingIndicator from "@/app/components/LoadingIndicator";
-import { UserType } from "@/app/components/Types";
+import { UserType, AdminType } from "@/app/components/Types";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import FilledButton, { ToggleSwitch } from "@/app/components/Buttons";
 import { IoTrash } from "react-icons/io5";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 const EditUserForm = () => {
   const [users, setUsers] = useState<UserType[]>([]);
+  const [admins, setAdmins] = useState<AdminType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
@@ -31,8 +33,19 @@ const EditUserForm = () => {
               (doc) => doc as UserType
             );
             setUsers(userArray);
-            setIsLoading(false);
           }
+        }
+        const adminData = await getAdminUsers();
+        if (adminData !== undefined) {
+          if ("error" in adminData) {
+            toast.error(adminData.error, { id: "fetchAdminError" });
+          } else {
+            const adminArray: AdminType[] = adminData.map(
+              (doc) => doc as AdminType
+            );
+            setAdmins(adminArray);
+          }
+          setIsLoading(false);
         }
       } catch (error: any) {
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
@@ -96,6 +109,12 @@ const EditUserForm = () => {
       <div className="container max-w-screen-md">
         <div className="mb-8">
           <h1 className="mb-4">Kaikki rekisteröityneet käyttäjät</h1>
+          <p className="mb-4 text-base">
+            <MdAdminPanelSettings className="inline align-middle text-2xl mr-1" />
+            -kuvake nimen vieressä tarkoittaa, että käyttäjällä on
+            admin-oikeudet. Oikeuksia ja muita tietoja voi muuttaa
+            klikkaamalla käyttäjän nimeä.
+          </p>
           <div className="flex justify-end">
             <ToggleSwitch
               title="Käyttäjän poistaminen"
@@ -105,29 +124,40 @@ const EditUserForm = () => {
           </div>
           <div>
             <div className="grid space-y-4 p-4">
-              {users.map((user) => (
-                <Link
-                  className="flex justify-between bg-white shadow rounded-lg p-4 hover:bg-orange transition duration-300"
-                  key={user.id}
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/edituser?showDialog=y&user=${user.id}`}
-                >
-                  {user.lastName} {user.firstName}
-                  {showDelete && (
-                    <IoTrash
-                      className="text-orange hover:text-background text-2xl cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleDelete(
-                          user.id,
-                          user.firstName || "",
-                          user.lastName || ""
-                        );
-                      }}
-                    />
-                  )}
-                </Link>
-              ))}
+              {users.map((user) => {
+                const isAdmin = admins.some(
+                  (admin) => admin.user_id === user.id
+                );
+
+                return (
+                  <Link
+                    className="flex justify-between bg-white shadow rounded-lg p-4 hover:bg-greylighthover transition duration-300"
+                    key={user.id}
+                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/useradmin/edituser?showDialog=y&user=${user.id}`}
+                  >
+                    {user.lastName} {user.firstName}
+                    <div className="flex items-center gap-2">
+                      {isAdmin && (
+                        <MdAdminPanelSettings className="text-grey text-2xl" />
+                      )}
+                      {showDelete && (
+                        <IoTrash
+                          className="text-orange hover:text-background text-2xl cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDelete(
+                              user.id,
+                              user.firstName || "",
+                              user.lastName || ""
+                            );
+                          }}
+                        />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

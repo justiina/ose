@@ -12,6 +12,12 @@ export type UserType = {
   showPhoneNumber: boolean | undefined;
 };
 
+export type AdminType = {
+  id: number;
+  user_id: string;
+  email: string | null;
+}
+
 export type GetUserType = {
   userData: UserType | null;
   error: string | null;

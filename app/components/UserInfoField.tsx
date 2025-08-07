@@ -3,7 +3,7 @@ import { MdOutlineEdit } from "react-icons/md";
 
 type InputFieldType = {
   title: string;
-  content: string | string[] | undefined;
+  content: string | string[] | React.ReactNode | undefined;
   onEdit?: () => void;
 };
 
@@ -12,7 +12,7 @@ const UserInfoField: React.FC<InputFieldType> = ({
   content,
   onEdit,
 }) => {
-  const renderContent = (content: string | string[] | undefined) => {
+  const renderContent = (content: string | string[] | React.ReactNode | undefined) => {
     // Render content of strings
     if (typeof content === "string") {
       return <p className="text-xl">{content}</p>;
