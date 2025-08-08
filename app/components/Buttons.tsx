@@ -84,7 +84,28 @@ export const FilledLink: React.FC<OwnLinkProps> = ({
   }
 };
 
-export const ToggleSwitch: React.FC<ToggleProps> = ({ title, isOn, onToggle }) => {
+export const FilledRoundLink: React.FC<OwnLinkProps> = ({
+  title,
+  color,
+  href,
+  icon,
+}) => {
+  return (
+    <Link
+      href={href}
+      className={`w-12 h-12 flex items-center justify-center rounded-full text-white bg-${color}`}
+      aria-label={title}
+    >
+      {icon}
+    </Link>
+  );
+};
+
+export const ToggleSwitch: React.FC<ToggleProps> = ({
+  title,
+  isOn,
+  onToggle,
+}) => {
   return (
     <div className="flex items-center space-x-3">
       {/* Label */}
@@ -92,7 +113,8 @@ export const ToggleSwitch: React.FC<ToggleProps> = ({ title, isOn, onToggle }) =
       {/* Toggle Button */}
       <div
         className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-          isOn ? "bg-blue" : "bg-grey"}`}
+          isOn ? "bg-blue" : "bg-grey"
+        }`}
         onClick={() => onToggle(!isOn)} // Call the parent toggle function
       >
         {/* Circle */}

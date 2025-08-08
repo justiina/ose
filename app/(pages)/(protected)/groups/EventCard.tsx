@@ -17,7 +17,6 @@ type PropsType = {
 };
 
 const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
-  const [showData, setShowData] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -45,18 +44,15 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
     setDeleteId(null);
   };
 
+  const filteredEvents = events.filter((event) => event.type === group);
+
   return (
     <div>
-      <h2
-        onClick={() => {
-          setShowData(!showData);
-        }}
-        className="text-blue mb-4 cursor-pointer hover:text-orange active:text-orange"
-      >
-        {heading}
-      </h2>
-      {events.map((event, index) => {
-        if (showData && event.type === group) {
+      <h1 className="mb-4">{heading}</h1>
+      {filteredEvents.length === 0 ? (
+        <p>Ei tapahtumia.</p>
+      ) : (
+        filteredEvents.map((event, index) => {
           const [year, month, day] = event.date?.split("-");
           const date = `${day}.${month}.${year}`;
           return (
@@ -166,8 +162,8 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
               </div>
             </div>
           );
-        }
-      })}
+        })
+      )}
     </div>
   );
 };
