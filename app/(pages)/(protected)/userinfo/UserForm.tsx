@@ -11,7 +11,10 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { TbEye } from "react-icons/tb";
 import { TbEyeClosed } from "react-icons/tb";
 import Dropdown, { MultiDropdown } from "@/app/components/Dropdown";
-import { groupOptions, roleOptions } from "@/app/components/StyleMappingAndOptions";
+import {
+  groupOptions,
+  roleOptions,
+} from "@/app/components/StyleMappingAndOptions";
 
 type EditType = {
   editName: boolean;
@@ -161,10 +164,13 @@ const UserForm = () => {
     <div className="container max-w-screen-md p-8 lg:p-16">
       <h1 className="mb-4">Omat tiedot</h1>
       <div>
-        <p className="mb-4">
-          Avonaisen silmän kuva tietokentän vieressä tarkoittaa, että tiedon saa
-          näyttää Yhteystiedot-sivulla muille OSElaisille. Voit muokata tätä ja
-          itse tietokenttää kynäikonin kautta.
+        <p className="mb-4 text-base">
+          <TbEye className="inline align-bottom text-2xl mr-1" />
+          tietokentän vieressä tarkoittaa, että tiedon saa näyttää
+          Yhteystiedot-sivulla muille OSElaisille. Voit muokata tätä ja itse
+          tietokenttää
+          <MdOutlineEdit className="inline align-bottom text-2xl mx-1" />
+          -kuvakkeen kautta.
         </p>
         <p className="mb-4">
           Viikkoryhmäsi sekä roolisi OSEssa näkyvät yhteystiedoissa

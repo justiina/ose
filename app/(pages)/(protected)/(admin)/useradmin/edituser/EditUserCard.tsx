@@ -1,5 +1,11 @@
 "use client";
-import { getUserById, updateUserById, updateUserInfo } from "@/app/actions";
+import {
+  getUserById,
+  getAdminById,
+  updateUserById,
+  addToAdmins,
+  removeFromAdmins,
+} from "@/app/actions";
 import { UserType } from "@/app/components/Types";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -12,12 +18,13 @@ import {
   groupOptions,
   roleOptions,
 } from "@/app/components/StyleMappingAndOptions";
-import FilledButton from "@/app/components/Buttons";
+import FilledButton, { ToggleSwitch } from "@/app/components/Buttons";
 
 type EditType = {
   editName: boolean;
   editEmail: boolean;
   editPhoneNumber: boolean;
+  editAdmin: boolean;
   editGroup: boolean;
   editRole: boolean;
   editShowName: boolean;
@@ -29,10 +36,13 @@ const EditUserCard = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [updatedUser, setUpdatedUser] =
     useState<Partial<UserType | null>>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [updatedIsAdmin, setUpdatedIsAdmin] = useState<boolean>(false);
   const [edit, setEdit] = useState<EditType>({
     editName: false,
     editEmail: false,
     editPhoneNumber: false,
+    editAdmin: false,
     editGroup: false,
     editRole: false,
     editShowName: false,
@@ -62,8 +72,10 @@ const EditUserCard = () => {
             setUser(userData.userData);
             setUpdatedUser(userData.userData);
           }
+          const adminInfo = await getAdminById(userId);
+          setIsAdmin(adminInfo);
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error fetching admin data:", error);
         }
         setIsLoading(false);
       };
@@ -77,7 +89,7 @@ const EditUserCard = () => {
       ...prevEdit,
       [field]: !prevEdit[field],
     }));
-    setIsEdited(true); // Set isEdited to true when a field is edited
+    setIsEdited(true); // Set isEdited to true when any field is edited
     setSelectedRadio(""); // Clear the radio toggle for next radio selection
   };
 
@@ -118,9 +130,24 @@ const EditUserCard = () => {
     }
   };
 
+  const handleAdminEdit = () => {
+    setIsAdmin(updatedIsAdmin);
+    setEdit((prevEdit) => ({
+      ...prevEdit,
+      editAdmin: false,
+    }));
+    setIsEdited(true);
+  };
+
   const handleRadioChange = (value: string) => {
     setSelectedRadio(value);
     switch (value) {
+      case "isAdmin":
+        setUpdatedIsAdmin(true);
+        break;
+      case "isNotAdmin":
+        setUpdatedIsAdmin(false);
+        break;
       case "showName":
         setUpdatedUser((prevUser) => ({
           ...(prevUser as UserType),
@@ -154,29 +181,39 @@ const EditUserCard = () => {
     }
   };
 
-  const handleCancel = () => {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("user");
-      url.searchParams.delete("showDialog");
-      window.history.replaceState({}, "", url.toString());
-      window.location.reload();
-    };
+  const closeModal = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("user");
+    url.searchParams.delete("showDialog");
+    window.history.replaceState({}, "", url.toString());
+    window.location.reload();
+  };
 
   const handleSave = async () => {
-    if (user !== null) {
+    // Save user and admin info
+    if (user !== null && userId !== null) {
       const updateOk = await updateUserById(user);
-      if (updateOk === true) {
-        toast.success("Tietojen päivittäminen onnistui!");
+      let adminUpdateOk: boolean | null = null;
+      console.log("Admin-oikeudet:", isAdmin);
 
-        // Update URL and React state to close the dialog
-        const url = new URL(window.location.href);
-        url.searchParams.delete("user");
-        url.searchParams.delete("showDialog");
-        window.history.replaceState({}, "", url.toString());
-        window.location.reload();
+      if (isAdmin) {
+        adminUpdateOk = await addToAdmins(userId, user?.email);
+      } else {
+        adminUpdateOk = await removeFromAdmins(userId);
+      }
+
+      if (updateOk && adminUpdateOk) {
+        toast.success("Tietojen päivittäminen onnistui!");
+        closeModal();
       }
       if (typeof updateOk === "string") {
         toast.error(updateOk, { id: "updateError" });
+      }
+      if (!adminUpdateOk) {
+        toast.error(
+          "Käyttäjäoikeuksien päivittäminen epäonnistui!\nYritä myöhemmin uudelleen.",
+          { id: "adminUpdateError" }
+        );
       }
     }
   };
@@ -203,7 +240,7 @@ const EditUserCard = () => {
     <div className="mb-12">
       {isEdited && (
         <div className="flex justify-center mt-8 gap-2 ">
-          <FilledButton onClick={handleCancel} title="Peruuta" color="grey" />
+          <FilledButton onClick={closeModal} title="Peruuta" color="grey" />
           <FilledButton onClick={handleSave} title="Tallenna" color="orange" />
         </div>
       )}
@@ -231,20 +268,19 @@ const EditUserCard = () => {
                 />
                 <div>
                   <button
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
+                    onClick={() => handleCancelEdit("editName")}
+                  >
+                    Peru
+                  </button>
+                  <button
                     className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleEdit("firstName", "editName")}
                   >
                     OK
                   </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
-                    onClick={() => handleCancelEdit("editName")}
-                  >
-                    Peru
-                  </button>
                 </div>
               </div>
-
               {/*--- Edit last name ---*/}
               <UserInfoField title="Sukunimi" content="" />
               <div className="py-2 flex justify-between items-center">
@@ -258,16 +294,16 @@ const EditUserCard = () => {
                 />
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("lastName", "editName")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editName")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("lastName", "editName")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -298,16 +334,75 @@ const EditUserCard = () => {
                 />
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
+                    onClick={() => handleCancelEdit("editEmail")}
+                  >
+                    Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
                     onClick={() => handleEdit("email", "editEmail")}
                   >
                     OK
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/*--- User rights ---*/}
+        {!edit.editAdmin ? (
+          <UserInfoField
+            title="Käyttäjän oikeudet"
+            content={isAdmin ? "Admin-käyttäjä" : "Peruskäyttäjä"}
+            onEdit={() => handleEditToggle("editAdmin")}
+          />
+        ) : (
+          <div>
+            {/*--- Edit user rights ---*/}
+            <div>
+              <UserInfoField
+                title="Annetaanko käyttäjälle admin-oikeudet?"
+                content=""
+              />
+              <div className="py-2 flex justify-between items-center">
+                <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                  <div className="flex gap-4">
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        id="isAdmin"
+                        value="isAdmin"
+                        checked={selectedRadio === "isAdmin"}
+                        onChange={() => handleRadioChange("isAdmin")}
+                      />
+                      Kyllä
+                    </label>
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        name="isNotAdmin"
+                        value="isNotAdmin"
+                        checked={selectedRadio === "isNotAdmin"}
+                        onChange={() => handleRadioChange("isNotAdmin")}
+                      />
+                      Ei
+                    </label>
+                  </div>
+                </div>
+                <div>
                   <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
-                    onClick={() => handleCancelEdit("editEmail")}
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
+                    onClick={() => handleCancelEdit("editAdmin")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleAdminEdit()}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -338,16 +433,16 @@ const EditUserCard = () => {
                 />
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("phoneNumber", "editPhoneNumber")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editPhoneNumber")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("phoneNumber", "editPhoneNumber")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -376,16 +471,16 @@ const EditUserCard = () => {
                 </div>
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("group", "editGroup")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editGroup")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("group", "editGroup")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -424,16 +519,16 @@ const EditUserCard = () => {
                 </div>
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("role", "editRole")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editRole")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("role", "editRole")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -483,16 +578,16 @@ const EditUserCard = () => {
                 </div>
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("showName", "editShowName")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editShowName")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("showName", "editShowName")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -542,16 +637,16 @@ const EditUserCard = () => {
                 </div>
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleEdit("showEmail", "editShowEmail")}
-                  >
-                    OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
                     onClick={() => handleCancelEdit("editShowEmail")}
                   >
                     Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() => handleEdit("showEmail", "editShowEmail")}
+                  >
+                    OK
                   </button>
                 </div>
               </div>
@@ -603,18 +698,18 @@ const EditUserCard = () => {
                 </div>
                 <div>
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg mr-1"
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
+                    onClick={() => handleCancelEdit("editShowPhoneNumber")}
+                  >
+                    Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
                     onClick={() =>
                       handleEdit("showPhoneNumber", "editShowPhoneNumber")
                     }
                   >
                     OK
-                  </button>
-                  <button
-                    className="bg-grey text-white px-4 py-2 rounded-lg"
-                    onClick={() => handleCancelEdit("editShowPhoneNumber")}
-                  >
-                    Peru
                   </button>
                 </div>
               </div>
