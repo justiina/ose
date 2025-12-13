@@ -249,8 +249,13 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
     <>
       <div className="container mx-auto lg:p-4">
         {/*---Heading with month name and year or only year if list view is selected---*/}
-        <div className="grid grid-cols-12 mx-4">
-          <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+        <div className="grid grid-cols-12 gap-y-3 mx-4">
+          <div
+            className="flex justify-center gap-4 md:gap-8
+                col-span-12 md:col-span-10
+                order-1"
+          >
+            {" "}
             <button
               onClick={showList ? goToPreviousYear : goToPreviousMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
@@ -268,7 +273,6 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                 <MdOutlineToday className="text-2xl" />
               </button>
             </div>
-
             <button
               onClick={showList ? goToNextYear : goToNextMonth}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
@@ -278,10 +282,26 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
           </div>
 
           {/*---Buttons to filter events, show them in list and add---*/}
-          <div className="col-span-3 md:col-span-2 grid grid-cols-3 mb-4 border-2 border-greylight rounded-full">
+          <div
+            className="col-span-12 md:col-span-2
+                order-2 md:order-1
+                grid grid-cols-3
+                mx-auto md:mx-0
+                max-w-xs
+                mb-4
+                border-2 border-greylight rounded-full"
+          >
             <button
               onClick={filterEvents}
-              className="flex justify-center items-center cursor-pointer rounded-l-full text-orange hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+              className="
+              flex justify-center items-center 
+              min-w-[40px] min-h-[40px]
+              p-2
+              cursor-pointer 
+              rounded-l-full 
+              text-orange hover:bg-greylight 
+              active:bg-greylight 
+              border-r-2 border-r-greylight"
             >
               {filterActive ? (
                 <LuFilterX className="text-xl" />
@@ -292,7 +312,13 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
 
             <button
               onClick={() => setShowList(!showList)}
-              className="flex justify-center items-center cursor-pointer text-grey hover:bg-greylight active:bg-greylight border-r-2 border-r-greylight"
+              className="flex justify-center items-center 
+              min-w-[40px] min-h-[40px]
+              p-2
+              cursor-pointer 
+              text-grey hover:bg-greylight 
+              active:bg-greylight 
+              border-r-2 border-r-greylight"
             >
               {showList ? (
                 <FaRegCalendarAlt className="text-xl" />
@@ -303,7 +329,12 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
 
             <button
               onClick={() => router.push("/addevent")}
-              className="flex justify-center items-center cursor-pointer rounded-r-full text-blue hover:bg-greylight active:bg-greylight"
+              className="flex justify-center 
+              min-w-[40px] min-h-[40px]
+              p-2
+              items-center cursor-pointer 
+              rounded-r-full 
+              text-blue hover:bg-greylight active:bg-greylight"
             >
               <FaPlus className="text-lg" />
             </button>
