@@ -358,8 +358,15 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             </div>
             {/* Event Type Checkboxes */}
             {Object.keys(EventColorAndIconMap).map((type) => {
+              const color = EventColorAndIconMap[type].color ?? "bg-grey";
+
               return (
-                <div key={type} className="flex items-center">
+                //<div key={type} className="flex items-center">
+                <label
+                  key={type}
+                  htmlFor={`checkbox_${type}`}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     id={`checkbox_${type}`}
@@ -367,8 +374,9 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                     checked={selectedFilters.includes(type)}
                     onChange={() => handleCheckboxChange(type)}
                   />
-                  <label htmlFor={`checkbox_${type}`}>{type}</label>
-                </div>
+                  <span className={`${color} w-3 h-3 rounded-full`} />
+                  <span>{type}</span>
+                </label>
               );
             })}
           </div>
@@ -414,19 +422,20 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                 >
                   {/*---Add events from Supabase---*/}
                   {format(day, "d")}
-                  {filteredEvents.map((event, index) => {
-                    const backgroundColor =
-                      EventColorAndIconMap[event.type].color || "bg-grey";
+                  <div className="flex flex-wrap justify-center gap-1 mt-1">
+                    {filteredEvents.map((event, index) => {
+                      const color =
+                        EventColorAndIconMap[event.type].color || "bg-grey";
 
-                    return (
-                      <div
-                        key={`event-${index}`}
-                        className={`${backgroundColor} text-white cursor-pointer flex mb-1 items-center justify-center text-xs rounded-full lg:mx-4 py-0.5`}
-                      >
-                        {event.type}
-                      </div>
-                    );
-                  })}
+                      return (
+                        <span
+                          key={`event-${index}`}
+                          className={`${color} w-3 h-3 rounded-full`}
+                          title={event.type}
+                        />
+                      );
+                    })}
+                  </div>
                 </Link>
               );
             })}
