@@ -13,34 +13,31 @@ const Groups = async () => {
     return redirect("/");
   }
 
+  type GroupType = {
+    slug: string;
+    title: string;
+  };
+  // List the groups
+  const groups: GroupType[] = [
+    { slug: "group1", title: "Taso 1" },
+    { slug: "group2", title: "Taso 2" },
+    { slug: "group3", title: "Taso 3" },
+    { slug: "raahe", title: "Raahe" },
+  ];
+
   return (
     <div className="container mx-auto p-8 lg:p-16">
       <h1 className="mb-4">Viikkotreenit ryhmittäin</h1>
       <div className="grid justify-start mt-4 gap-2">
-        <FilledLink
-          title="Taso 1"
-          color="blue"
-          href="/groups/group1"
-          icon={<FaDog className="text-2xl" />}
-        />
-        <FilledLink
-          title="Taso 2"
-          color="blue"
-          href="/groups/group2"
-          icon={<FaDog className="text-2xl" />}
-        />
-        <FilledLink
-          title="Taso 3"
-          color="blue"
-          href="/groups/group3"
-          icon={<FaDog className="text-2xl" />}
-        />
-        <FilledLink
-          title="Raahe"
-          color="blue"
-          href="/groups/raahe"
-          icon={<FaDog className="text-2xl" />}
-        />
+        {groups.map((group) => (
+          <FilledLink
+            key={group.slug}
+            title={group.title}
+            color="blue"
+            href={`/groups/${group.slug}`}
+            icon={<FaDog className="text-2xl" />}
+          />
+        ))}
       </div>
     </div>
   );

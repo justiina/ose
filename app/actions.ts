@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import {
+  LoginResultType,
   UserType,
   EventsByDateType,
   AddEventType,
@@ -21,25 +22,16 @@ import {
 export const login = async (
   email: string,
   password: string
-): Promise<{ success: boolean; error?: string }> => {
-  try {
-    const supabase = await createClient();
-    const data = { email, password };
-
-    const { error } = await supabase.auth.signInWithPassword(data);
-    if (error) {
-      console.error("Supabase Login Error:", error.message); // Log for debugging
-      return { success: false, error: "Jotain meni vikaan!\nYritä uudestaan." };
+): Promise<LoginResultType> => {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    if (error.status === 400) {
+      return { success: false, reason: "INVALID_CREDENTIALS" };
     }
-
-    return { success: true };
-  } catch (err) {
-    console.error("Unexpected Error:", err); // Log unexpected errors
-    return {
-      success: false,
-      error: "Unexpected error occurred. Please try again.",
-    };
+    return { success: false, reason: "UNKNOWN" };
   }
+  return { success: true };
 };
 
 export const signup = async (
@@ -557,7 +549,7 @@ export const removeFromAdmins = async (uid: string): Promise<boolean> => {
       .from("adminUsers")
       .delete()
       .eq("user_id", uid);
-    console.log("uid:", uid)
+    console.log("uid:", uid);
     return !error;
   } catch (error) {
     return false;

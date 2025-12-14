@@ -1,3 +1,7 @@
+export type LoginResultType =
+  | { success: true }
+  | { success: false; reason: "INVALID_CREDENTIALS" | "NETWORK" | "UNKNOWN" };
+
 export type UserType = {
   id: string | null;
   created: string | null;
@@ -16,7 +20,7 @@ export type AdminType = {
   id: number;
   user_id: string;
   email: string | null;
-}
+};
 
 export type GetUserType = {
   userData: UserType | null;

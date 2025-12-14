@@ -7,6 +7,7 @@ import Link from "next/link";
 import Dialog from "@/app/components/Dialog";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import { useSearchParams, useRouter } from "next/navigation";
+import { LoginResultType } from "@/app/components/Types";
 
 const LoginForm = () => {
   const [email, setEmail] = useState<string | null>(null);
@@ -30,15 +31,26 @@ const LoginForm = () => {
     window.history.replaceState({}, "", url.toString());
   };
 
+  // Map errors to UI messages
+  type LoginFailureType = Extract<LoginResultType, { success: false }>;
+  const ERROR_MESSAGES: Record<LoginFailureType["reason"], string> = {
+    INVALID_CREDENTIALS: "Väärä sähköposti tai salasana",
+    NETWORK: "Verkkovirhe, yritä uudelleen",
+    UNKNOWN: "Jotain meni vikaan",
+  };
+
   const handleLogin = async () => {
-    if (email && password != null) {
-      const result = await login(email, password);
-      if (result) {
-        router.push("/main");
-      } else {
-        toast.error(result, { id: "loginError" });
-        return;
-      }
+    if (!email || !password) {
+      toast.error("Syötä sähköposti ja salasana");
+      return;
+    }
+
+    const result = await login(email, password);
+    if (result.success) {
+      router.push("/main");
+    } else {
+      toast.error(ERROR_MESSAGES[result.reason], { id: "loginError" });
+      return;
     }
   };
 
