@@ -135,14 +135,14 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const goToFileUrl = async (bucket: string, path: string) => {
     const { data, error } = await supabase.storage
       .from(bucket)
-      .createSignedUrl(path, 1800); // url expires in 30min
+      .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
     if (error) {
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
     }
     if (data) {
-      router.push(data.signedUrl);
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -170,8 +170,8 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
           setBoardFiles((prevFiles) =>
             prevFiles.filter(
               (file) =>
-                file.name !== deleteFile.path.replace("poytakirjat/", "")
-            )
+                file.name !== deleteFile.path.replace("poytakirjat/", ""),
+            ),
           );
         } else if (
           deleteFile.bucket === "hallitus" &&
@@ -180,8 +180,8 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
           setLetters((prevFiles) =>
             prevFiles.filter(
               (file) =>
-                file.name !== deleteFile.path.replace("sihteerikirjeet/", "")
-            )
+                file.name !== deleteFile.path.replace("sihteerikirjeet/", ""),
+            ),
           );
         }
         setShowConfirmation(false);
@@ -221,7 +221,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
             if (uploadError.message === "The resource already exists") {
               toast.error(
                 "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" }
+                { id: "uploadError" },
               );
             } else {
               toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
@@ -257,7 +257,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
             if (uploadError.message === "The resource already exists") {
               toast.error(
                 "Samalle päivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" }
+                { id: "uploadError" },
               );
             } else {
               toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
@@ -503,30 +503,29 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         <div className="md:mx-8">
           <table className="mb-8">
             <thead>
-            <tr>
-              <th className="bg-green text-white" scope="col">
-                #
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Päivämäärä
-              </th>
-              <th className="bg-green text-white" scope="col">
-                Sihteerikirje
-              </th>
-              {admin && <th className="bg-green text-white" scope="col"></th>}
-            </tr>
+              <tr>
+                <th className="bg-green text-white" scope="col">
+                  #
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Päivämäärä
+                </th>
+                <th className="bg-green text-white" scope="col">
+                  Sihteerikirje
+                </th>
+                {admin && <th className="bg-green text-white" scope="col"></th>}
+              </tr>
             </thead>
             <tbody>
-
-            {filteredLetters.map((file, index) => {
-              if (file.name === ".emptyFolderPlaceholder") return false;
-              const [year, month, day] = file.name
-              .replace("-sihteerikirje.pdf", "")
-              .split("-");
-              const date = `${day}.${month}.${year}`;
-              const fileNum = index + 1;
-              return (
-                <tr key={index}>
+              {filteredLetters.map((file, index) => {
+                if (file.name === ".emptyFolderPlaceholder") return false;
+                const [year, month, day] = file.name
+                  .replace("-sihteerikirje.pdf", "")
+                  .split("-");
+                const date = `${day}.${month}.${year}`;
+                const fileNum = index + 1;
+                return (
+                  <tr key={index}>
                     <td>{fileNum}</td>
                     <td>{date}</td>
                     <td>
@@ -535,7 +534,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                         onClick={() =>
                           goToFileUrl(
                             "hallitus",
-                            `sihteerikirjeet/${file.name}`
+                            `sihteerikirjeet/${file.name}`,
                           )
                         }
                         key={index}
@@ -549,16 +548,16 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
                           onClick={() =>
                             handleDelete(
                               "hallitus",
-                              `sihteerikirjeet/${file.name}`
+                              `sihteerikirjeet/${file.name}`,
                             )
                           }
                           className="cursor-pointer hover:text-orange text-grey text-2xl"
-                          />
+                        />
                       </td>
                     )}
                   </tr>
-              );
-            })}
+                );
+              })}
             </tbody>
           </table>
           {showConfirmation && admin && (

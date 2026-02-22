@@ -82,14 +82,14 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
   const goToFileUrl = async (bucket: string, path: string) => {
     const { data, error } = await supabase.storage
       .from(bucket)
-      .createSignedUrl(path, 1800); // url expires in 30min
+      .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
     if (error) {
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
     }
     if (data) {
-      router.push(data.signedUrl);
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -140,7 +140,7 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
           if (uploadError.message === "The resource already exists") {
             toast.error(
               "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-              { id: "uploadError" }
+              { id: "uploadError" },
             );
           } else {
             toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
@@ -252,7 +252,7 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
                           onClick={() =>
                             handleDelete(
                               "halyryhma",
-                              `poytakirjat/${file.name}`
+                              `poytakirjat/${file.name}`,
                             )
                           }
                           className="cursor-pointer hover:text-orange text-grey text-2xl"

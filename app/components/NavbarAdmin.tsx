@@ -3,42 +3,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LogoutForm from "./LogoutForm";
-import { FaRegCalendarAlt } from "react-icons/fa";
+import {
+  FaRegCalendarAlt,
+  FaSuitcase,
+  FaBookOpen,
+  FaUserCircle,
+} from "react-icons/fa";
 import { FaDog } from "react-icons/fa6";
 import { TbFiles } from "react-icons/tb";
-import { FaSuitcase } from "react-icons/fa";
 import { GoBellFill } from "react-icons/go";
-import { FaBookOpen } from "react-icons/fa";
-import { FaUserCircle } from "react-icons/fa";
 import { RiUserSettingsLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 const NavbarAdmin = () => {
   const currentPath: string | null = usePathname();
   const [hamburgerOpen, setHamburgerOpen] = useState<boolean>(false);
-  const showNavbar = [
-    "/addevent",
-    "/editevent",
-    "/board",
-    "/calloutgroup",
-    "/calloutgroup/board",
-    "/calloutgroup/trainings",
-    "/calloutgroup/participation",
-    "/contacts",
-    "/groups",
-    "/groups/group1",
-    "/groups/group2",
-    "/groups/group3",
-    "/groups/raahe",
-    "/instructions",
-    "/main",
-    "/userinfo",
-    "/useradmin",
-    "/useradmin/adduser",
-    "/useradmin/edituser",
-  ];
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const shouldShowNavbar =
+    !currentPath.startsWith("/login") &&
+    !currentPath.startsWith("/signup") &&
+    !currentPath.startsWith("/resetpassword");
+  
+    const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Open/close the hamburger menu when small/medium screen
   const toggleHamburger = () => {
@@ -59,7 +46,7 @@ const NavbarAdmin = () => {
     };
   }, []);
 
-  return showNavbar.includes(currentPath) ? (
+  return shouldShowNavbar ? (
     <>
       {/*--- Big screen navbar on the side ---*/}
       <nav className="fixed top-0  left-0 hidden lg:grid grid-rows-10 min-h-screen w-72 bg-grey text-background font-sans text-lg p-4">
@@ -157,8 +144,8 @@ const NavbarAdmin = () => {
                 : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
             }
           >
-            <RiUserSettingsLine className="text-2xl" />
-            Käyttäjähallinta
+            <MdAdminPanelSettings className="text-2xl" />
+            Ylläpito
           </Link>
         </div>
         <div className="row-span-3 flex flex-col justify-evenly">
@@ -349,8 +336,8 @@ const NavbarAdmin = () => {
                   : "flex gap-4 items-center cursor-pointer rounded-full pl-4 pr-6 py-1 text-orange hover:bg-blue hover:text-background"
               }
             >
-              <RiUserSettingsLine className="text-2xl" />
-              Käyttäjähallinta
+              <MdAdminPanelSettings className="text-2xl" />
+              Ylläpito
             </Link>
           </div>
           <LogoutForm

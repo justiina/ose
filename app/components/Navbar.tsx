@@ -17,24 +17,11 @@ import { IoClose } from "react-icons/io5";
 const Navbar = () => {
   const currentPath: string | null = usePathname();
   const [hamburgerOpen, setHamburgerOpen] = useState<boolean>(false);
-  const showNavbar = [
-    "/addevent",
-    "/editevent",
-    "/board",
-    "/calloutgroup",
-    "/calloutgroup/board",
-    "/calloutgroup/trainings",
-    "/calloutgroup/participation",
-    "/contacts",
-    "/groups",
-    "/groups/group1",
-    "/groups/group2",
-    "/groups/group3",
-    "/groups/raahe",
-    "/instructions",
-    "/main",
-    "/userinfo",
-  ];
+  const shouldShowNavbar =
+    !currentPath.startsWith("/login") &&
+    !currentPath.startsWith("/signup") &&
+    !currentPath.startsWith("/resetpassword");
+
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Open/close the hamburger menu when small/medium screen
@@ -56,7 +43,7 @@ const Navbar = () => {
     };
   }, []);
 
-  return showNavbar.includes(currentPath) ? (
+  return shouldShowNavbar ? (
     <>
       {/*--- Big screen navbar on the side ---*/}
       <nav className="fixed top-0  left-0 hidden lg:grid grid-rows-10 min-h-screen w-72 bg-grey text-background font-sans text-lg p-4">
@@ -145,7 +132,6 @@ const Navbar = () => {
             <FaUserCircle className="text-2xl" />
             Omat tiedot
           </Link>
-
         </div>
         <div className="row-span-3 flex flex-col justify-evenly">
           <LogoutForm

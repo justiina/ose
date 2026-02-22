@@ -227,7 +227,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                       className="grid grid-cols-5 sm:max-w-2xl gap-4 text-lg mb-1"
                     >
                       <span className="flex justify-end">
-                        {format(event.date, "d.M.")}
+                        {format(event.date, "d.M")}
                       </span>
                       <span className="col-span-3">{event.title}</span>
                       <span className="event-type">{event.type}</span>

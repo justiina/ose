@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { FilledLink } from "@/app/components/Buttons";
 import { FaDog } from "react-icons/fa";
+import { Key } from "react";
 
 const Groups = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -13,31 +14,30 @@ const Groups = async () => {
     return redirect("/");
   }
 
-  type GroupType = {
-    slug: string;
-    title: string;
-  };
-  // List the groups
-  const groups: GroupType[] = [
-    { slug: "group1", title: "Taso 1" },
-    { slug: "group2", title: "Taso 2" },
-    { slug: "group3", title: "Taso 3" },
-    { slug: "raahe", title: "Raahe" },
-  ];
+  // Fetch group by slug
+  const { data: groups, error: groupError } = await supabase
+    .from("groups")
+    .select("*")
+    .eq("active", true)
+    .order("id", { ascending: true });
+
+  if (groupError || !groups) notFound();
 
   return (
     <div className="container mx-auto p-8 lg:p-16">
       <h1 className="mb-4">Viikkotreenit ryhmittäin</h1>
       <div className="grid justify-start mt-4 gap-2">
-        {groups.map((group) => (
-          <FilledLink
-            key={group.slug}
-            title={group.title}
-            color="blue"
-            href={`/groups/${group.slug}`}
-            icon={<FaDog className="text-2xl" />}
-          />
-        ))}
+        {groups.map(
+          (group: { slug: string; name: string; active: boolean }) => (
+            <FilledLink
+              key={group.slug}
+              title={group.name}
+              color="blue"
+              href={`/groups/${group.slug}`}
+              icon={<FaDog className="text-2xl" />}
+            />
+          ),
+        )}
       </div>
     </div>
   );
