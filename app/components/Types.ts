@@ -96,6 +96,19 @@ export type EventsByDateType = {
   error: string | null;
 };
 
+export type GroupType = {
+  id: string;
+  slug: string;
+  name: string;
+  created_at?: string;
+};
+
+export type CreateGroupType = {
+  slug: string;
+  name: string;
+};
+
+
 export type CalloutTrainingType = {
   id: string;
   date: string;

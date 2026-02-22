@@ -62,26 +62,17 @@ export const FilledLink: React.FC<OwnLinkProps> = ({
   icon,
   openInNewTab = false,
 }) => {
-  if (openInNewTab) {
-    return (
-      <Link
-        href={href}
-        className={filledClassName(color)}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {icon && <span>{icon}</span>}
-        {title}
-      </Link>
-    );
-  } else {
-    return (
-      <Link href={href} className={filledClassName(color)}>
-        {icon && <span>{icon}</span>}
-        {title}
-      </Link>
-    );
-  }
+  return (
+    <Link
+      href={href}
+      className={filledClassName(color)}
+      target={openInNewTab ? "_blank": undefined}
+      rel={openInNewTab ? "noopener noreferrer" : undefined}
+    >
+      {icon && <span>{icon}</span>}
+      {title}
+    </Link>
+  );
 };
 
 export const FilledRoundLink: React.FC<OwnLinkProps> = ({

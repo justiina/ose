@@ -16,6 +16,8 @@ import {
   AddToInvitedUsersType,
   ResetPasswordType,
   GetResetPasswordType,
+  CreateGroupType,
+  GroupType,
 } from "./components/Types";
 
 // USER FUNCTIONS
@@ -771,6 +773,7 @@ export const getEventById = async (id: string): Promise<EditEventType> => {
   }
 };
 
+
 export const getGroupEvents = async () => {
   const supabase = await createClient();
   try {
@@ -846,6 +849,78 @@ export const updateEvent = async (
   }
   // Return notification if none of the conditions are met
   return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
+};
+
+// GROUP FUNCTIONS
+
+export const createGroup = async (
+  data: CreateGroupType
+): Promise<boolean | { error: string }> => {
+  const supabase = await createClient();
+
+  // Ensure user is admin
+  const admin = await isAdmin();
+  if (!admin) {
+    return { error: "Ei oikeuksia luoda ryhmiä." };
+  }
+
+  try {
+    const { error } = await supabase.from("groups").insert({
+      slug: data.slug,
+      name: data.name,
+    });
+
+    if (error) {
+      if (error.code === "23505") {
+        return { error: "Ryhmä samalla tunnisteella on jo olemassa." };
+      }
+      throw error;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("createGroup error:", err);
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const getGroupBySlug = async (
+  slug: string
+): Promise<GroupType | { error: string }> => {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("groups")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error || !data) {
+      return { error: "Ryhmää ei löytynyt." };
+    }
+
+    return data;
+  } catch (err) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
+};
+
+export const getEventsByGroupId = async (groupId: string) => {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("group_id", groupId)
+      .order("date", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    return { error: "Jotain meni vikaan!\nYritä myöhemmin uudestaan." };
+  }
 };
 
 // CALLOUT GROUP FUNCTIONS

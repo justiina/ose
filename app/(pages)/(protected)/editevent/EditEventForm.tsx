@@ -137,6 +137,13 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
               id="datetimeInput"
               aria-label="Date and time"
               type={isFullDay ? "date" : "datetime-local"}
+              value={
+                event?.date
+                  ? isFullDay
+                    ? event.date
+                    : `${event.date}T${event.time ?? "00:00"}`
+                  : ""
+              }
               onChange={handleInputChange("date")}
             />
           </div>

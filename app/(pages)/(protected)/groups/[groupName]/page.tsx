@@ -1,22 +1,36 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import EventCard from "../EventCard";
 import { EventType } from "@/app/components/Types";
 import { getFirstName, getGroupEvents } from "@/app/actions";
-import toast from "react-hot-toast";
 import { showDateAndTime } from "@/app/components/Functions";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { FilledRoundLink } from "@/app/components/Buttons";
+import toast from "react-hot-toast";
 
-const Group1 = async () => {
-  // Check that the user is signed in, redirect to login page if not
+const GroupPage = async ({
+  params,
+}: {
+  params: Promise<{ groupName: string }>;
+}) => {
+  const groupName = (await params).groupName;
   const supabase = await createClient();
+
+  // Auth check
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) {
-    return redirect("/");
-  }
+
+  if (!user) redirect("/");
+
+  // Fetch group by slug
+  const { data: group, error: groupError } = await supabase
+    .from("groups")
+    .select("*")
+    .eq("slug", groupName)
+    .single();
+
+  if (groupError || !group) notFound();
 
   let events: EventType[] = [];
 
@@ -59,12 +73,12 @@ const Group1 = async () => {
 
       <EventCard
         events={events}
-        heading="Taso 1 viikkotreenit"
-        group="Taso 1"
+        heading={`${group.name} viikkotreenit`}
+        group={group.name}
         currentUser={user.id}
       />
     </div>
   );
 };
 
-export default Group1;
+export default GroupPage;

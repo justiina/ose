@@ -13,6 +13,7 @@ export const EventColorAndIconMap: {
   "Taso 2": { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
   "Taso 3": { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
   "Raahe": { color: "bg-blue", icon: <FaDog className="text-2xl" /> },
+  "Kuusamo": {color: "bg-blue", icon: <FaDog className="text-2xl" />},
   "Koe": { color: "bg-purple", icon: <PiMedalBold className="text-2xl" /> },
   "Virta": {
     color: "bg-grey",
@@ -28,7 +29,7 @@ export const EventColorAndIconMap: {
 };
 
 // List groups
-export const groupOptions = ["Taso 1", "Taso 2", "Taso 3", "Raahe", "Ei ryhmää"];
+export const groupOptions = ["Taso 1", "Taso 2", "Taso 3", "Raahe", "Kuusamo", "Ei ryhmää"];
 
 // List event types for dropdown list in AddEvent and EditEvent
 export const eventTypeOptions = [
@@ -36,6 +37,7 @@ export const eventTypeOptions = [
   "Taso 2 treeni",
   "Taso 3 treeni",
   "Raahen treeni",
+  "Kuusamon treeni",
   "Kokeet",
   "Virta",
   "Hälytreeni",

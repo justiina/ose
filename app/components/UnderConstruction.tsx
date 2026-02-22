@@ -1,9 +1,14 @@
-import Link from "next/link";
+"use client"
+import { usePathname } from "next/navigation";
 import { IoConstructOutline } from "react-icons/io5";
 import { FilledLink } from "./Buttons";
 import { RiArrowGoBackLine } from "react-icons/ri";
 
 const UnderConstruction = () => {
+  const pathname = usePathname()
+  
+  const parentPath = pathname.split("/").slice(0,-1).join("/") || "/"
+
   return (
     <div className="mt-40 ml-16">
       <div className="flex mb-8 gap-4 items-center">
@@ -12,7 +17,7 @@ const UnderConstruction = () => {
       </div>
       <div className="flex justify-start mt-4 gap-2">
         <FilledLink
-          href="/main"
+          href={parentPath}
           title="Palaa takaisin"
           color="orange"
           icon={<RiArrowGoBackLine className="text-2xl" />}
