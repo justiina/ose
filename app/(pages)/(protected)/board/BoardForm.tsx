@@ -13,16 +13,6 @@ import FilledButton from "@/app/components/Buttons";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineToday } from "react-icons/md";
 
-type FileType = {
-  title: string;
-  url: string;
-};
-
-type UploadInfoType = {
-  filename: string;
-  title: string;
-};
-
 type DeleteFileType = {
   bucket: string;
   path: string;
@@ -36,6 +26,8 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const supabase = createClient();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentLetterDate, setCurrentLetterDate] = useState<Date>(new Date());
+  const [boardExpanded, setBoardExpanded] = useState<boolean>(false)
+  const [lettersExpanded, setLettersExpanded] = useState<boolean>(false)
   const currentYear = currentDate.getFullYear();
   const currentLetterYear = currentLetterDate.getFullYear();
   const thisYear = new Date().getFullYear();
@@ -71,13 +63,13 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
 
       if (data !== null) {
         setBoardFiles(data);
-        setFetchLoading(false);
       } else {
         console.log(error);
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
           id: "uploadError",
         });
       }
+      setFetchLoading(false);
     };
     const getLetterFiles = async () => {
       const { data, error } = await supabase.storage
@@ -85,13 +77,13 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
         .list("sihteerikirjeet", { sortBy: { column: "name", order: "asc" } });
       if (data !== null) {
         setLetters(data);
-        setFetchLettersLoading(false);
       } else {
         console.log(error);
         toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
           id: "uploadError",
         });
       }
+      setFetchLettersLoading(false);
     };
 
     getBoardFiles();
@@ -111,10 +103,10 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.id === "datetimeBoard") {
       const date = e.target.value;
-      setFileNameBoard(`${date}-kokous.pdf`);
+      setFileNameBoard(`${date}-kokous.pdf`); // just show base name
     } else if (e.target.id === "datetimeLetter") {
       const date = e.target.value;
-      setFileNameLetter(`${date}-sihteerikirje.pdf`);
+      setFileNameLetter(`${date}-sihteerikirje.pdf`); // just show base name
     }
   };
 
@@ -205,79 +197,75 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
     }
   };
 
+  const generateFilename = (
+    date: string,
+    type: "kokous" | "sihteerikirje",
+    existingFiles: FileObject[],
+  ) => {
+    const baseName = `${date}-${type}`;
+    const ext = ".pdf";
+
+    // Get all existing file names in this folder
+    const existingNames = existingFiles.map((f) => f.name);
+
+    let counter = 1;
+    let newName = `${baseName}${ext}`;
+
+    // Increment counter until the filename is unique
+    while (existingNames.includes(newName)) {
+      counter++;
+      newName = `${baseName}-${counter}${ext}`;
+    }
+    return newName;
+  };
   const save = async (bucket: string, folder: string) => {
-    if (folder === "poytakirjat") {
-      try {
-        // Check that all the required info is provided
-        if (fileNameBoard === "" || uploadBoardFile === null) {
-          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
-            id: "infoError",
-          });
-        } else {
-          const { error: uploadError } = await supabase.storage
-            .from(bucket)
-            .upload(`${folder}/${fileNameBoard}`, uploadBoardFile);
-          if (uploadError) {
-            if (uploadError.message === "The resource already exists") {
-              toast.error(
-                "Samalle kokouspäivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" },
-              );
-            } else {
-              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-                id: "uploadError",
-              });
-            }
-          } else {
-            toast.success("Tiedoston tallentaminen onnistui!");
-            setShowAddBoardForm(false);
-            window.location.reload();
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "uploadError2",
-        });
-      } finally {
-        setBoardUploading(false);
+    // Determine which file and filename to use
+    const fileToUpload =
+      folder === "poytakirjat" ? uploadBoardFile : uploadLetterFile;
+    const existingFiles = folder === "poytakirjat" ? boardFiles : letters;
+    const type = folder === "poytakirjat" ? "kokous" : "sihteerikirje";
+
+    // Check that all the required info is provided
+    if (!fileToUpload) {
+      toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
+        id: "infoError",
+      });
+      return;
+    }
+    try {
+      // Generate a unique filename based on the date and existing files
+      const date =
+        folder === "poytakirjat"
+          ? (document.getElementById("datetimeBoard") as HTMLInputElement).value
+          : (document.getElementById("datetimeLetter") as HTMLInputElement)
+              .value;
+
+      const filename = generateFilename(date, type, existingFiles);
+
+      // Upload the file
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(`${folder}/${filename}`, fileToUpload);
+
+      if (uploadError) throw uploadError;
+
+      toast.success("Tiedoston tallentaminen onnistui!");
+      // Close the form
+      if (folder === "poytakirjat") {
+        setShowAddBoardForm(false);
+      } else {
+        setShowAddLetterForm(false);
       }
-    } else if (folder === "sihteerikirjeet") {
-      try {
-        // Check that all the required info is provided
-        if (fileNameLetter === "" || uploadLetterFile === null) {
-          toast.error("Täytä päivämäärä ja muista lisätä tiedosto!", {
-            id: "infoError",
-          });
-        } else {
-          const { error: uploadError } = await supabase.storage
-            .from(bucket)
-            .upload(`${folder}/${fileNameLetter}`, uploadLetterFile);
-          if (uploadError) {
-            if (uploadError.message === "The resource already exists") {
-              toast.error(
-                "Samalle päivämäärälle voi tällä hetkellä lisätä vain yhden tiedoston. Valitse tarvittaessa eri päivämäärä.",
-                { id: "uploadError" },
-              );
-            } else {
-              toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-                id: "uploadError",
-              });
-            }
-          } else {
-            toast.success("Tiedoston tallentaminen onnistui!");
-            setShowAddLetterForm(false);
-            window.location.reload();
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "uploadError2",
-        });
-      } finally {
-        setLetterUploading(false);
-      }
+      // Refresh page and reload the files
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
+        id: "uploadError",
+      });
+    } finally {
+      if (folder === "poytakirjat") setBoardUploading(false);
+      else setLetterUploading(false);
     }
   };
 
@@ -326,7 +314,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
             <button
               onClick={() => goToToday("board")}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
-            >
+              >
               <MdOutlineToday className="text-2xl" />
             </button>
           </div>

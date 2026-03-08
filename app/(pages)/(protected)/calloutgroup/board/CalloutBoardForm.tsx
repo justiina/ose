@@ -180,7 +180,7 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
   }
 
   return (
-    <div className="container p-8 lg:p-16">
+    <div className="container max-w-screen-md p-8 lg:p-16">
       <div className="mb-8">
         {/*---Callout Board Files---*/}
         <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
