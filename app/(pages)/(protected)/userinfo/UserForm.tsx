@@ -392,7 +392,7 @@ const UserForm = () => {
             {/*--- Callout group membership (not possible to change) ---*/}
             <UserInfoField
               title="Hälyryhmän jäsen? (ei voi muokata)"
-              content={user?.isCallOutMember ? "Kyllä" : "Ei"}
+              content={user?.isCalloutMember ? "Kyllä" : "Ei"}
             />
 
             {/*--- Permission to show name in the contacts ---*/}

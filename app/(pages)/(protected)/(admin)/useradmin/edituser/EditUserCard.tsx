@@ -30,7 +30,7 @@ type EditType = {
   editShowName: boolean;
   editShowEmail: boolean;
   editShowPhoneNumber: boolean;
-  editCallOutMember: boolean;
+  editCalloutMember: boolean;
 };
 
 const EditUserCard = () => {
@@ -49,7 +49,7 @@ const EditUserCard = () => {
     editShowName: false,
     editShowEmail: false,
     editShowPhoneNumber: false,
-    editCallOutMember: false,
+    editCalloutMember: false,
   });
 
   const [isEdited, setIsEdited] = useState<boolean>(false);
@@ -150,16 +150,16 @@ const EditUserCard = () => {
       case "isNotAdmin":
         setUpdatedIsAdmin(false);
         break;
-      case "isCallOutMember":
+      case "isCalloutMember":
         setUpdatedUser((prevUser) => ({
           ...(prevUser as UserType),
-          isCallOutMember: true,
+          isCalloutMember: true,
         }));
         break;
-      case "isNotCallOutMember":
+      case "isNotCalloutMember":
         setUpdatedUser((prevUser) => ({
           ...(prevUser as UserType),
-          isCallOutMember: false,
+          isCalloutMember: false,
         }));
         break;
       case "showName":
@@ -423,11 +423,11 @@ const EditUserCard = () => {
           </div>
         )}
         {/*--- Callout group membership ---*/}
-        {!edit.editCallOutMember ? (
+        {!edit.editCalloutMember ? (
           <UserInfoField
             title="Hälyryhmän jäsen?"
-            content={user?.isCallOutMember ? "Kyllä" : "Ei"}
-            onEdit={() => handleEditToggle("editCallOutMember")}
+            content={user?.isCalloutMember ? "Kyllä" : "Ei"}
+            onEdit={() => handleEditToggle("editCalloutMember")}
           />
         ) : (
           <div>
@@ -443,20 +443,20 @@ const EditUserCard = () => {
                     <label className=" flex gap-1">
                       <input
                         type="radio"
-                        id="isCallOutMember"
-                        value="isCallOutMember"
-                        checked={selectedRadio === "isCallOutMember"}
-                        onChange={() => handleRadioChange("isCallOutMember")}
+                        id="isCalloutMember"
+                        value="isCalloutMember"
+                        checked={selectedRadio === "isCalloutMember"}
+                        onChange={() => handleRadioChange("isCalloutMember")}
                       />
                       Kyllä
                     </label>
                     <label className=" flex gap-1">
                       <input
                         type="radio"
-                        name="isNotCallOutMember"
-                        value="isNotCallOutMember"
-                        checked={selectedRadio === "isNotCallOutMember"}
-                        onChange={() => handleRadioChange("isNotCallOutMember")}
+                        name="isNotCalloutMember"
+                        value="isNotCalloutMember"
+                        checked={selectedRadio === "isNotCalloutMember"}
+                        onChange={() => handleRadioChange("isNotCalloutMember")}
                       />
                       Ei
                     </label>
@@ -465,14 +465,14 @@ const EditUserCard = () => {
                 <div>
                   <button
                     className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
-                    onClick={() => handleCancelEdit("editCallOutMember")}
+                    onClick={() => handleCancelEdit("editCalloutMember")}
                   >
                     Peru
                   </button>
                   <button
                     className="bg-blue text-white px-4 py-2 rounded-lg"
                     onClick={() =>
-                      handleEdit("isCallOutMember", "editCallOutMember")
+                      handleEdit("isCalloutMember", "editCalloutMember")
                     }
                   >
                     OK
