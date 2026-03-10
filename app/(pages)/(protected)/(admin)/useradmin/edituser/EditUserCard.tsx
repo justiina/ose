@@ -30,6 +30,7 @@ type EditType = {
   editShowName: boolean;
   editShowEmail: boolean;
   editShowPhoneNumber: boolean;
+  editCallOutMember: boolean;
 };
 
 const EditUserCard = () => {
@@ -48,6 +49,7 @@ const EditUserCard = () => {
     editShowName: false,
     editShowEmail: false,
     editShowPhoneNumber: false,
+    editCallOutMember: false,
   });
 
   const [isEdited, setIsEdited] = useState<boolean>(false);
@@ -148,6 +150,18 @@ const EditUserCard = () => {
       case "isNotAdmin":
         setUpdatedIsAdmin(false);
         break;
+      case "isCallOutMember":
+        setUpdatedUser((prevUser) => ({
+          ...(prevUser as UserType),
+          isCallOutMember: true,
+        }));
+        break;
+      case "isNotCallOutMember":
+        setUpdatedUser((prevUser) => ({
+          ...(prevUser as UserType),
+          isCallOutMember: false,
+        }));
+        break;
       case "showName":
         setUpdatedUser((prevUser) => ({
           ...(prevUser as UserType),
@@ -194,7 +208,6 @@ const EditUserCard = () => {
     if (user !== null && userId !== null) {
       const updateOk = await updateUserById(user);
       let adminUpdateOk: boolean | null = null;
-      console.log("Admin-oikeudet:", isAdmin);
 
       if (isAdmin) {
         adminUpdateOk = await addToAdmins(userId, user?.email);
@@ -212,7 +225,7 @@ const EditUserCard = () => {
       if (!adminUpdateOk) {
         toast.error(
           "Käyttäjäoikeuksien päivittäminen epäonnistui!\nYritä myöhemmin uudelleen.",
-          { id: "adminUpdateError" }
+          { id: "adminUpdateError" },
         );
       }
     }
@@ -401,6 +414,66 @@ const EditUserCard = () => {
                   <button
                     className="bg-blue text-white px-4 py-2 rounded-lg"
                     onClick={() => handleAdminEdit()}
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/*--- Callout group membership ---*/}
+        {!edit.editCallOutMember ? (
+          <UserInfoField
+            title="Hälyryhmän jäsen?"
+            content={user?.isCallOutMember ? "Kyllä" : "Ei"}
+            onEdit={() => handleEditToggle("editCallOutMember")}
+          />
+        ) : (
+          <div>
+            {/*--- Edit callout group membership ---*/}
+            <div>
+              <UserInfoField
+                title="Onko henkilö hälyryhmän jäsen?"
+                content=""
+              />
+              <div className="py-2 flex justify-between items-center">
+                <div className="col-span-6 border border-grey bg-white rounded-lg py-1 px-4 mb-2">
+                  <div className="flex gap-4">
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        id="isCallOutMember"
+                        value="isCallOutMember"
+                        checked={selectedRadio === "isCallOutMember"}
+                        onChange={() => handleRadioChange("isCallOutMember")}
+                      />
+                      Kyllä
+                    </label>
+                    <label className=" flex gap-1">
+                      <input
+                        type="radio"
+                        name="isNotCallOutMember"
+                        value="isNotCallOutMember"
+                        checked={selectedRadio === "isNotCallOutMember"}
+                        onChange={() => handleRadioChange("isNotCallOutMember")}
+                      />
+                      Ei
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <button
+                    className="bg-grey text-white px-4 py-2 rounded-lg mr-1"
+                    onClick={() => handleCancelEdit("editCallOutMember")}
+                  >
+                    Peru
+                  </button>
+                  <button
+                    className="bg-blue text-white px-4 py-2 rounded-lg"
+                    onClick={() =>
+                      handleEdit("isCallOutMember", "editCallOutMember")
+                    }
                   >
                     OK
                   </button>

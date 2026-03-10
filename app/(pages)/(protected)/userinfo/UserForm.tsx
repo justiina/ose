@@ -239,7 +239,10 @@ const UserForm = () => {
               <div>
                 {/*--- Edit email ---*/}
                 <div>
-                  <UserInfoField title="Sähköpostiosoite" content="" />
+                  <UserInfoField
+                    title="Sähköpostiosoite HUOM! Uuden sähköpostin vaihtaminen ao. kentässä vaihtaa vain yhteystiedot-välilehdelle tulevan sähköpostin. Sisäänkirjautumisessa ja OSEn viestinnässä olevan sähköpostisi voit vaihtaa ottamalla yhteyttä sihteeriin."
+                    content=""
+                  />
                   <div className="py-2 flex justify-between items-center">
                     <input
                       id="email"
@@ -385,6 +388,12 @@ const UserForm = () => {
                 </div>
               </div>
             )}
+
+            {/*--- Callout group membership (not possible to change) ---*/}
+            <UserInfoField
+              title="Hälyryhmän jäsen? (ei voi muokata)"
+              content={user?.isCallOutMember ? "Kyllä" : "Ei"}
+            />
 
             {/*--- Permission to show name in the contacts ---*/}
             {!edit.editShowName ? (
