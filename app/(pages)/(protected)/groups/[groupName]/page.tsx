@@ -32,6 +32,26 @@ const GroupPage = async ({
 
   if (groupError || !group) notFound();
 
+  // Fetch members by group
+  const { data: members, error: memberError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("group", group.name);
+
+  if (memberError) notFound();
+
+  const sortedMembers = [...(members ?? [])].sort((a, b) => {
+    const aIsInstructor = a.role?.includes("Kouluttaja");
+    const bIsInstructor = b.role?.includes("Kouluttaja");
+
+    // Instructors first
+    if (aIsInstructor && !bIsInstructor) return -1;
+    if (!aIsInstructor && bIsInstructor) return 1;
+
+    // Then rest in alphabetical order by lastName
+    return a.lastName.localeCompare(b.lastName);
+  });
+
   let events: EventType[] = [];
 
   const allEvents = await getGroupEvents();
@@ -57,23 +77,44 @@ const GroupPage = async ({
             individuals: event.individuals,
             duration: event.duration,
           };
-        })
+        }),
       );
     }
   }
 
   return (
-    <div className="container mx-auto p-8 lg:p-16 flex flex-col gap-8">
+    <div className="container mx-auto p-8 lg:p-16 flex flex-col gap-4">
       <FilledRoundLink
         title="Takaisin"
         color="grey"
         href="/groups"
         icon={<RiArrowGoBackLine className="text-2xl" />}
       />
+      <h1>{group.name}</h1>
+      <h2>Ryhmän jäsenet</h2>
+      <ul className="list-disc ml-6">
+        {sortedMembers.map((member) => {
+          const roleLabels: string[] = [];
 
+          if (member.role?.includes("Kouluttaja")) {
+            roleLabels.push("kouluttaja");
+          }
+
+          if (member.role?.includes("Treeniryhmän yhteyshenkilö")) {
+            roleLabels.push("yhteyshenkilö");
+          }
+
+          return (
+            <li key={member.id}>
+              {member.firstName} {member.lastName}
+              {roleLabels.length > 0 && ` (${roleLabels.join(", ")})`}
+            </li>
+          );
+        })}
+      </ul>
       <EventCard
         events={events}
-        heading={`${group.name} viikkotreenit`}
+        heading={"Viikkotreenit"}
         group={group.name}
         currentUser={user.id}
       />

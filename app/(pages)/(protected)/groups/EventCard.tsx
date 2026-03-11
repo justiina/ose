@@ -48,7 +48,7 @@ const EventCard = ({ events, heading, group, currentUser }: PropsType) => {
 
   return (
     <div>
-      <h1 className="mb-4">{heading}</h1>
+      <h2 className="mb-4">{heading}</h2>
       {filteredEvents.length === 0 ? (
         <p>Ei tapahtumia.</p>
       ) : (

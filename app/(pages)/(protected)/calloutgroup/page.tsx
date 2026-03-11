@@ -22,21 +22,23 @@ const CalloutGroup = async () => {
       <CalloutErrorToast />
       <h1 className="mb-4">Hälytysryhmä</h1>
       <p className="mb-4">
-        Alta löydät hälytysryhmän kokouspöytäkirjat, hälytreenien ajankohdat ja
-        järjestäjät sekä linkin, johon voit merkitä hälytyksiin osallistumisesi.
+        Alta löydät hälytreenien ajankohdat ja järjestäjät. Hälytysryhmän
+        jäsenet pääsevät katsomaan myös hälytysryhmän kokouspöytäkirjoja sekä
+        merkitsemään hälytyksiin osallistumisensa.
       </p>
       <div className="grid justify-start mt-4 gap-2">
-        <FilledLink
-          title="Hälytysryhmän kokouspöytäkirjat"
-          color="orange"
-          href="/calloutgroup/board"
-          icon={<FaNoteSticky className="text-2xl" />}
-        />
         <FilledLink
           title="Hälytreenit"
           color="orange"
           href="/calloutgroup/trainings"
           icon={<FaShieldDog className="text-2xl" />}
+        />
+        <h2>Hälytysryhmäläisille</h2>
+        <FilledLink
+          title="Hälytysryhmän kokouspöytäkirjat"
+          color="orange"
+          href="/calloutgroup/board"
+          icon={<FaNoteSticky className="text-2xl" />}
         />
         <FilledLink
           title="Hälytyksiin osallistuminen"

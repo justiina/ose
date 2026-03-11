@@ -14,6 +14,8 @@ const CalloutParticipation = async () => {
     return redirect("/");
   }
 
+  const admin = await isAdmin();
+
   // Get user info
   const { userData } = await getUserById(user.id);
 
@@ -21,8 +23,6 @@ const CalloutParticipation = async () => {
   if (!userData?.isCalloutMember) {
     redirect("/calloutgroup?error=callout");
   }
-
-  const admin = await isAdmin();
 
   return <CalloutParticipationForm admin={admin} />;
 };
