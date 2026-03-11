@@ -67,5 +67,6 @@ export const roleOptions = [
   "Vapepa-yhteyshenkilö",
   "Varainhankintatoimikunnan jäsen",
   "Varustevastaava",
+  "Vastaava testaaja",
   "Web-master",
 ];
