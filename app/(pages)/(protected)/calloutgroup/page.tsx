@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { isAdmin } from "@/app/actions";
-import Link from "next/link";
+import { getUserById } from "@/app/actions";
 import { FilledLink } from "@/app/components/Buttons";
 import { FaNoteSticky, FaShieldDog } from "react-icons/fa6";
 import { RiThumbUpFill } from "react-icons/ri";
+import CalloutErrorToast from "./participation/CalloutErrorToast";
 
 const CalloutGroup = async () => {
   // Check that the user is signed in, redirect to login page if not
@@ -19,6 +19,7 @@ const CalloutGroup = async () => {
 
   return (
     <div className="container mx-auto p-8 lg:p-16">
+      <CalloutErrorToast />
       <h1 className="mb-4">Hälytysryhmä</h1>
       <p className="mb-4">
         Alta löydät hälytysryhmän kokouspöytäkirjat, hälytreenien ajankohdat ja

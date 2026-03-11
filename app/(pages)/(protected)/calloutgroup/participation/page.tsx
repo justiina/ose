@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { isAdmin } from "@/app/actions";
+import { getUserById, isAdmin } from "@/app/actions";
 import CalloutParticipationForm from "./CalloutParticipationForm";
 
-const CalloutBoard = async () => {
+const CalloutParticipation = async () => {
   // Check that the user is signed in, redirect to login page if not
   const supabase = await createClient();
   const {
@@ -14,9 +14,17 @@ const CalloutBoard = async () => {
     return redirect("/");
   }
 
-  const admin = await isAdmin()
+  // Get user info
+  const { userData } = await getUserById(user.id);
 
-  return <CalloutParticipationForm admin={admin}/>;
+  // Check callout group membership
+  if (!userData?.isCalloutMember) {
+    redirect("/calloutgroup?error=callout");
+  }
+
+  const admin = await isAdmin();
+
+  return <CalloutParticipationForm admin={admin} />;
 };
 
-export default CalloutBoard;
+export default CalloutParticipation;
