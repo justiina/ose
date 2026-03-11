@@ -460,6 +460,7 @@ export const getUserInfo = async (): Promise<GetUserType> => {
           showName: userObject.showName || false, // default to false if not provided
           showEmail: userObject.showEmail || false, // default to false if not provided
           showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
+          isCalloutMember: userObject.isCalloutMember || false,
         };
 
         return { userData: mappedUserData, error: null };
@@ -501,6 +502,7 @@ export const getUserById = async (uid: string): Promise<GetUserType> => {
         showName: userObject.showName || false, // default to false if not provided
         showEmail: userObject.showEmail || false, // default to false if not provided
         showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
+        isCalloutMember: userObject.isCalloutMember || false
       };
       return { userData: mappedUserData, error: null };
     } else {

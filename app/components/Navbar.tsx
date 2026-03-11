@@ -10,7 +10,6 @@ import { FaSuitcase } from "react-icons/fa";
 import { GoBellFill } from "react-icons/go";
 import { FaBookOpen } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
-import { RiUserSettingsLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 

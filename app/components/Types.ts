@@ -14,6 +14,7 @@ export type UserType = {
   showName: boolean | undefined;
   showEmail: boolean | undefined;
   showPhoneNumber: boolean | undefined;
+  isCalloutMember: boolean | undefined;
 };
 
 export type AdminType = {
