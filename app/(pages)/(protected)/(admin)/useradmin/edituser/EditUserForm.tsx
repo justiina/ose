@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import FilledButton, { ToggleSwitch } from "@/app/components/Buttons";
 import { IoTrash } from "react-icons/io5";
 import { MdAdminPanelSettings } from "react-icons/md";
+import { GoBellFill } from "react-icons/go";
 
 const EditUserForm = () => {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -30,7 +31,7 @@ const EditUserForm = () => {
             toast.error(userData.error, { id: "fetchError" });
           } else {
             const userArray: UserType[] = userData.map(
-              (doc) => doc as UserType
+              (doc) => doc as UserType,
             );
             setUsers(userArray);
           }
@@ -41,7 +42,7 @@ const EditUserForm = () => {
             toast.error(adminData.error, { id: "fetchAdminError" });
           } else {
             const adminArray: AdminType[] = adminData.map(
-              (doc) => doc as AdminType
+              (doc) => doc as AdminType,
             );
             setAdmins(adminArray);
           }
@@ -69,11 +70,11 @@ const EditUserForm = () => {
   const handleDelete = (
     uid: string | null,
     firstName: string,
-    lastName: string
+    lastName: string,
   ) => {
     if (uid === null) {
       toast.error(
-        "Käyttäjätunnusta ei löytynyt!\nYritä myöhemmin uudestaan ja ota yhteys sivuston ylläpitäjään, jos ongelma toistuu."
+        "Käyttäjätunnusta ei löytynyt!\nYritä myöhemmin uudestaan ja ota yhteys sivuston ylläpitäjään, jos ongelma toistuu.",
       );
     }
     setShowConfirmation(true);
@@ -112,8 +113,10 @@ const EditUserForm = () => {
           <p className="mb-4 text-base">
             <MdAdminPanelSettings className="inline align-middle text-2xl mr-1" />
             -kuvake nimen vieressä tarkoittaa, että käyttäjällä on
-            admin-oikeudet. Oikeuksia ja muita tietoja voi muuttaa
-            klikkaamalla käyttäjän nimeä.
+            admin-oikeudet.
+            <GoBellFill className="inline align-middle text-2xl mr-1" />
+            -kuvake on merkki hälytysrhymän jäsenyydestä. Oikeuksia ja muita
+            tietoja voi muuttaa klikkaamalla käyttäjän nimeä.
           </p>
           <div className="flex justify-end">
             <ToggleSwitch
@@ -126,7 +129,7 @@ const EditUserForm = () => {
             <div className="grid space-y-4 p-4">
               {users.map((user) => {
                 const isAdmin = admins.some(
-                  (admin) => admin.user_id === user.id
+                  (admin) => admin.user_id === user.id,
                 );
 
                 return (
@@ -140,6 +143,9 @@ const EditUserForm = () => {
                       {isAdmin && (
                         <MdAdminPanelSettings className="text-grey text-2xl" />
                       )}
+                      {user.isCalloutMember && (
+                        <GoBellFill className="text-grey text-2xl" />
+                      )}
                       {showDelete && (
                         <IoTrash
                           className="text-orange hover:text-background text-2xl cursor-pointer"
@@ -149,7 +155,7 @@ const EditUserForm = () => {
                             handleDelete(
                               user.id,
                               user.firstName || "",
-                              user.lastName || ""
+                              user.lastName || "",
                             );
                           }}
                         />
