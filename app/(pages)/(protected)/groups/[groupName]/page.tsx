@@ -29,7 +29,7 @@ const GroupPage = async ({
     .select("*")
     .eq("slug", groupName)
     .single();
-
+  
   if (groupError || !group) notFound();
 
   // Fetch members by group

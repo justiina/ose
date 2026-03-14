@@ -4,38 +4,13 @@ import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { createClient } from "@/utils/supabase/client";
 import { FileObject } from "@supabase/storage-js";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
-const InstructionsForm: React.FC<{ admin: boolean }> = ({ admin }) => {
+const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   const supabase = createClient();
-  const [files, setFiles] = useState<FileObject[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const router = useRouter();
-
-  /*
-  useEffect(() => {
-    const GetFiles = async () => {
-      const { data, error } = await supabase.storage
-        .from("ohjeet")
-        .list("*", { sortBy: { column: "name", order: "asc" } });
-
-      if (data !== null) {
-        setFiles(data);
-        setLoading(false);
-      } else {
-        console.log(error);
-        toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
-          id: "loadError",
-        });
-      }
-    };
-
-    GetFiles();
-  }, []);
-  */
 
   const goToFileUrl = async (bucket: string, path: string) => {
     const { data, error } = await supabase.storage
@@ -81,6 +56,12 @@ const InstructionsForm: React.FC<{ admin: boolean }> = ({ admin }) => {
           >
             OSEn säännöt
           </button>
+          <Link
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            href="/instructions/annualmeetings"
+          >
+            Vuosikokouspöytäkirjat
+          </Link>
         </section>
       </div>
 

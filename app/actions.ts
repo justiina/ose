@@ -23,7 +23,7 @@ import {
 // USER FUNCTIONS
 export const login = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<LoginResultType> => {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -41,7 +41,7 @@ export const signup = async (
   password: string,
   firstName: string,
   lastName: string,
-  isAdmin?: boolean
+  isAdmin?: boolean,
 ): Promise<{ error?: string }> => {
   const supabase = await createClient();
   const data = {
@@ -104,7 +104,7 @@ export const logout = async () => {
 };
 
 export const deleteUser = async (
-  uid: string
+  uid: string,
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     const supabase = createAdminClient(
@@ -115,20 +115,19 @@ export const deleteUser = async (
           autoRefreshToken: false,
           persistSession: false,
         },
-      }
+      },
     );
 
     // Delete user from authentication
-    const { data, error: authError } = await supabase.auth.admin.deleteUser(
-      uid
-    );
+    const { data, error: authError } =
+      await supabase.auth.admin.deleteUser(uid);
 
     if (authError) {
       console.error(
         "Delete user error:",
         authError.message,
         "Code:",
-        authError.code
+        authError.code,
       );
 
       return { success: false, error: "Jotain meni vikaan!\nYritä uudestaan." };
@@ -164,7 +163,7 @@ export const getUserByEmail = async (email: string): Promise<boolean | any> => {
         autoRefreshToken: false,
         persistSession: false,
       },
-    }
+    },
   );
   try {
     const { data, error } = await supabase
@@ -188,7 +187,7 @@ export const getUserByEmail = async (email: string): Promise<boolean | any> => {
 
 export const resetPassword = async (
   id: string,
-  password: string
+  password: string,
 ): Promise<boolean | any> => {
   const supabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -198,7 +197,7 @@ export const resetPassword = async (
         autoRefreshToken: false,
         persistSession: false,
       },
-    }
+    },
   );
   try {
     const { error } = await supabase.auth.admin.updateUserById(id, {
@@ -217,7 +216,7 @@ export const resetPassword = async (
 
 export const addToPasswordResets = async (
   token: string,
-  email: string
+  email: string,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -236,7 +235,7 @@ export const addToPasswordResets = async (
 };
 
 export const deleteFromPasswordResets = async (
-  token: string
+  token: string,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -256,7 +255,7 @@ export const deleteFromPasswordResets = async (
 };
 
 export const getResetPasswordInfo = async (
-  token: string
+  token: string,
 ): Promise<GetResetPasswordType> => {
   const supabase = await createClient();
   try {
@@ -318,7 +317,7 @@ export const getUidByEmail = async (email: string): Promise<string | any> => {
 
 // USER ADMIN
 export const addToInvitedUsers = async (
-  data: AddToInvitedUsersType
+  data: AddToInvitedUsersType,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -347,7 +346,7 @@ export const getInvitedUsers = async () => {
 };
 
 export const getInvitedUserByToken = async (
-  token: string
+  token: string,
 ): Promise<GetInvitedUserType> => {
   const supabase = await createClient();
   try {
@@ -388,32 +387,27 @@ export const getInvitedUserByToken = async (
 };
 
 export const isAdmin = async (): Promise<boolean> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user !== undefined) {
-    const uid = user?.id;
-    try {
-      const { data: userData, error } = await supabase
-        .from("adminUsers")
-        .select()
-        .eq("user_id", uid);
-      if (error) {
-        throw new Error(error.message);
-      }
-      if (userData && userData.length > 0) {
-        return true;
-      } else if (userData.length == 0) {
-        return false;
-      } else {
-        return false;
-      }
-    } catch (error: any) {
-      console.log(error.message);
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return false;
     }
+    const { data, error } = await supabase
+      .from("adminUsers")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .limit(1);
+    if (error) {
+      return false;
+    }
+    return !!data && data.length > 0;
+  } catch {
+    return false;
   }
-  return false;
 };
 
 export const getAdminUsers = async () => {
@@ -502,7 +496,7 @@ export const getUserById = async (uid: string): Promise<GetUserType> => {
         showName: userObject.showName || false, // default to false if not provided
         showEmail: userObject.showEmail || false, // default to false if not provided
         showPhoneNumber: userObject.showPhoneNumber || false, // default to false if not provided
-        isCalloutMember: userObject.isCalloutMember || false
+        isCalloutMember: userObject.isCalloutMember || false,
       };
       return { userData: mappedUserData, error: null };
     } else {
@@ -532,7 +526,7 @@ export const getAdminById = async (uid: string): Promise<boolean> => {
 
 export const addToAdmins = async (
   uid: string,
-  email: string | null
+  email: string | null,
 ): Promise<boolean> => {
   const supabase = await createClient();
   try {
@@ -560,42 +554,8 @@ export const removeFromAdmins = async (uid: string): Promise<boolean> => {
   }
 };
 
-/*
 export const updateUserInfo = async (
-  data: Partial<UserType>
-): Promise<boolean | string> => {
-  const supabase = await createClient();
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (user !== undefined) {
-      const uid = user?.id;
-      const { data:userData, error } = await supabase
-        .from("users")
-        .update(data)
-        .eq("id", uid)
-
-      if (error) {
-        console.log(error);
-        return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-      }
-      if (userData) {
-        return true;
-      }
-    }
-  } catch (error) {
-    console.error("Error updating user info:", error);
-    return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-  }
-  // Return notification if none of the conditions are met
-  return "Jotain meni vikaan!\nYritä myöhemmin uudestaan.";
-};
-*/
-
-export const updateUserInfo = async (
-  data: Partial<UserType>
+  data: Partial<UserType>,
 ): Promise<boolean | string> => {
   const supabase = await createClient();
 
@@ -629,7 +589,7 @@ export const updateUserInfo = async (
 };
 
 export const updateUserById = async (
-  data: Partial<UserType>
+  data: Partial<UserType>,
 ): Promise<boolean | string> => {
   const supabase = await createClient();
 
@@ -723,7 +683,7 @@ export const getEvents = async () => {
 };
 
 export const getEventsByDate = async (
-  date: string
+  date: string,
 ): Promise<EventsByDateType> => {
   const supabase = await createClient();
   try {
@@ -775,14 +735,12 @@ export const getEventById = async (id: string): Promise<EditEventType> => {
   }
 };
 
-
 export const getGroupEvents = async () => {
   const supabase = await createClient();
   try {
     const { data: eventData } = await supabase
       .from("events")
       .select("*")
-      .in("type", ["Taso 1", "Taso 2", "Taso 3", "Raahe"])
       .order("date", { ascending: false });
     if (eventData) {
       return eventData;
@@ -795,7 +753,7 @@ export const getGroupEvents = async () => {
 export const saveEvent = async (data: AddEventType): Promise<boolean | any> => {
   // Remove properties with empty strings or zero values
   const cleanData = Object.fromEntries(
-    Object.entries(data).filter(([_, value]) => value !== "" && value !== 0)
+    Object.entries(data).filter(([_, value]) => value !== "" && value !== 0),
   );
 
   const supabase = await createClient();
@@ -827,7 +785,7 @@ export const deleteEvent = async (eventId: string): Promise<boolean | any> => {
 };
 
 export const updateEvent = async (
-  updatedData: Partial<EventType>
+  updatedData: Partial<EventType>,
 ): Promise<boolean | string> => {
   const supabase = await createClient();
   try {
@@ -856,7 +814,7 @@ export const updateEvent = async (
 // GROUP FUNCTIONS
 
 export const createGroup = async (
-  data: CreateGroupType
+  data: CreateGroupType,
 ): Promise<boolean | { error: string }> => {
   const supabase = await createClient();
 
@@ -887,7 +845,7 @@ export const createGroup = async (
 };
 
 export const getGroupBySlug = async (
-  slug: string
+  slug: string,
 ): Promise<GroupType | { error: string }> => {
   const supabase = await createClient();
 
@@ -943,7 +901,7 @@ export const getCalloutTrainings = async () => {
 };
 
 export const saveCalloutTraining = async (
-  data: CalloutTrainingType
+  data: CalloutTrainingType,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -980,7 +938,7 @@ export const getCalloutParticipationTableUrl = async (): Promise<
 };
 
 export const updateCalloutParticipationTableUrl = async (
-  url: string
+  url: string,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -999,7 +957,7 @@ export const updateCalloutParticipationTableUrl = async (
 };
 
 export const deleteCalloutTraining = async (
-  trainingId: string
+  trainingId: string,
 ): Promise<boolean | any> => {
   const supabase = await createClient();
   try {
@@ -1019,7 +977,7 @@ export const deleteCalloutTraining = async (
 };
 
 export const updateCalloutTraining = async (
-  data: Partial<CalloutTrainingType>
+  data: Partial<CalloutTrainingType>,
 ): Promise<boolean | string> => {
   const supabase = await createClient();
   try {
