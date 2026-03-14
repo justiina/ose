@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import EventCalendar from "./EventCalendar";
-import { isAdmin } from "@/app/actions";
+import AnnualMeetingsForm from "./AnnualMeetingsForm";
 
-const Main = async () => {
+const AnnualMeetings = async () => {
   // Check that the user is signed in, redirect to login page if not
   const supabase = await createClient();
   const {
@@ -14,14 +13,11 @@ const Main = async () => {
     return redirect("/");
   }
 
-    // Allow also admin users to edit or delete events
-    const admin = await isAdmin();
-
   return (
-    <div className="container mx-auto p-8">
-      <EventCalendar currentUser={user.id} isAdmin={admin}/>
-    </div>
+      <div>
+        <AnnualMeetingsForm isAdmin={false} />
+      </div>
   );
 };
 
-export default Main;
+export default AnnualMeetings;

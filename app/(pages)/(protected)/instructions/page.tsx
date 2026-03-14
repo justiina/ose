@@ -20,7 +20,7 @@ const Instructions = async () => {
 
   return (
       <div>
-        <InstructionsForm admin={false} />
+        <InstructionsForm isAdmin={false} />
       </div>
   );
 };

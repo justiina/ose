@@ -46,7 +46,12 @@ const MONTHNAMES = [
   "Joulukuu",
 ];
 
-function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
+type EventCalendarProps = {
+  currentUser: string;
+  isAdmin: boolean;
+};
+
+function EventCalendar({ currentUser, isAdmin }: EventCalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [eventDate, setEventDate] = useState<string | null>(null);
   const firstDayOfMonth: Date = startOfMonth(currentDate);
@@ -77,7 +82,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
             toast.error(eventData.error, { id: "fetchError" });
           } else {
             const eventArray: EventType[] = eventData.map(
-              (doc) => doc as EventType
+              (doc) => doc as EventType,
             );
             setEvents(eventArray);
             setIsLoading(false);
@@ -157,7 +162,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
       (prev) =>
         prev.includes(type)
           ? prev.filter((item) => item !== type) // uncheck
-          : [...prev, type] // check
+          : [...prev, type], // check
     );
   };
 
@@ -192,7 +197,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
         acc[monthYear].push(event);
         return acc;
       },
-      {}
+      {},
     );
 
     // Sort the eventsByMonthAndYear array
@@ -218,7 +223,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
                 {eventsByMonthAndYear[monthYear]
                   .sort(
                     (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
+                      new Date(a.date).getTime() - new Date(b.date).getTime(),
                   )
                   .map((event, index) => (
                     <Link
@@ -406,7 +411,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
               // Filter events based on the selected filters
               const filteredEvents = selectedFilters.length
                 ? todaysEvents.filter((event) =>
-                    selectedFilters.includes(event.type)
+                    selectedFilters.includes(event.type),
                   )
                 : todaysEvents;
 
@@ -444,7 +449,7 @@ function EventCalendar({ currentUser }: { currentUser: string | undefined }) {
       </div>
       {/*---Show days events on modal when clicked---*/}
       <Dialog title={eventDate} onClose={closeModal}>
-        <DayCard currentUser={currentUser} />
+        <DayCard currentUser={currentUser} isAdmin={isAdmin}/>
       </Dialog>
     </>
   );

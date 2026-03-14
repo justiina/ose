@@ -12,7 +12,12 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-const EditEventForm = ({ currentUser }: { currentUser: string }) => {
+type EditEventProps = {
+  currentUser: string;
+  isAdmin: boolean;
+};
+
+const EditEventForm = ({ currentUser, isAdmin }: EditEventProps) => {
   const searchParams = useSearchParams()!;
   const eventParams: string | null = searchParams.get("event");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -36,8 +41,8 @@ const EditEventForm = ({ currentUser }: { currentUser: string }) => {
           setEvent(eventData);
           setDefaultTime(eventData?.date + "T" + eventData?.time);
 
-          // Allow only user who created the event to edit it
-          if (currentUser !== eventData?.createdBy) {
+          // Allow only user who created the event or admin to edit it
+          if (currentUser !== eventData?.createdBy && !isAdmin) {
             toast.error("Vain tapahtuman luoja voi muokata sitä.", {
               id: "uidError",
             });

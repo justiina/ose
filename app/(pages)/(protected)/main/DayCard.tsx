@@ -14,7 +14,12 @@ import { GrGroup } from "react-icons/gr";
 import FilledButton from "@/app/components/Buttons";
 import { SmallLoadingIndicator } from "@/app/components/LoadingIndicator";
 
-const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
+type DayCardProps = {
+  currentUser: string;
+  isAdmin: boolean;
+};
+
+const DayCard = ({ currentUser, isAdmin }: DayCardProps) => {
   const [events, setEvents] = useState<EventType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
@@ -126,7 +131,7 @@ const DayCard = ({ currentUser }: { currentUser: string | undefined }) => {
                   <h2>{event.title}</h2>
 
                   {/*--- Show delete and edit buttons only if currentUser has created it --- */}
-                  {currentUser === event.createdBy && (
+                  {(currentUser === event.createdBy || isAdmin) && (
                     <div className="flex gap-2">
                       <IoTrash
                         onClick={() => handleDelete(event.id)}
