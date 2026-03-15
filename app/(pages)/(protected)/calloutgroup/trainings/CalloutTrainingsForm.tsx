@@ -398,13 +398,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
               </div>
             </div>
           )}
-          <div className="flex justify-between">
-            <FilledButton
-              onClick={() => router.push("/calloutgroup")}
-              icon={<RiArrowGoBackLine className="text-2xl" />}
-              title="Takaisin"
-              color="grey"
-            />
+          <div className="flex justify-end">
             {admin && (
               <FilledButton
                 onClick={() => setShowAddTrainingsForm(!showAddTrainingsForm)}

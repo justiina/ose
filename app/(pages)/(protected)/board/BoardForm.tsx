@@ -125,16 +125,21 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
   };
 
   const goToFileUrl = async (bucket: string, path: string) => {
+    const newTab = window.open("", "_blank");
+
     const { data, error } = await supabase.storage
       .from(bucket)
       .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
-    if (error) {
+    if (error || !data) {
+      newTab?.close();
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
+      return;
     }
-    if (data) {
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+
+    if (newTab) {
+      newTab.location.href = data.signedUrl;
     }
   };
 
@@ -299,9 +304,10 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
 
   return (
     <div className="container max-w-screen-md p-8 lg:p-16">
+      <h1 className="mb-8">OSEn hallitus</h1>
       {/* -- Letters section -- */}
       <div className="mb-8">
-        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+        <div className="mb-4 flex gap-4 md:gap-8 col-span-9 md:col-span-10">
           <button
             onClick={() => goToPreviousYear("letters")}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
@@ -313,7 +319,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               onClick={() => setLettersExpanded((prev) => !prev)}
               className="text-grey text-xl font-semibold flex items-center gap-2"
             >
-              <h1 className="text-center">Sihteerikirjeet {currentYear}</h1>
+              <h2 className="text-center">Sihteerikirjeet {currentYear}</h2>
               <span className="text-sm">{lettersExpanded ? "▲" : "▼"}</span>
             </button>
 
@@ -321,7 +327,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               onClick={() => goToToday("letters")}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
-              <MdOutlineToday className="text-2xl" />
+              <MdOutlineToday className="text-2xl text-grey" />
             </button>
           </div>
           {Number(thisYear) > Number(currentLetterYear) ? (
@@ -498,7 +504,7 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
       </div>
       {/* -- Board section -- */}
       <div className="mb-8">
-        <div className="mb-4 flex justify-center gap-4 md:gap-8 col-span-9 md:col-span-10">
+        <div className="mb-4 flex gap-4 md:gap-8 col-span-9 md:col-span-10">
           <button
             onClick={() => goToPreviousYear("board")}
             className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
@@ -510,16 +516,16 @@ const BoardForm: React.FC<PropsType> = ({ admin }) => {
               onClick={() => setBoardExpanded((prev) => !prev)}
               className="text-grey text-xl font-semibold flex items-center gap-2"
             >
-              <h1 className="text-center">
+              <h2 className="text-center">
                 Hallituksen kokouspöytäkirjat {currentYear}
-              </h1>
+              </h2>
               <span className="text-sm">{boardExpanded ? "▲" : "▼"}</span>
             </button>
             <button
               onClick={() => goToToday("board")}
               className="cursor-pointer flex items-center justify-center h-8 w-8 rounded-full hover:bg-grey hover:text-background"
             >
-              <MdOutlineToday className="text-2xl" />
+              <MdOutlineToday className="text-2xl text-grey" />
             </button>
           </div>
           {Number(thisYear) > Number(currentYear) ? (

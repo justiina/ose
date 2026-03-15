@@ -70,12 +70,6 @@ const CalloutParticipationForm: React.FC<PropsType> = ({ admin }) => {
           Merkitse hälytyksiin osallistumisesi alla olevan linkin kautta.
         </p>
         <div className="flex justify-start gap-2 mb-8">
-          <FilledButton
-            onClick={() => router.push("/calloutgroup")}
-            icon={<RiArrowGoBackLine className="text-2xl" />}
-            title="Takaisin"
-            color="grey"
-          />
           <FilledLink
             title="Hälytykset"
             color="orange"
