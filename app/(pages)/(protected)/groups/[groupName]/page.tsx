@@ -4,8 +4,6 @@ import EventCard from "../EventCard";
 import { EventType } from "@/app/components/Types";
 import { getFirstName, getGroupEvents } from "@/app/actions";
 import { showDateAndTime } from "@/app/components/Functions";
-import { RiArrowGoBackLine } from "react-icons/ri";
-import { FilledRoundLink } from "@/app/components/Buttons";
 import toast from "react-hot-toast";
 
 const GroupPage = async ({
@@ -29,7 +27,7 @@ const GroupPage = async ({
     .select("*")
     .eq("slug", groupName)
     .single();
-  
+
   if (groupError || !group) notFound();
 
   // Fetch members by group
@@ -84,12 +82,6 @@ const GroupPage = async ({
 
   return (
     <div className="container mx-auto p-8 lg:p-16 flex flex-col gap-4">
-      <FilledRoundLink
-        title="Takaisin"
-        color="grey"
-        href="/groups"
-        icon={<RiArrowGoBackLine className="text-2xl" />}
-      />
       <h1>{group.name}</h1>
       <h2>Ryhmän jäsenet</h2>
       <ul className="list-disc ml-6">

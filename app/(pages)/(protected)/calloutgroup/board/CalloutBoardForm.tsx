@@ -80,16 +80,21 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
   };
 
   const goToFileUrl = async (bucket: string, path: string) => {
+    const newTab = window.open("", "_blank");
+
     const { data, error } = await supabase.storage
       .from(bucket)
       .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
-    if (error) {
+    if (error || !data) {
+      newTab?.close();
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
+      return;
     }
-    if (data) {
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+
+    if (newTab) {
+      newTab.location.href = data.signedUrl;
     }
   };
 
@@ -264,14 +269,7 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
               })}
             </tbody>
           </table>
-          <div className="flex justify-between">
-            <FilledButton
-              onClick={() => router.push("/calloutgroup")}
-              icon={<RiArrowGoBackLine className="text-2xl" />}
-              title="Takaisin"
-              color="grey"
-            />
-
+          <div className="flex justify-end">
             {!showAddBoardForm && admin && (
               <FilledButton
                 onClick={() => setShowAddBoardForm(!showAddBoardForm)}

@@ -2,11 +2,8 @@
 
 import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { createClient } from "@/utils/supabase/client";
-import { FileObject } from "@supabase/storage-js";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import Link from "next/link";
 import { FilledRoundLink } from "@/app/components/Buttons";
 import { RiArrowGoBackLine } from "react-icons/ri";
 
@@ -15,16 +12,21 @@ const AnnualMeetingsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const goToFileUrl = async (bucket: string, path: string) => {
+    const newTab = window.open("", "_blank");
+
     const { data, error } = await supabase.storage
       .from(bucket)
       .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
-    if (error) {
+    if (error || !data) {
+      newTab?.close();
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
+      return;
     }
-    if (data) {
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+
+    if (newTab) {
+      newTab.location.href = data.signedUrl;
     }
   };
 
@@ -34,13 +36,7 @@ const AnnualMeetingsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 
   return (
     <div className="container max-w-screen-md p-8 lg:p-16">
-      <FilledRoundLink
-        title="Takaisin"
-        color="grey"
-        href="/instructions"
-        icon={<RiArrowGoBackLine className="text-2xl" />}
-      />
-      <h2 className="text-blue mt-4 mb-2">Vuosikokouspöytäkirjat</h2>
+      <h1 className="mb-4">OSEn vuosikokouspöytäkirjat</h1>
       <div>
         <section className="grid gap-2 ml-4 mb-4">
           <button

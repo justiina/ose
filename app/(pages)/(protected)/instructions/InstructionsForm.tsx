@@ -13,16 +13,21 @@ const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const goToFileUrl = async (bucket: string, path: string) => {
+    const newTab = window.open("", "_blank");
+
     const { data, error } = await supabase.storage
       .from(bucket)
       .createSignedUrl(path, 60 * 60 * 24 * 7); // url expires in 7 days
-    if (error) {
+    if (error || !data) {
+      newTab?.close();
       toast.error("Jotain meni vikaan!\nYritä myöhemmin uudestaan.", {
         id: "urlError",
       });
+      return;
     }
-    if (data) {
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+
+    if (newTab) {
+      newTab.location.href = data.signedUrl;
     }
   };
 
@@ -61,6 +66,12 @@ const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
             href="/instructions/annualmeetings"
           >
             Vuosikokouspöytäkirjat
+          </Link>
+                    <Link
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            href="/instructions/points"
+          >
+            Talkoopisteet
           </Link>
         </section>
       </div>
