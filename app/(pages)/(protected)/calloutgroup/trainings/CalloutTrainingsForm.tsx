@@ -19,7 +19,6 @@ import { groupOptions } from "@/app/components/StyleMappingAndOptions";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdOutlineEdit, MdOutlineToday } from "react-icons/md";
 import { addYears, subYears } from "date-fns";
-import { RiArrowGoBackLine } from "react-icons/ri";
 
 type PropsType = {
   admin: boolean;
