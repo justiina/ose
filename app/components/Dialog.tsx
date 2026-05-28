@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, ReactNode } from "react";
 import { IoClose } from "react-icons/io5";
 
 type Props = {
@@ -34,7 +34,7 @@ export default function Dialog({ title, onClose, children }: Props) {
     window.history.replaceState({}, "", url.toString());
   };
 
-  const dialog: JSX.Element | null =
+  const dialog: ReactNode =
     showDialog === "y" ? (
       <dialog
         ref={dialogRef}
