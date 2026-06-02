@@ -67,7 +67,7 @@ const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
           >
             Vuosikokouspöytäkirjat
           </Link>
-                    <Link
+          <Link
             className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
             href="/instructions/points"
           >
@@ -79,6 +79,12 @@ const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
       <div>
         <h2 className="text-blue mb-2">Hälytreenit</h2>
         <section className="grid gap-2 ml-4 mb-4">
+          <Link
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            href="/calloutgroup/trainings"
+          >
+            Hälytreenilista
+          </Link>
           <button
             className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
             onClick={() => goToFileUrl("ohjeet", "halytreenin_kutsu.docx")}
@@ -103,6 +109,32 @@ const InstructionsForm: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
           >
             Suunnistusnäyttöraportti
           </button>
+        </section>
+      </div>
+
+      <div>
+        <h2 className="text-blue mb-2">Hälytysryhmä</h2>
+        <section className="grid gap-2 ml-4 mb-4">
+          <button
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            onClick={() => goToFileUrl("ohjeet", "halytysryhma_hakemus.pdf")}
+          >
+            Hälytysryhmähakemus
+          </button>
+
+          <Link
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            href="/calloutgroup/board"
+          >
+            Hälytysryhmän kokouspöytäkirjat
+          </Link>
+
+          <Link
+            className="text-left bg-white hover:bg-greylight p-2 rounded-lg"
+            href="calloutgroup/participation"
+          >
+            Hälytyksiin osallistuminen
+          </Link>
         </section>
       </div>
 
