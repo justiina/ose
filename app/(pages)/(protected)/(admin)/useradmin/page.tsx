@@ -25,13 +25,12 @@ const UserAdmin = async () => {
 
   return (
     //<div className="container mx-auto p-8 lg:p-16">
-    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+    (<div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
       {/*--- PAGE TITLE ---*/}
       <header>
         <h1>Ylläpito</h1>
         <p className="mt-1">Käyttäjien ja treeniryhmien hallintasivut.</p>
       </header>
-
       {/*--- USER MANAGEMENT ---*/}
       <section className="bg-white rounded-2xl shadow-sm border p-6">
         <h2 className="flex items-center gap-2 mb-4"><FaUserCircle className="text-xl"/> Käyttäjähallinta</h2>
@@ -53,7 +52,6 @@ const UserAdmin = async () => {
           />
         </div>
       </section>
-
       {/*--- USER MANAGEMENT ---*/}
       <section className="bg-white rounded-2xl shadow-sm border p-6">
         <h2 className="flex items-center gap-2 mb-4"><FaDog className="text-xl"/>Ryhmien hallinta</h2>
@@ -75,7 +73,7 @@ const UserAdmin = async () => {
           />
         </div>
       </section>
-    </div>
+    </div>)
   );
 };
 

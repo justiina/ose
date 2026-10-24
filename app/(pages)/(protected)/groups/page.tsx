@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { FilledLink } from "@/app/components/Buttons";
 import { FaDog } from "react-icons/fa";
-import { Key } from "react";
 
 const Groups = async () => {
   // Check that the user is signed in, redirect to login page if not
