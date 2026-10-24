@@ -410,7 +410,7 @@ const CalloutGroupForm: React.FC<PropsType> = ({ admin }) => {
           {showAddTrainingsForm && admin && (
             <div className="my-4 bg-white rounded-lg p-4 border border-grey">
               <>
-                <h2 className="mb-2 text-blue">Häytreenin lisäys</h2>
+                <h2 className="mb-2 text-blue">Hälytreenin lisäys</h2>
                 {/*---Date---*/}
                 <div className="flex flex-col lg:w-2/3">
                   <div className="flex gap-1">
