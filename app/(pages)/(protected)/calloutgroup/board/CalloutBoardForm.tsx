@@ -197,7 +197,7 @@ const CalloutBoardForm: React.FC<PropsType> = ({ admin }) => {
           </button>
           <div className="flex gap-2">
             <h1 className="text-center">
-              Häytysryhmän kokouspöytäkirjat {currentYear}
+              Hälytysryhmän kokouspöytäkirjat {currentYear}
             </h1>
             <button
               onClick={goToToday}
